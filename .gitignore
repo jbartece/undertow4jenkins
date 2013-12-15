@@ -1,4 +1,10 @@
+thesis/tex/.obsah.tex.swp
+*~
 *.class
+*.swp
+
+thesis/docs/
+thesis/sablona/
 
 # Package Files #
 *.jar
