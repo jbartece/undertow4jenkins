@@ -1,0 +1,11 @@
+"Co v diplomové práci dělám?"
+Snažím se vylepšit Jenkins tím, že vyměním starý vestavěný webserver Winstone a jeho wrapper Jetty za nový webserver Undertow. 
+Zvolený nový webserver by měl dosahovat většího výkonu a jeho vývoj bude nadále pokračovat, zatímco starý server
+je už neudržovaný. Následně se budu snažit potvrdit zlepšení výkonu pomocí "performace" testů.
+
+
+"Co za přínos moje diplomové práci má, a pro koho?"
+Má přínos jak pro komunitu jako případná alternativa či vylepšení Jenkins. Dále má přínos pro mě jako zkušenost
+s rozsáhlejší samostatnou prací a tvorbou kompletní dokumentace v podobě textu diplomové práce.
+
+
