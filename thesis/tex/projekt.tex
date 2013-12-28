@@ -1,8 +1,9 @@
 %============================================================================
-% tento soubor pouzijte jako zaklad
+% Predloha
 % (c) 2008 Michal Bidlo
 % E-mail: bidlom AT fit vutbr cz
 %============================================================================
+%Upravy: Jakub Bartecek (xbarte09 at fit vutbr cz)
 % kodovaní: iso-8859-2 (zmena prikazem iconv, recode nebo cstocs)
 %----------------------------------------------------------------------------
 % zpracování: make, make pdf, make desky, make clean
@@ -72,15 +73,26 @@
   %bud pomoci nasledujicich parametru nebo pomoci vyhrazenych maker (viz dale)
   %===========================================================================
   %Klicova slova
-  keywords.cs={Klíčová slova v~českém jazyce.}, %klicova slova v ceskem jazyce
-  keywords.en={Klíčová slova v~anglickém jazyce.}, %klicova slova v anglickem jazyce
+  keywords.cs={Jenkins, Undertow, servlet, integrace, CI, Winstone, Jetty, Java}, %klicova slova v ceskem jazyce
+  keywords.en={Jenkins, Undertow, servlet, integration, CI, Winstone, Jetty, Java}, %klicova slova v anglickem jazyce
   %Abstract
-  abstract.cs={Výtah (abstrakt) práce v~českém jazyce.}, % abstrakt v ceskem jazyce
-  abstract.en={Výtah (abstrakt) práce v~anglickém jazyce.}, % abstrakt v anglickem jazyce
+  abstract.cs={Tento semestrální projekt se zabývá nahrazením webového serveru v~systému Jenkins CI 
+                za server Undertow. Server Undertow by měl být potenciálně rychlejší než současné řešení a~celkově lepší. 
+                V~práci jsou popsány obecné informace o~komponentách a~programech, které se této problematiky týkají. 
+                Nejdůležitější částí práce je analýza současného stavu a~návrh způsobu integrace.
+                Samotná integrace není provedena v~rámci semestrálního projektu, ale je předmětem navazujícího diplomového projektu. }, % abstrakt v ceskem jazyce
+  %        
+  abstract.en={This term project deals with replacement of webserver in Jenkins CI by server Undertow.
+               The Undertow should be potentially faster than actual state and in general better.
+               In this project there are described general information about components and programs, which are related to this topic.
+               The most important part is analysis of current state and a~design of integration.
+               The integration is not accomplished in this term project. Is is a~subject of follow-up diploma thesis.    }, % abstrakt v anglickem jazyce
   %Prohlaseni
-  declaration={Prohlašuji, že jsem tuto bakalářskou práci vypracoval samostatně pod vedením pana ...},
+  declaration={Prohlašuji, že jsem tento semestrální projekt vypracoval samostatně pod vedením pana inženýra Petra Müllera. Další informace mi poskytl
+    pan doktor Vojtěch Juránek, který je zaměstnancem firmy Red Hat$^\circledR$. },
   %Podekovani (nepovinne)
-  acknowledgment={Zde je možné uvést poděkování vedoucímu práce a~těm, kteří poskytli odbornou pomoc.} % nepovinne
+  acknowledgment={Děkuji panu inženýru Petru Müllerovi za vedení mého semestrálního projektu a~panu doktoru Vojtěchu Juránkovi za odborné konzultace týkající se 
+    zpravovávané problematiky. } % nepovinne
 }
 
 %Abstrakt (cesky, anglicky)
