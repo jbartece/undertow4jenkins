@@ -8,13 +8,37 @@
 
 
 \chapter{Úvod}
-    Co v projektu dělám, jeho význam a potenciální přínos.
+    Tento semestrální projekt se zabývá vylepšením systému Jenkins CI, který je v praxi velmi využíván pro potřeby průběžného testování softwaru
+    a jeho kontinuální integraci. Vylepšení se týká především webového serveru a \emph{servlet} kontejneru, který je v Jenkins integrován. 
+    V současném stavu tyto funkce vykonává kombinace nástrojů Winstone a Jetty. 
+    
+    Server Winstone je již neudržovaný a zastaralý nástroj a z tohoto důvodu
+    byl z velké části nahrazen serverem Jetty, který potřebnou funkcionalitu poskytuje. Server Jetty je poměrně komplexní projekt a nabízí
+    mnoho funkcionality, ale na druhou stranu jeho rozsah nedovoluje poskytovat maximální rychlost.
+    
+    V současné době vznikl nový webový server Undertow, který si klade za cíl být co nejjednodušší a nejrychlejší a mohl by být přínosný
+    a vhodný pro systém Jenkins. Jelikož tento server je nový a je sponzorován firmou Red Hat, tak lze předpokládat, že jeho vývoj
+    bude nadále pokračovat a nebude zastarávat.
 
-    kniha o Jenkins \cite{JenkinsBook}.
+    Cílem této práce je nahradit server Jetty a případně i serveu Winstone pomocí serveru Undertow 
+    a integrovat jej se systémem Jenkins CI. Při integraci je kladen důraz na snahu
+    zachovat zpětnou kompatibilitu se starým řešením. 
+
+    V rámci tohoto semestrálního projektu jsou nejprve rozebrány potřebné informace týkající se jednotlivých nástrojů a plánované integrace.
+    Následně je detailně analyzována architektura systému Jenkins a způsob jeho integrace se servery Winstone a Jetty. V následující části
+    je diskutována varianta nahrazení pouze serveru Jetty a varianta nahrazení serveru Jetty i Winstone pomocí serveru Undertow. 
+    Z provedené analýzy je zvolena jedna varianta, která je vybrána pro následnou integraci.
+
+    Samotná implementace integrace není předmětem tohoto semestrálního projektu a bude provedena až v navazujícím diplomovém projektu. 
+    V rámci dimplomového projektu bude také provedeno testování výkonu modifikovaného systému Jenkins CI a celkové shodnocení navržených
+    a provedených změn.
+
+
 
 \chapter{Teoretická část}
     \section {Jenkins}
         Obecné informace o Jenkins a asi i nějaké detaily - k čemu slouží, jeho přínos, apod.
+        kniha o Jenkins \cite{JenkinsBook}.
         
         Typy spouštění a překlady, spouštění testů
 
@@ -23,19 +47,20 @@
     \section{Maven}
         Základní obecné informace, něco o pomkách, způsobech překladů
 
+    \section{Winstone a Jetty}
+        Aspoň základní informace, aby následující kapitola byla lehčeji pochopitelná?
+
     \section{Undertow}
         Obecné informace, k čemu je dobrý
 
         Jak se používá? Jak moc do detailů?
 
-    \section{Winstone a Jetty}
-        Aspoň základní informace, aby následující kapitola byla lehčeji pochopitelná?
         
 
 
 \chapter{Analýza problému}
     
-    \section{Aktuální stav arhitekturyservlet kontejneru v Jenkins}
+    \section{Aktuální stav arhitektury servlet kontejneru v Jenkins}
         Popis aktuálního stavu architektury Jenkins z pohledu servlet kontejneru, napojení Winstone a Jetty v Jenkins
         extras-executeblas-war, vkládání winstonu jako .jar
 
