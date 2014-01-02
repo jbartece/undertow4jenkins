@@ -8,8 +8,8 @@
 
 
 \chapter{Úvod}
-    Tento semestrální projekt se zabývá vylepšením systému Jenkins CI, který je v praxi velmi využíván pro potřeby průběžného testování softwaru
-    a jeho kontinuální integraci. Vylepšení se týká především webového serveru a \emph{servlet} kontejneru, který je v Jenkins integrován. 
+    Tento semestrální projekt se zabývá vylepšením serveru Jenkins CI, který je v praxi velmi využíván pro potřeby průběžného testování softwaru
+    a jeho kontinuální integraci. Vylepšení se týká především webového serveru a \emph{servlet} kontejneru, který je v Jenkins CI integrován. 
     V současném stavu tyto funkce vykonává kombinace nástrojů Winstone a Jetty. 
     
     Server Winstone je již neudržovaný a zastaralý nástroj a z tohoto důvodu
@@ -17,50 +17,106 @@
     mnoho funkcionality, ale na druhou stranu jeho rozsah nedovoluje poskytovat maximální rychlost.
     
     V současné době vznikl nový webový server Undertow, který si klade za cíl být co nejjednodušší a nejrychlejší a mohl by být přínosný
-    a vhodný pro systém Jenkins. Jelikož tento server je nový a je sponzorován firmou Red Hat, tak lze předpokládat, že jeho vývoj
+    a vhodný pro Jenkins CI. Jelikož tento server je nový a je sponzorován firmou Red Hat, tak lze předpokládat, že jeho vývoj
     bude nadále pokračovat a nebude zastarávat.
 
     Cílem této práce je nahradit server Jetty a případně i serveu Winstone pomocí serveru Undertow 
-    a integrovat jej se systémem Jenkins CI. Při integraci je kladen důraz na snahu
+    a integrovat jej se serverem Jenkins CI. Při integraci je kladen důraz na snahu
     zachovat zpětnou kompatibilitu se starým řešením. 
 
     V rámci tohoto semestrálního projektu jsou nejprve rozebrány potřebné informace týkající se jednotlivých nástrojů a plánované integrace.
-    Následně je detailně analyzována architektura systému Jenkins a způsob jeho integrace se servery Winstone a Jetty. V následující části
+    Následně je detailně analyzována architektura Jenkins CI a způsob jeho integrace se servery Winstone a Jetty. V následující části
     je diskutována varianta nahrazení pouze serveru Jetty a varianta nahrazení serveru Jetty i Winstone pomocí serveru Undertow. 
     Z provedené analýzy je zvolena jedna varianta, která je vybrána pro následnou integraci.
 
     Samotná implementace integrace není předmětem tohoto semestrálního projektu a bude provedena až v navazujícím diplomovém projektu. 
     V rámci dimplomového projektu bude také provedeno testování výkonu modifikovaného systému Jenkins CI a celkové shodnocení navržených
     a provedených změn.
+//TODO - že to dělám pod Red Hatem
 
 
+\chapter{Jenkins CI a související nástroje}
+    Tato kapitola se zaměřuje na teoretické základy práce, které je nutné nebo vhodné znát pro pochopení zpracovávané problematiky.
+    Je zde detailněji popsán systém Jenkins CI (kapitola \ref{jenkins}) ke kterému se tato práce přímo váže. K němu se váže seznámení
+    s webovými servery Winstone (kapitola \ref{winstone}) a Jetty (kapitola \ref{jetty}), jejichž kombinace je současně v Jenkins CI integrována.
 
-\chapter{Teoretická část}
-    \section {Jenkins}
-        Obecné informace o Jenkins a asi i nějaké detaily - k čemu slouží, jeho přínos, apod.
-        kniha o Jenkins \cite{JenkinsBook}.
-        
-        Typy spouštění a překlady, spouštění testů
+    Větší důraz je dále věnován serveru Undertow (kapitola \ref{undertow}), který byl vybrán jako nový webový server pro Jenkins CI. V tomto případě je provedena hlubší studie
+    tohoto nástroje, aby na jejím základě bylo možné pochopit a provést samotnou integraci s Jenkins CI, která je jádrem této práce. 
+    Pro poskytnutí ucelených informací
+    je menší prostor také vymezen pro nástroj Maven (kapitola \ref{maven}), který se používá k řízení překladu serveru Jenkins CI, a je v této práci několikrát zmiňován. 
 
-        Co je servlet kontejner?
+    Uvedené informace mají spíše informativní charakter, aby poskytly ucelený úvod do zkoumané problematiky. Jsou zaměřeny především na informace týkající se samotné
+    integrace. Pro případné získání detailnějších informací jsou uvedeny patřičné zdroje, kde je lze hledat.
+//TODO - zahrnout odkaz na servlet/webserver
 
-    \section{Maven}
-        Základní obecné informace, něco o pomkách, způsobech překladů
+    \section {Jenkins CI} \label{jenkins}
+        Jenkins CI je open source nástroj pro kontinuální integraci softwaru.
+        Je velmi populární a využíván malými i velkými firmami jako je například firma Red Hat, kde tento program běží na stovkách serverů.
 
-    \section{Winstone a Jetty}
+        Informace v této kapitole byly čerpány z knihy \cite{jenkinsBook}, kde lze nalézt další informace o serveru Jenkins CI,
+        a také z webové stránky projektu \cite{jenkinsWeb}.
+
+        \subsection{Kontinuální integrace a využití Jenkins CI}
+            V minulosti byla integrace programu do výsledného produktu velmi náročným procesem a často ztraceným časem.
+            S vydáním každé verze programu se musel postup probíhající před vydáním produktu opakovat a pro vývojářský tým
+            to prakticky znamenalo zdržení se. Pokud se v tomto procesu odhalil nějaký problém, což bylo běžné, 
+            tak jeho řešení bylo z důvodu nedostatku času a jeho pozdního objevení mnohem problematičtější,
+            než kdyby byl tento problém odhalen dříve.
+
+            Kontinuální integrace je moderní přístup k vývoji softwaru, který mění způsob myšlení nad celým procesem vývoje
+            a snaží se předcházet problémům popsaným výše a především ušetřit čas. V tomto přístupu je využíván nějaký
+            kvalitní nástroj, který automatizovaně provádí specifikované kroky, které provázejí integraci softwaru a jeho vydání.
+
+            Jedním z nástrojů poskytujích podporu pro kontinuální integraci při vývoji softwaru je 
+            server Jenkins CI. 
+            
+            \medskip \noindent Základními možnostmi, které umožňuje Jenkins CI nakonfigurovat jsou:
+            
+            \begin{itemize}
+                \item Spouštění integračních a jednotkových testů v přesně definovaném čase (např. v noci, kdy jsou servery méně vytížené)
+                \item Spuštění integračních a jednotkových testů při změně ve verzovacím systému. Jenkins CI dokáže zaznamenat změnu v repozitáři,
+                    stáhnout si změny a spustit testování
+                \item Shromažďování a vyhodnocování metrik softwaru
+                \item Spuštění akceptačních testů
+                \item Informování e-mailem o testech, které skončily chybou
+                \item Automatické nahrání nové verze produktu na server
+            \end{itemize} 
+
+            Uživatelé mohou kdykoliv přidat využití libovolné funkcionality systému a tudíž neopakovat stále stejné kroky. 
+            
+
+        \subsection{Praktický způsob použití}
+            Celý program je napsán v jazyce Java a je tedy plně přenositelný mezi platformami. 
+            web rozhraní, deploynutí
+            Typy spouštění a překlady, spouštění testů
+
+    \section{Servlet kontejner a webový server}
+        Co je servlet kontejner a webserver? \cite{webserverVsServletPage}
+         
+    \section{Maven} \label{maven}
+        Základní obecné informace, něco o pomkách - co tam najdeme, způsobech překladů
+        \cite{mavenWeb}
+
+    \section{Winstone} \label{winstone}
         Aspoň základní informace, aby následující kapitola byla lehčeji pochopitelná?
+        \cite{winstoneWeb}
 
-    \section{Undertow}
-        Obecné informace, k čemu je dobrý
+    \section{Jetty} \label{jetty}
+        \cite{jettyWeb}
+        obecné seznámení, co to umí
 
-        Jak se používá? Jak moc do detailů?
+    \section{Undertow} \label{undertow}
+        Obecné informace, k čemu je dobrý, srovnání s Jetty, odkazy na výsledky testování výkonu
+
+        Jak se používá, jak se s ním pracuje a programuje, detailněji
+        \cite{undertowWeb}
 
         
 
 
 \chapter{Analýza problému}
     
-    \section{Aktuální stav arhitektury servlet kontejneru v Jenkins}
+    \section{Aktuální stav architektury webového serveru v Jenkins}
         Popis aktuálního stavu architektury Jenkins z pohledu servlet kontejneru, napojení Winstone a Jetty v Jenkins
         extras-executeblas-war, vkládání winstonu jako .jar
 
@@ -76,8 +132,6 @@
         Způsob vyhodnocení správnosti výsledného řešení pomocí testů jenkins
 
 
-\chapter{Otázky}
-    Zveřejnit odkazy na repozitáře v práci?
 
 \chapter{Závěr}
 
