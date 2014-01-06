@@ -32,13 +32,14 @@
     Samotná implementace integrace není předmětem tohoto semestrálního projektu a bude provedena až v navazujícím diplomovém projektu. 
     V rámci dimplomového projektu bude také provedeno testování výkonu modifikovaného systému Jenkins CI a celkové shodnocení navržených
     a provedených změn.
-//TODO - že to dělám pod Red Hatem
+%TODO - že to dělám pod Red Hatem
 
 
 \chapter{Jenkins CI a související nástroje}
     Tato kapitola se zaměřuje na teoretické základy práce, které je nutné nebo vhodné znát pro pochopení zpracovávané problematiky.
-    Je zde detailněji popsán systém Jenkins CI (kapitola \ref{jenkins}) ke kterému se tato práce přímo váže. K němu se váže seznámení
+    Je zde detailněji popsán systém Jenkins CI (kapitola \ref{jenkins}) ke kterému se tato práce přímo váže. S ním je spojeno seznámení
     s webovými servery Winstone (kapitola \ref{winstone}) a Jetty (kapitola \ref{jetty}), jejichž kombinace je současně v Jenkins CI integrována.
+    Pro tuto práci je důležité poruzumět rozdílu mezí \emph{servlet kontejnerem} a webovým server. Vysvětlením těchto pojmů se zabývá kapitola \ref{servletWebserver}.
 
     Větší důraz je dále věnován serveru Undertow (kapitola \ref{undertow}), který byl vybrán jako nový webový server pro Jenkins CI. V tomto případě je provedena hlubší studie
     tohoto nástroje, aby na jejím základě bylo možné pochopit a provést samotnou integraci s Jenkins CI, která je jádrem této práce. 
@@ -47,7 +48,6 @@
 
     Uvedené informace mají spíše informativní charakter, aby poskytly ucelený úvod do zkoumané problematiky. Jsou zaměřeny především na informace týkající se samotné
     integrace. Pro případné získání detailnějších informací jsou uvedeny patřičné zdroje, kde je lze hledat.
-//TODO - zahrnout odkaz na servlet/webserver
 
     \section {Jenkins CI} \label{jenkins}
         Jenkins CI je open source nástroj pro kontinuální integraci softwaru.
@@ -70,13 +70,13 @@
             Jedním z nástrojů poskytujích podporu pro kontinuální integraci při vývoji softwaru je 
             server Jenkins CI. 
             
-            \medskip \noindent Základními možnostmi, které umožňuje Jenkins CI nakonfigurovat jsou:
+            \medskip \noindent Základními možnostmi, které umožňuje Jenkins CI nakonfigurovat, jsou:
             
             \begin{itemize}
                 \item Spouštění integračních a jednotkových testů v přesně definovaném čase (např. v noci, kdy jsou servery méně vytížené)
                 \item Spuštění integračních a jednotkových testů při změně ve verzovacím systému. Jenkins CI dokáže zaznamenat změnu v repozitáři,
                     stáhnout si změny a spustit testování
-                \item Shromažďování a vyhodnocování metrik softwaru
+                \item Shromažďování a vyhodnocování metrik vývoje softwaru
                 \item Spuštění akceptačních testů
                 \item Informování e-mailem o testech, které skončily chybou
                 \item Automatické nahrání nové verze produktu na server
@@ -85,12 +85,44 @@
             Uživatelé mohou kdykoliv přidat využití libovolné funkcionality systému a tudíž neopakovat stále stejné kroky. 
             
 
-        \subsection{Praktický způsob použití}
-            Celý program je napsán v jazyce Java a je tedy plně přenositelný mezi platformami. 
-            web rozhraní, deploynutí
+        \subsection{Způsob použití}
+            Celý program je napsán v jazyce Java a je tedy plně přenositelný mezi platformami. Architektura je navržena tak, aby byla 
+            lehce rozšiřitelná pomocí tzv. \emph{pluginů}, kterých je pro Jenkins vytvořené velké množství. 
+            
+            Jenkins CI je určen pro běh na serveru a je dostupný přes webové rozhraní (ale může být samozřejmě spuštěn
+            na libovolném osobním počátači). Komunikuje pomocí protokolu \emph{HTTP}, 
+            který je založen na modelu \emph{request-response} (česky požadavek-odpověď). Jelikož tento způsob komunikace
+            je velmi, tak není v programu přímo implementován, ale využívá k němu externí nástroje. 
+            Další důležitou činností, kterou Jenkins CI deleguje na jiné nástroje, je práce \emph{servlet kontejneru}. 
+            Tento pojem je blíže objasněn v kapitole \ref{servletWebserver}.
+
+            \medskip \noindent
+            Existují dvě možnosti jak spustit server Jenkins CI:
+
+            \begin{enumerate}
+                \item{Může běžet na libovolném \emph{Java EE} aplikačním serveru \cite{jenkinsServers} jako jsou například servery 
+                JBoss\footnote{Více informací o serveru viz http://www.jboss.org/jbossas/} 
+                anebo Glasfish\footnote{Více informací o serveru viz http://www.oracle.com/technetwork/middleware/glassfish/}}.
+                Jenkins CI se standardně nasadí na server (dle zvyklostí konkrétního serveru)
+                a poté je s ním možné pracovat. V tomto případě veškerou nízkoúrovňovou komunikaci pomocí \emph{HTTP} 
+                i práci servlet kontejneru zajišťuje aplikační server.
+                
+                \item{Pokud nechceme nebo nemůžeme spouštět Jenkins CI na aplikačním serveru, tak jej lze spustit přímo
+                    z vytvořené \texttt{.war} archivu (překladem se zabývá kapitola \ref{jenkinsUsage}). V tomto případě
+                    se o práci servlet kontejneru i webového serveru komunikujícího protokolem \emph{HTTP} stará 
+                    kombinace nástrojů Winstone a Jetty, které jsou přímo integrovány do serveru Jenkins CI. 
+                    
+                    Nahrazení těchto dvou nástrojů (nebo pouze serveru Jetty) a zajištění vykonávání této činnosti je hlavním cílem této práce.
+                    Záměrem je tedy nahradit server Jetty a případně i server Winstone pomocí zvoleného nového serveru Undertow.
+                    Studie těchto nástrojů a jejich rozbor je předmětem následujícíh kapitol.}
+            \end{enumerate}
+
+
+        \subsection{Možnosti použití} \label{jenkinsUsage}
+            WAR archiv
             Typy spouštění a překlady, spouštění testů
 
-    \section{Servlet kontejner a webový server}
+    \section{Servlet kontejner a webový server} \label{servletWebserver}
         Co je servlet kontejner a webserver? \cite{webserverVsServletPage}
          
     \section{Maven} \label{maven}
