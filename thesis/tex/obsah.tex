@@ -53,6 +53,10 @@
         Jenkins CI je komunitní open source nástroj pro kontinuální integraci softwaru, který je vyvíjen pod svobodnou licencí
         MIT\footnote{Licence MIT: http://opensource.org/licenses/MIT}.
         Je velmi populární a využíván malými i velkými firmami jako je například firma Red Hat, kde tento program běží na stovkách serverů.
+        Původní název tohoto projektu je Hudson\footnote{Webové stránky projektu Hudson: http://hudson-ci.org/}. 
+        Když se vývoje tohoto projektu ujala firma Oracle, tak se tento projekt
+        rozštěpil a vznikla komunitní verze projektu, což je server Jenkins CI. Přesto se v některých částech tohoto projektu 
+        stále objevuje název Hudson, ale jedná se pouze pozůstatek z původního projektu.
 
         Zkratka CI je z anglického spojení \emph{continuous integration}, což lze do češtiny přeložit jako kontinuální nebo průběžná 
         integrace. Krátké seznámení se z touto metodologií je v následující kapitole.
@@ -159,15 +163,41 @@
             Je možné nastavit ještě další parametry při spuštění programu, které lze vypsat pomocí přidání parametru \texttt{--help}.
 
             Pro práci se spuštěnou instancí aplikace se používá především webové rozhraní. Standardně aplikace
-            komunikuje pomocí protokolu TCP na portu 8080. Je tedy možné se na lokálním počítači připojit do aplikace zadáním URL adresy 
+            komunikuje pomocí protokolu \emph{TCP} na portu 8080. Je tedy možné se na lokálním počítači připojit do aplikace zadáním URL adresy 
             \texttt{http://localhost:8080} do webového prohlížeče. 
 
-            Pokud se aplikaci povede spustit, tak již je možné libovolně pracovat pouze s prohlížeče. Detaily práce s aplikací Jenkins CI
+            Pokud se aplikaci povede spustit, tak je již možné libovolně pracovat pouze s prohlížeče. Detaily práce s aplikací Jenkins CI
             lze nalézt v této knize \cite{jenkinsBook}, ale tyto informace jsou již nad rámec této publikace.
             
             
-    \section{Servlet kontejner a webový server} \label{servletWebserver}
-        Co je servlet kontejner a webserver? \cite{webserverVsServletPage}
+    \section{Webový server a servlet kontejner} \label{servletWebserver}
+        V této kapitole jsou vysvětleny pojmy webový server a servlet kontejner, které se 
+        na mnoha místech této práce objevují. Porozumění těmto pojmům je důležité, aby bylo možné správně porozumět
+        jednotlivým částem textu.
+        
+        Informace zde uvedené byly čerpány z článku \cite{webserverVsServletPage}.
+
+        \subsection{Webový server}
+            
+            \begin{figure}[ht]
+                \begin{center}
+                    \scalebox{0.63}{\includegraphics{img/web-server.jpg}}
+                    \caption{Model komunikace webového serveru s klientem \cite{webserverVsServletPage}}
+                    \label{imgWebserver}
+                \end{center}
+            \end{figure}
+
+        \subsection{Servlet kontejner}
+            \begin{figure}[ht]
+                \begin{center}
+                    \scalebox{0.7}{\includegraphics{img/servlet-container-life-cycle.jpg}}
+                    \caption{Ukázka způsobu činnosti servlet kontejneru \cite{webserverVsServletPage}}
+                    \label{imgWebserver}
+                \end{center}
+            \end{figure}
+
+
+        Co je servlet kontejner a webserver? 
          
     \section{Maven} \label{maven}
         Základní obecné informace, něco o pomkách - co tam najdeme, způsobech překladů
