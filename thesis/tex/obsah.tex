@@ -99,7 +99,7 @@
             
             Jenkins CI je určen pro běh na serveru a je dostupný přes webové rozhraní (ale může být samozřejmě spuštěn
             na libovolném osobním počátači). Komunikuje pomocí protokolu \emph{HTTP}, 
-            který je založen na modelu \emph{request-response} (česky požadavek-odpověď). Jelikož tento způsob komunikace
+            který je založen na modelu \emph{požadavek-odpověď} (anglicky \emph{request-response}). Jelikož tento způsob komunikace
             je velmi běžný, tak není v programu přímo implementován, ale využívá k němu externí nástroje. 
             Dalším nástrojem, který pro svou činnost Jenkins potřebuje, je servlet kontejner ve kterém samotná 
             aplikace poběží.
@@ -178,7 +178,16 @@
         Informace zde uvedené byly čerpány z článku \cite{webserverVsServletPage}.
 
         \subsection{Webový server}
+            Webový server je program, který zprostředkovává komunikaci přes síť s klienty, kteří
+            se k němu připojí a požadují po něm nějaká data. Tato komunikace probíhá pomocí protokolu \emph{HTTP}, 
+            který je založen na modelu \emph{požadavek-odpověd} (anglicky \emph{request-response}).
+            Model této komunikace je zachycen na obrázku \ref{imgWebserver}.
             
+            Typický způsob komunikace webového serveru je, 
+            že klient pomocí URL adresy specifikuje požadavek na nějaká
+            data a server v odpovědi tato data pošle. Pokud by neexistoval za webovým serverem nějaký další
+            program, tak by webový server vždy odpovídal na stejný požadavek stále stejnou odpovědí.
+
             \begin{figure}[ht]
                 \begin{center}
                     \scalebox{0.63}{\includegraphics{img/web-server.jpg}}
@@ -188,16 +197,32 @@
             \end{figure}
 
         \subsection{Servlet kontejner}
+            Jelikož dostávat stále stejná statická data při stejném požadavku není dostatečná funkcionalita serveru,
+            tak existují způsoby jak zajistit dynamickou práci s daty na serveru (a tudíž i měnící se odpovědi na stejný dotaz).
+            Jedním ze způsobů jak této činnosti docílit je využití tzv. \emph{servlet kontejneru} a \emph{servletů},
+            které jsou navrženy pro programovací jazyk Java.
+
+            Servlet je standardní program (konkrétně jedna třída) napsaný v jazyce Java, 
+            který implementuje rozhraní \texttt{javax.servlet}.
+            Implementace tohoto rozhraní ho zavazuje k definování několika metod, ale jinak se jedná o běžnou
+            třídu z které jsou při zpracovávání požadavků vytvářeny její instance.
+
+            Základní myšlenkou servlet kontejneru je umožnit dynamicky vytvářet odpovědi (často webové stránky)
+            pomocí vykonávání servletů. Samotný servlet kontejner je program, který poskytuje běhové prostředí pro vykonávání servletů,
+            zajišťuje jejich vytváření, vykonávání a odstraňování. Dále se také podílí na zpracovávání HTTP požadavků, které jsou
+            mu předávány od webového serveru. 
+
+            Popsaný způsob fungování servlet kontejneru je znázorněn na obrázku \ref{imgServlet}.
+
             \begin{figure}[ht]
                 \begin{center}
-                    \scalebox{0.7}{\includegraphics{img/servlet-container-life-cycle.jpg}}
-                    \caption{Ukázka způsobu činnosti servlet kontejneru \cite{webserverVsServletPage}}
-                    \label{imgWebserver}
+                    \scalebox{0.75}{\includegraphics{img/servlet-container-life-cycle.jpg}}
+                    \caption{Ukázka způsobu činnosti servlet kontejneru a jeho spolupráce s webovým serverem \cite{webserverVsServletPage}}
+                    \label{imgServlet}
                 \end{center}
             \end{figure}
 
 
-        Co je servlet kontejner a webserver? 
          
     \section{Maven} \label{maven}
         Základní obecné informace, něco o pomkách - co tam najdeme, způsobech překladů
