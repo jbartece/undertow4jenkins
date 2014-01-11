@@ -172,8 +172,8 @@
             
     \section{Webový server a servlet kontejner} \label{servletWebserver}
         V této kapitole jsou vysvětleny pojmy webový server a servlet kontejner, které se 
-        na mnoha místech této práce objevují. Porozumění těmto pojmům je důležité, aby bylo možné správně porozumět
-        jednotlivým částem textu.
+        na mnoha místech této práce objevují. Porozumění těmto pojmům je důležité, protože bez
+        jejich znalosti by některé kapitoly byly těžko pochopitelné.
         
         Informace zde uvedené byly čerpány z článku \cite{webserverVsServletPage}.
 
@@ -229,16 +229,57 @@
         \cite{mavenWeb}
 
     \section{Winstone} \label{winstone}
-        Aspoň základní informace, aby následující kapitola byla lehčeji pochopitelná?
+        Winstone je servlet kontejner, který je velmi jednoduchý a poskytuje funkcionalitu
+        servlet kontejneru aniž by byl zatížen velkým množstvím požadavků, které jsou ve specifikaci jazyka Java EE.
+        Nikdy neposkytoval veškeré služby servlet kontejneru, které specifikace jazyka definuje. 
+        V jeho názvu je zahrnutý pouze pojem servlet kontejner, ale tato aplikace vykonává i služby
+        webového serveru odpovídající popisu v kapitole \ref{servletWebserver}.
 
-        že je upraven pro Jenkins, puvodne jen trochu a ted jsou jeho streva nahrazena pomoci Jetty
-        neuhlazeny kod, plno mrtveho kodu, neni dukladne otestovan, narychlo vymenen
+        Hlavními cíli projektu bylo poskytovat funkcionalitu servlet kontejneru pouze pro jednu aplikaci,
+        což je opačný přístup než u běžných aplikačních serverů jako jsou Glasfish, JBoss, aj.
+        Díky jeho omezeným službám je jeho velikost velmi malá a umožňuje jednoduchou integraci s
+        cílovou aplikací.
 
-        jak to bylo ve verzi 0.9 a 2.0
+        Uvedené informace byly čerpány z oficiální stránky projektu Winstone \cite{winstoneWeb}.
 
-        upraveny winstone v jenkins napr. nepodporuje clustorovani, ptoroze byl problem s tim, ze pres session
-        promennou predaval hodnoty --->problem se spustenim vice instanci na jedne IP
-        \cite{winstoneWeb}
+        \subsection{Nedostatky servlet kontejneru Winstone}
+            Původní myšlenka jednoduchého servlet kontejneru byla pro projekt Jenkins CI zajímavá.
+            Kontejner Winstone má několik zásadních nedostatků kvůli kterým bylo časem jeho využití v 
+            Jenkins CI problematické \cite{kohsukeTopic}. %TODO citace
+
+            Vývoj projektu Winstone již před delší dobou ustal a tím pádem nebyla poskytována 
+            žádná další podpora pro řešení a opravování objevených nedostatků a chyb. 
+            Značné množství bezpečnostních chyb objevených v projektu Jenkins CI bylo právě
+            způsobeno tímto servlet kontejnerem.
+
+            Zpočátku možnosti servlet kontejneru postačovaly, ale časem je potřeba, aby 
+            byly přidávány nové funkcionality, které odpovídají aktuálním trendům a 
+            novým specifikacím. Příkladem mohou být nové specifikace servlet kontejneru,
+            vývoj nových technologií jako webové sokety\footnote{Oficiální stránky 
+            specifikace webových soketů http://www.websocket.org/}(angl. \emph{websocket}).
+
+        \subsection{Vývoj v komunitě Jenkins CI}
+            Po ukončení vývoje projektu Winstone se musela o potřebné úpravy starat komunita
+            Jenkins CI. Takováto práce je pro komunitu velmi zatěžující
+            a naprosto neefektivní. Byly prováděny především nutné opravy bezpečnostních chyb v kontejneru,
+            ale jinak aplikace dále degenerovala. Pro tento vývoj vznikl v projektu Jenkins CI nový 
+            repozitář\footnote{Repozitář, kde komunita Jenkins CI provádí úpravy projektu Winstone:
+            https://github.com/jenkinsci/winstone} ze kterého jsou uváděné informace také čerpány. 
+            
+            \medskip
+            Vývoj tímto způsobem probíhal až do verze \emph{0.9.10-jenkins-47}. Když byl projekt
+            v této fázi, tak vznikalo zadání tohoto diplomového projektu, které mělo za cíl
+            výrazně zlepšit aktuální stav servlet kontejneru v projektu Jenkins CI. Během
+            formulace zadání byl servlet kontejner v projektu přepracován a část byla nahrazena 
+            serverem Jetty, který je popisován v kapitole \ref{jetty}. Tímto krokem vznikla 
+            interní verze kontejneru \emph{Winstone 2.0}. Tato změna proběhla velmi narychlo
+            a nebyla detailně otestována. Obsahuje ještě množství nepotřebného kódu a 
+            samotná implementace není moc předhledná \cite{kohsukeTopic}.
+            %TODO Napsat co bylo nahrazeno a jak a asi presunout jinde a doladit
+            
+        %že je upraven pro Jenkins, puvodne jen trochu a ted jsou jeho streva nahrazena pomoci Jetty
+        %neuhlazeny kod, plno mrtveho kodu, neni dukladne otestovan, narychlo vymenen
+
 
     \section{Jetty} \label{jetty}
         \cite{jettyWeb}
@@ -250,26 +291,34 @@
         Jak se používá, jak se s ním pracuje a programuje, detailněji
          argumenty v pdfku k wildfly8 - bezpecnost, rychlost, ...
 
+        \subsection{Srovnání s Jetty}
 
         \cite{undertowWeb}
 
         
 
 
-\chapter{Analýza problému}
+\chapter{Analýza současného stavu a návrh integrace}
     
-    \section{Aktuální stav architektury webového serveru a servlet kontejneru v Jenkins CI}
+    \section{Aktuální stav architektury servlet kontejneru v Jenkins CI}
         Popis aktuálního stavu architektury Jenkins z pohledu servlet kontejneru, 
         
         možnosti integrace: napojení Winstone a Jetty v Jenkins
         extras-executebles-war, vkládání winstonu jako .jar
 
     \section{Zjištěné problémy}
-        Rozdílná verze Javy - Undertow v. 7, Jenkins v. 6
+        Rozdílná verze Javy - Undertow v. 7, Jenkins v. 6 => nutnost převést Jenkins na verzi 7,
+        což mírně omezuje okamžité využití v hlavní větvi, ale do budoucna určitě bude nějaký přechod
         
     \section{Zpětná kompatibilita}
         zachování funkčnosti parametrů - závisí na tom různé komponenty a pluginy Jenkins. 
-        Odcitovat Keysukeho čláenk na docs.gmail.       
+        Odcitovat Keysukeho článek na docs.gmail.  
+        
+        Možnost řízení security věcí
+        komunikace přes HTTP
+        komunikace přes HTTPS
+        AJP13     
+        SPDY - aktuálně není v Jenkins využíván, pouze je podporován Jetty
         
     \section{Varianta ponechání Winstonu}
 
