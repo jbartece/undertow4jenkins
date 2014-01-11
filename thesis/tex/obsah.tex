@@ -3,9 +3,7 @@
 %Date: 2013 - 2014
 %Encoding: UTF-8
 %set syntax=tex
-
-
-
+%\listoffigures
 
 \chapter{Úvod}
     Tento semestrální projekt se zabývá vylepšením serveru Jenkins CI, který je v praxi velmi využíván pro potřeby průběžného testování softwaru
@@ -35,6 +33,8 @@
 %TODO - že to dělám pod Red Hatem
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Jenkins CI a související nástroje}
     Tato kapitola se zaměřuje na teoretické základy práce, které je nutné nebo vhodné znát pro pochopení zpracovávané problematiky.
     Je zde detailněji popsán systém Jenkins CI (kapitola \ref{jenkins}) ke kterému se tato práce přímo váže. S ním je spojeno seznámení
@@ -49,6 +49,7 @@
     Uvedené informace mají spíše informativní charakter, aby poskytly ucelený úvod do zkoumané problematiky. Jsou zaměřeny především na informace týkající se samotné
     integrace. Pro případné získání detailnějších informací jsou uvedeny patřičné zdroje, kde je lze hledat.
 
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     \section {Jenkins CI} \label{jenkins}
         Jenkins CI je komunitní open source nástroj pro kontinuální integraci softwaru, který je vyvíjen pod svobodnou licencí
         MIT\footnote{Licence MIT: http://opensource.org/licenses/MIT} \cite{jenkinsGovernance}.
@@ -170,8 +171,21 @@
             Pokud se aplikaci povede spustit, tak je již možné libovolně pracovat pouze s prohlížeče. Detaily práce s aplikací Jenkins CI
             lze nalézt v této knize \cite{jenkinsBook}, ale tyto informace jsou již nad rámec této publikace.
             
-        %TODO stapler
-            
+        \subsection{Architektura serveru}
+            Architektura systému Jenkins CI je poměrně komplikovaná a pro tuto práci není nutné ji detailně celou znát.
+            Bude popsána na vysoké úrovni abstrakce a zaměří se na komponenty, které se přímo týkají této práce
+            a budou dále v textu odkazovány nebo blíže rozebírány. \ref{imgJenkinsArchitecture}
+            %TODO Stapler
+       
+            \begin{figure}[ht]
+                \begin{center}
+                    \scalebox{0.75}{\includegraphics{img/jenkinsArchitecture.png}}
+                    \caption{Přehled architektury serveru Jenkins CI \cite{architectureOverview}}
+                    \label{imgJenkinsArchitecture}
+                \end{center}
+            \end{figure}     
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     \section{Webový server a servlet kontejner} \label{servletWebserver}
         V této kapitole jsou vysvětleny pojmy webový server a servlet kontejner, které se 
         na mnoha místech této práce objevují. Porozumění těmto pojmům je důležité, protože bez
@@ -201,7 +215,7 @@
         \subsection{Servlet kontejner}
             Jelikož dostávat stále stejná statická data při stejném požadavku není dostatečná funkcionalita serveru,
             tak existují způsoby jak zajistit dynamickou práci s daty na serveru (a tudíž i měnící se odpovědi na stejný dotaz).
-            Jedním ze způsobů jak této činnosti docílit je využití tzv. \emph{servlet kontejneru} a \emph{servletů},
+            Jedním ze způsobů jak této činnosti docílit je využití tzv. \emph{servletů},
             které jsou navrženy pro programovací jazyk Java.
 
             Servlet je standardní program (konkrétně jedna třída) napsaný v jazyce Java, 
@@ -226,10 +240,12 @@
 
 
          
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     \section{Nástroj Maven} \label{maven}
         Základní obecné informace, něco o pomkách - co tam najdeme, způsobech překladů
         \cite{mavenWeb}
 
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     \section{Server Jetty} \label{jetty}
         Jednou z komponent, které jsou aktuálně integrovány do serveru Jenkins CI, je webový server Jetty.
         Tento server je open source projektem vyvíjeným pod licencemi 
@@ -257,11 +273,12 @@
         zabývá kapitola \ref{srovnani}.
         
 
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     \section{Servlet kontejner Winstone} \label{winstone}
         Další komponentou serveru Jenkins CI je servlet kontejner Winstone.
         Winstone je velmi jednoduchý a poskytuje funkcionalitu
         servlet kontejneru aniž by byl zatížen velkým množstvím požadavků, které jsou ve specifikaci jazyka Java EE.
-        Nikdy neposkytoval veškeré služby servlet kontejneru, které specifikace jazyka definuje. 
+        Nikdy neposkytoval veškeré služby servlet kontejneru, které specifikace jazykPlugins are responsible for a definuje. 
         V jeho názvu je zahrnutý pouze pojem servlet kontejner, ale tato aplikace vykonává i služby
         webového serveru odpovídající popisu v kapitole \ref{servletWebserver}.
 
@@ -287,6 +304,8 @@
             novým specifikacím. Příkladem mohou být nové specifikace servlet kontejneru,
             vývoj nových technologií jako webové sokety.
 
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     \section{Vývoj servlet kontejneru v komunitě Jenkins CI} \label{vyvojWinstone}
         Po ukončení vývoje projektu Winstone se musela o potřebné úpravy starat komunita
         Jenkins CI. Takováto práce je pro komunitu velmi zatěžující
@@ -310,6 +329,7 @@
         %neuhlazeny kod, plno mrtveho kodu, neni dukladne otestovan, narychlo vymenen
 
 
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     \section{Server Undertow} \label{undertow}
         Obecné informace, k čemu je dobrý, srovnání s Jetty, odkazy na výsledky testování výkonu
 
@@ -322,7 +342,8 @@
 
         
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Analýza současného stavu a návrh integrace}
     
     \section{Aktuální stav architektury servlet kontejneru v Jenkins CI}
@@ -339,11 +360,12 @@
         zachování funkčnosti parametrů - závisí na tom různé komponenty a pluginy Jenkins. 
         Odcitovat Keysukeho článek na docs.gmail.  
         
-        Možnost řízení security věcí
+        Možnost řízení security věcí -- \cite{securityArchitecture}
         komunikace přes HTTP
         komunikace přes HTTPS
         AJP13     
         SPDY - aktuálně není v Jenkins využíván, pouze je podporován Jetty
+
         %parametry aspon do přílohy
 
     \section{Varianta ponechání Winstonu}
