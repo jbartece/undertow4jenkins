@@ -63,6 +63,7 @@
 
         Informace v této kapitole byly především čerpány z knihy \cite{jenkinsBook}, kde lze nalézt další informace o serveru Jenkins CI,
         a také z webové stránky projektu \cite{jenkinsWeb}.
+        %TODO přidání odkazu na vývoj servlet kontejneru v Jenkins
 
         \subsection{Kontinuální integrace a využití Jenkins CI}
             V minulosti byla integrace programu do výsledného produktu velmi náročným procesem a často ztraceným časem.
@@ -169,11 +170,12 @@
             Pokud se aplikaci povede spustit, tak je již možné libovolně pracovat pouze s prohlížeče. Detaily práce s aplikací Jenkins CI
             lze nalézt v této knize \cite{jenkinsBook}, ale tyto informace jsou již nad rámec této publikace.
             
+        %TODO stapler
             
     \section{Webový server a servlet kontejner} \label{servletWebserver}
         V této kapitole jsou vysvětleny pojmy webový server a servlet kontejner, které se 
         na mnoha místech této práce objevují. Porozumění těmto pojmům je důležité, protože bez
-        jejich znalosti by některé kapitoly byly těžko pochopitelné.
+        jejich znalosti by následující kapitoly byly obtížněji pochopitelné pochopitelné.
         
         Informace zde uvedené byly čerpány z článku \cite{webserverVsServletPage}.
 
@@ -224,12 +226,40 @@
 
 
          
-    \section{Maven} \label{maven}
+    \section{Nástroj Maven} \label{maven}
         Základní obecné informace, něco o pomkách - co tam najdeme, způsobech překladů
         \cite{mavenWeb}
 
-    \section{Winstone} \label{winstone}
-        Winstone je servlet kontejner, který je velmi jednoduchý a poskytuje funkcionalitu
+    \section{Server Jetty} \label{jetty}
+        Jednou z komponent, které jsou aktuálně integrovány do serveru Jenkins CI, je webový server Jetty.
+        Tento server je open source projektem vyvíjeným pod licencemi 
+        Eclipse\footnote{Licence Eclipse je dostupná na adrese http://www.eclipse.org/legal/epl-v10.html} a
+        Apache\footnote{Licence Apache je dostupná 
+        na adrese http://www.apache.org/licenses/LICENSE-2.0.html}. 
+        Je využíván velkým množstvím nástrojů jako jsou například \emph{Eclipse IDE}\footnote{Webové stránky nástroje Eclipse IDE 
+        http://www.eclipse.org/} nebo \emph{Google AppEngine}\footnote{Webové stránky platformy Google AppEngine
+        https://developers.google.com/appengine/}.
+
+        Jetty je webový server a poskytuje funkcionalitu servlet kontejneru dle specifikace verze 3.0. 
+        Je jej možné využít také jako webového klienta pro komunikaci se servery. Komunikace
+        klientů i serverů využívajících Jetty probíhá asynchronně. 
+        Návrh serveru umožňuje samostatné spouštění aplikací i jeho integraci do jiné aplikace. 
+
+        Kromě těchto základních možností obsahuje
+        řadu souvisejících technologií jako jsou SPDY, webové sokety\footnote{Oficiální stránky 
+            specifikace webových soketů: http://www.websocket.org/}(angl. \emph{websocket}),
+        JNDI, OSGi, JMX a další. 
+        Informace v této kapitole byly čerpány z webových stránek serveru Jetty \cite{jettyWeb}, kde lze nalézt 
+        další informace o zmíněných technologiích a o tomto serveru.
+        
+        Aktuální využití serveru Jetty v aplikaci Jenkins CI je podrobněji rozebráno
+        v kapitole \ref{vyvojWinstone} a jeho srovnáním se serverem Undertow se 
+        zabývá kapitola \ref{srovnani}.
+        
+
+    \section{Servlet kontejner Winstone} \label{winstone}
+        Další komponentou serveru Jenkins CI je servlet kontejner Winstone.
+        Winstone je velmi jednoduchý a poskytuje funkcionalitu
         servlet kontejneru aniž by byl zatížen velkým množstvím požadavků, které jsou ve specifikaci jazyka Java EE.
         Nikdy neposkytoval veškeré služby servlet kontejneru, které specifikace jazyka definuje. 
         V jeho názvu je zahrnutý pouze pojem servlet kontejner, ale tato aplikace vykonává i služby
@@ -255,45 +285,40 @@
             Zpočátku možnosti servlet kontejneru postačovaly, ale časem je potřeba, aby 
             byly přidávány nové funkcionality, které odpovídají aktuálním trendům a 
             novým specifikacím. Příkladem mohou být nové specifikace servlet kontejneru,
-            vývoj nových technologií jako webové sokety\footnote{Oficiální stránky 
-            specifikace webových soketů http://www.websocket.org/}(angl. \emph{websocket}).
+            vývoj nových technologií jako webové sokety.
 
-        \subsection{Vývoj v komunitě Jenkins CI}
-            Po ukončení vývoje projektu Winstone se musela o potřebné úpravy starat komunita
-            Jenkins CI. Takováto práce je pro komunitu velmi zatěžující
-            a naprosto neefektivní. Byly prováděny především nutné opravy bezpečnostních chyb v kontejneru,
-            ale jinak aplikace dále degenerovala. Pro tento vývoj vznikl v projektu Jenkins CI nový 
-            repozitář\footnote{Repozitář, kde komunita Jenkins CI provádí úpravy projektu Winstone:
-            https://github.com/jenkinsci/winstone} ze kterého jsou uváděné informace také čerpány. 
-            
-            \medskip
-            Vývoj tímto způsobem probíhal až do verze \emph{0.9.10-jenkins-47}. Když byl projekt
-            v této fázi, tak vznikalo zadání tohoto diplomového projektu, které mělo za cíl
-            výrazně zlepšit aktuální stav servlet kontejneru v projektu Jenkins CI. Během
-            formulace zadání byl servlet kontejner v projektu přepracován a část byla nahrazena 
-            serverem Jetty, který je popisován v kapitole \ref{jetty}. Tímto krokem vznikla 
-            interní verze kontejneru \emph{Winstone 2.0}. Tato změna proběhla velmi narychlo
-            a nebyla detailně otestována. Obsahuje ještě množství nepotřebného kódu a 
-            samotná implementace není moc předhledná \cite{kohsukeTopic}.
-            %TODO Napsat co bylo nahrazeno a jak a asi presunout jinde a doladit
-            
+    \section{Vývoj servlet kontejneru v komunitě Jenkins CI} \label{vyvojWinstone}
+        Po ukončení vývoje projektu Winstone se musela o potřebné úpravy starat komunita
+        Jenkins CI. Takováto práce je pro komunitu velmi zatěžující
+        a naprosto neefektivní. Byly prováděny především nutné opravy bezpečnostních chyb v kontejneru,
+        ale jinak aplikace dále degenerovala. Pro tento vývoj vznikl v projektu Jenkins CI nový 
+        repozitář\footnote{Repozitář, kde komunita Jenkins CI provádí úpravy projektu Winstone:
+        https://github.com/jenkinsci/winstone} ze kterého jsou uváděné informace také čerpány. 
+        
+        \medskip
+        Vývoj tímto způsobem probíhal až do verze \emph{0.9.10-jenkins-47}. Když byl projekt
+        v této fázi, tak vznikalo zadání tohoto diplomového projektu, které mělo za cíl
+        výrazně zlepšit aktuální stav servlet kontejneru v projektu Jenkins CI. Během
+        formulace zadání byl servlet kontejner v projektu přepracován a část byla nahrazena 
+        serverem Jetty, který je popisován v kapitole \ref{jetty}. Tímto krokem vznikla 
+        interní verze kontejneru \emph{Winstone 2.0}. Tato změna proběhla velmi narychlo
+        a nebyla detailně otestována. Obsahuje ještě množství nepotřebného kódu a 
+        samotná implementace není moc předhledná \cite{kohsukeTopic}.
+        %TODO Napsat co bylo nahrazeno a jak a asi presunout jinde a doladit
+        
         %že je upraven pro Jenkins, puvodne jen trochu a ted jsou jeho streva nahrazena pomoci Jetty
         %neuhlazeny kod, plno mrtveho kodu, neni dukladne otestovan, narychlo vymenen
 
 
-    \section{Jetty} \label{jetty}
-        \cite{jettyWeb}
-        obecné seznámení, co to umí
-
-    \section{Undertow} \label{undertow}
+    \section{Server Undertow} \label{undertow}
         Obecné informace, k čemu je dobrý, srovnání s Jetty, odkazy na výsledky testování výkonu
 
         Jak se používá, jak se s ním pracuje a programuje, detailněji
          argumenty v pdfku k wildfly8 - bezpecnost, rychlost, ...
-
-        \subsection{Srovnání s Jetty}
-
         \cite{undertowWeb}
+
+        \subsection{Srovnání serveru Undertow a Jetty}\label{srovnani}
+
 
         
 
@@ -319,7 +344,8 @@
         komunikace přes HTTPS
         AJP13     
         SPDY - aktuálně není v Jenkins využíván, pouze je podporován Jetty
-        
+        %parametry aspon do přílohy
+
     \section{Varianta ponechání Winstonu}
 
     \section{Varianta nahrazení Jetty i Winstonu}
