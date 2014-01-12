@@ -367,7 +367,9 @@
                     \\\texttt{http://www.techempower.com/benchmarks/\#section=data-r8\&hw=ec2\&test=plaintext}}
                     byl server Undertow i více 3,5 krát rychlejší než server Jetty a dosahoval menší
                     až třetinové odezvy.
-                    
+            
+            Na obrá
+        
                     Po dokončení diplomového projektu a provedení plánované
                     integrace uskutečním vlastní porovnání těchto dvou implementací a pokusím se potvrdit
                     tyto výsledky.}
@@ -400,7 +402,6 @@
                     Lze usuzovat, že rychlost spuštění bude u serveru Undertow výrazně nižší
                     než u serveru Jetty. Tato skutečnost bude testována při vyhodnocování
                     výsledků této diplomové práce.
-
 
                     V aktuálním stavu Jenkins CI běží integrační testy více než hodinu. Pokud 
                     by byl servlet kontejner spuštěn za poloviční dobu, tak by mohla být doba testování
@@ -442,17 +443,85 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Analýza současného stavu a návrh integrace}
+    většina informací čerpána přímo ze zdrojových kódu aplikace a komponent Jenkins CI.
     
-    \section{Aktuální stav architektury servlet kontejneru v Jenkins CI}
-        Popis aktuálního stavu architektury Jenkins z pohledu servlet kontejneru, 
-        
-        možnosti integrace: napojení Winstone a Jetty v Jenkins
-        extras-executebles-war, vkládání winstonu jako .jar
+    \section{Aktuální stav architektury servlet kontejneru v~Jenkins~CI}
+        Jak již bylo uvedeno v kapitole \ref{vyvojWinstone}, současný servlet kontejner 
+        v Jenkins CI se skládá z nástojů Winstone a Jetty, které byly popisovány v 
+        předchozí kapitole. Velká část servlet
+        kontejneru Winstone byla odstraněna a zůstala pouze část, která
+        provádí zpracování parametrů
+        programu po spuštění aplikace. Činnost webového serveru, servlet kontejneru
+        a další vykonává server Jetty.
 
-    \section{Zjištěné problémy}
-        Rozdílná verze Javy - Undertow v. 7, Jenkins v. 6 => nutnost převést Jenkins na verzi 7,
-        což mírně omezuje okamžité využití v hlavní větvi, ale do budoucna určitě bude nějaký přechod
+        \subsection{Detaily architektury Jenkins CI}
+            Na vysoké úrovni pohledu je architektura serveru Jenkins CI rozdělena na tři části:
+            
+            \begin{itemize}
+                \item{\textbf{Jádro aplikace} do kterého patřím nejnutnější základní komponenty systému,
+                    části, které jsou pro Jenkins CI specifické a vznikaly a vznikají v rámci tohoto projektu.}
+
+                \item{\textbf{Přídavné moduly} aplikace, které jsou do ní dynamicky přidávány jako archivy javových programů
+                    \texttt{.jar}. Tyto součásti jsou většinou nutné pro standardní běh aplikace a je s nimi aplikace
+                    běžně dodávána (teoreticky lze
+                    aplikaci spustit např. bez servlet kontejneru pomocí aplikačního serveru, ale toto je spíše ojedinělý případ). 
+                    
+                    Komponenty z této kategorie pocházejí typicky z externích projektů.
+                    Do této kategorie také spadá servlet kontejner, který je aktuálně do aplikace
+                    přidáván pod názvem \texttt{winstone.jar}.}
+
+                \item{\textbf{Rozšiřující moduly} (angl. plugins) jsou samostatné menší programy, které nějakým
+                    způsobem přidávají funkcionalitu serveru Jenkins CI. Typicky nejsou dodávány s aplikací
+                    a uživatel si je může stáhnout popř. si nějaký vlastní modul vytvořit.
+                    
+                    Samotná aplikace se dodává jen s těmi nejnutnějšími součástmi a ponechává na uživatelích, které
+                    další funkcionality si do systému doinstalují. V současné době již existují stovky takových
+                    modulů, které jsou volně ke stažení. }
+            \end{itemize}
+            
+
+            V následujícím textu bude při popisu interních součástí zdrojových kódů použita notace
+            ve tvaru \texttt{Název\_třídy::Název\_metody}.
+
+            Architektura Jenkins CI z pohledu servlet kontejneru je znázorněna na obrázku \ref{imgArchitekturaServlet}.
+            Jsou zde zachyceny především komponenty, které přímo souvisejí s činností servlet kontejneru.
+
+            \begin{figure}[ht]
+                \begin{center}
+                    \scalebox{0.63}{\includegraphics{img/web-server.jpg}}
+                    \caption{Přehled architektury systému Jenkins CI z pohledu vestavěného servlet kontejneru}
+                    \label{imgArchitekturaServlet}
+                \end{center}
+            \end{figure}
+
+            
+            Archiv \texttt{winstone.jar} obsahuje servlet kontejner pro Jenkins CI. Název je nyní sice mírně matoucí
+            (způsoben předchozí implementací, ale aktuálně jsou součástí tohoto archivu komponenty Winstone a Jetty.
+
+            Velmi podstatnu součásti aplikace z pohledu servlet kontejneru je komponenta\\\texttt{extras-executable-war}. 
+            Tato součást aplikace je sice malá, ale obsahuje metodu \texttt{main}, kterou se aplikace spouští 
+            (pokud není spuštěna v aplikačním serveru). Hlavním úkolem této komponenty je právě spustit 
+            servlet kontejner a tím spustit i celou aplikaci. Tento proces spuštění aplikace je zobrazen
+            na obrázku \ref{imgArchitekturaSpusteni}.
+
+            Nejprve je spuštěna vstupní metoda celé aplikace \texttt{Main.java::main} z komponenty\\\texttt{extras-executable-war}.
+            Po počáteční inicializaci je spuštěna metoda \texttt{Launcher.java::main}, která provede nastartování a 
+            zavedení servlet kontejneru. Po spuštění servlet kontejneru je provedena inicializace a spuštění
+            jediného servletu aplikace Jenkins CI a tím je servlet Stapler. %TODO reference na stapler
+            Pokud se podaří úspěšně spustit tento servlet, tak je spuštění celé aplikace Jenkins CI z pohledu
+            servlet kontejneru úspěšně hotovo a aplikace běží.
+
+            \begin{figure}[ht]
+                \begin{center}
+                    \scalebox{0.63}{\includegraphics{img/web-server.jpg}}
+                    \caption{Průběh spouštění aplikace Jekins CI při spouštění pomocí vestavěného servlet kontejneru}
+                    \label{imgArchitekturaSpusteni}
+                \end{center}
+            \end{figure}
+
         
+
+
     \section{Zpětná kompatibilita}
         zachování funkčnosti parametrů - závisí na tom různé komponenty a pluginy Jenkins. 
         Odcitovat Keysukeho článek na docs.gmail.  
@@ -464,6 +533,10 @@
         SPDY - aktuálně není v Jenkins využíván, pouze je podporován Jetty
 
         %parametry aspon do přílohy
+
+    \section{Zjištěné problémy}
+        Rozdílná verze Javy - Undertow v. 7, Jenkins v. 6 => nutnost převést Jenkins na verzi 7,
+        což mírně omezuje okamžité využití v hlavní větvi, ale do budoucna určitě bude nějaký přechod
 
     \section{Varianta ponechání Winstonu}
 
