@@ -137,7 +137,7 @@
             GitHub\footnote{Adresa aktuální verze Jekins CI: \texttt{www.github.com/jenkinsci}}.
 
             Po stažení zdrojových souborů je potřeba provést překlad aplikace. Pro tento automatizovaný překlad se používá nástroj Maven, který
-            krátce zmíněn v kapitole \ref{maven}. Pro provedení překladu bez spouštění jednotkových testů je potřeba použít tento příkaz:
+            je krátce zmíněn v kapitole \ref{maven}. Pro provedení překladu bez spouštění jednotkových testů je potřeba použít tento příkaz:
             \begin{verbatim}
                 mvn clean install -pl war -am -DskipTests
             \end{verbatim}
@@ -358,29 +358,88 @@
             v Jenkins CI, tak bychom měli srovnávat server Jetty se serverem Undertow.
 
             \medskip
-            Provedeme srovnání serverů Undertow a Jetty a jejich výhod a nevýhod
+            Budeme tedy srovnávat servery Undertow a Jetty a jejich výhody a nevýhody
             vzhledem k využití v systému Jenkins CI:
             \begin{itemize}
-                \item {\textbf{Rychlost:} Server Undertow je ve velmi ranném stádiu, ale už přesto existují
-                    i testy, které prokazují, že je výkonnější než server Jetty. V tomto           
+                \item {\textbf{Rychlost:} Server Undertow je aktuálně ještě stále ve verzi \emph{beta}, ale už přesto existují
+                    testy, které prokazují, že je výkonnější než server Jetty. V tomto           
                     testování\footnote{Porovnání rychlosti, odezvy a celkové výkonnosti serverů Undertow, Jetty a jiných: 
                     \\\texttt{http://www.techempower.com/benchmarks/\#section=data-r8\&hw=ec2\&test=plaintext}}
                     byl server Undertow i více 3,5 krát rychlejší než server Jetty a dosahoval menší
                     až třetinové odezvy.
                     
                     Po dokončení diplomového projektu a provedení plánované
-                    integrace uskutečníme vlastní porovnání těchto dvou implementací a pokusíme se potvrdit
+                    integrace uskutečním vlastní porovnání těchto dvou implementací a pokusím se potvrdit
                     tyto výsledky.}
 
-                \item{\textbf{Rychlost spuštění:} }
-                \item{\textbf{Spolehlivost:}}
-                \item{\textbf{Konfigurovatelnost:}}
-                \item{\textbf{Velikost:}}
+                \item{\textbf{Spolehlivost:} Dalším důležitým aspektem je spolehlivost daného serveru. 
+                        Server Jetty má za sebou již dlouhou historii a je integrován ve velkém množství
+                        různých aplikací\footnote{Aplikace, které využívají server Jetty: \texttt{http://www.eclipse.org/jetty/powered/}},
+                        což mu dodává velkou důvěryhodnost a lze očekávat, že bude pracovat velmi 
+                        spolehlivě. 
+                        
+                        U server Undertow ještě nebyla dokončena první finální verze,
+                        takže lze předpokládat, že může obsahovat ještě drobné nedostatky,
+                        které budou časem opravovány. Jelikož tento server bude integrován
+                        v novém aplikačním serveru WildFly 8, tak lze předpokládat,
+                        že postupem času bude také velmi spolehlivý. 
+                        Nicméně v tomto aspektu je server Jetty zřejmě 
+                        aktuálně lepší.}
+
+                \item{\textbf{Rychlost spuštění:}  Velmi často je u serverů hodnocena hlavně
+                    jejich rychlost a výkonnost v zátěži. Je běžné, že nebývá kladen důraz na
+                    velmi rychlé spuštění serveru. Pro standardní běh serveru, kdy bývá 
+                    spuštěn jednou za několik týdnů či měsíců po nějakých úpravám aplikace,
+                    není doba spuštění zásadní. Pokud se na to podíváme z pohledu testování
+                    aplikace, kdy jsou spouštěny integrační testy a pro každý test musí být
+                    znovu spuštěn server, tak je rychlost nastartování serveru velmi podstatná.
+                    
+                    Cílem serveru Undertow je být minimalistickým a velmi rychlým 
+                    řešením. Server Jetty poskytuje kvalitní podporu pro běh aplikací, ale je 
+                    rozsáhlejší a není jeho prioritou, aby byl extrémně rychle spuštěn.
+                    Lze usuzovat, že rychlost spuštění bude u serveru Undertow výrazně nižší
+                    než u serveru Jetty. Tato skutečnost bude testována při vyhodnocování
+                    výsledků této diplomové práce.
+
+
+                    V aktuálním stavu Jenkins CI běží integrační testy více než hodinu. Pokud 
+                    by byl servlet kontejner spuštěn za poloviční dobu, tak by mohla být doba testování
+                    zkrácená také téměř na polovinu.
+
+                    }
+
+                \item{\textbf{Velikost:} Jelikož je servlet kontejner přímo integrován do archivu ve kterém
+                    je systém Jenkins CI distribuován, tak komunita dbá na to, aby přidávané komponenty
+                    nebyly příliš velké. Z důvodu velikosti byla v minulosti zavržena například
+                    myšlenka využít aplikační server \emph{JBoss AS 7} jako náhradu za kontejner
+                    Winstone\footnote{Diskuze o velikosti archivu Jenkins CI: \texttt{link}}. %TODO link
+                    
+                    Po integraci Jetty vzrostla velikost servlet kontejneru o 1,5 MB na celkovou
+                    velikost 1,8 MB. U serveru Undertow je uváděno, že jeho archiv má méně
+                    než 1 MB a konečná velikost po integraci bude také záležet na využitých komponentách
+                    a rozsahu implementace. Přesto z pohledu velikosti výsledného archivu
+                    se jeví server Undertow jako výhodnější, ale rozdíl oproti serveru Jetty není zásadní.
+                    Rozdíl je zřejmě přibližně 1MB, což jsou necelé 2\% z aktuální velikosti
+                    Jenkins CI\footnote{Stránka, kde je v systému Jenkins CI automatizovaně
+                    sledována velikost archivu aplikace:\\ 
+                    \texttt{https://wiki.jenkins-ci.org/display/JENKINS/Jenkins+WAR+Size+Tracker}}.}
+
+                %Tato část by měla být pečlivě překontrolována
+                \item{\textbf{Konfigurovatelnost:} Server Undertow je velmi flexibilní a způsob
+                    jeho návrhu, který byl popsán výše, umožňuje provádět mnoho různých úpravy 
+                    své činnosti dle potřeby a využít pouze ty části, které potřebujeme.
+                    Tato filozofie je velmi blízká filozofii projektu Jenkins CI. 
+                    
+                    Server Jetty
+                    je oproti tomu robustnější a rozsáhlejší, ale neumožňuje tak velké přizpůsobování potřebám
+                    uživatele jako například využití jen několika malých částí jeho funkčnosti či jejich
+                    kombinování. }
 
             \end{itemize}
         
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Analýza současného stavu a návrh integrace}
     
@@ -398,7 +457,7 @@
         zachování funkčnosti parametrů - závisí na tom různé komponenty a pluginy Jenkins. 
         Odcitovat Keysukeho článek na docs.gmail.  
         
-        Možnost řízení security věcí -- \cite{securityArchitecture}
+        Možnost řízení security věcí -- \cite{securityArchitecture}, \cite{securityArchitectureWinstone}
         komunikace přes HTTP
         komunikace přes HTTPS
         AJP13     
@@ -416,9 +475,9 @@
 
 
 \chapter{Závěr}
-
+    Zhodnocení aktuálního stavu a budoucí výhled a plán
 
 %=========================================================================
 
 
-
+3
