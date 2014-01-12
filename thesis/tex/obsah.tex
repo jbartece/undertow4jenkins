@@ -446,6 +446,10 @@
     většina informací čerpána přímo ze zdrojových kódu aplikace a komponent Jenkins CI.
     
     \section{Aktuální stav architektury servlet kontejneru v~Jenkins~CI}
+        V následujících dvou podkapitolách bude blíže analyzována architektura
+        Jenkins CI z pohledu servlet kontejneru. Tato analýza je velmi důležitá
+        pro pochopení návazností jednotlivých komponent, které budou později upravovány.
+
         Jak již bylo uvedeno v kapitole \ref{vyvojWinstone}, současný servlet kontejner 
         v Jenkins CI se skládá z nástojů Winstone a Jetty, které byly popisovány v 
         předchozí kapitole. Velká část servlet
@@ -453,9 +457,10 @@
         provádí zpracování parametrů
         programu po spuštění aplikace. Činnost webového serveru, servlet kontejneru
         a další vykonává server Jetty.
+        
 
-        \subsection{Detaily architektury Jenkins CI}
-            Na vysoké úrovni pohledu je architektura serveru Jenkins CI rozdělena na tři části:
+        \subsection{Architektura Jenkins CI z pohledu servlet kontejneru}
+            Na vysoké úrovni pohledu lze architekturu serveru Jenkins CI rozdělit do tří částí:
             
             \begin{itemize}
                 \item{\textbf{Jádro aplikace} do kterého patřím nejnutnější základní komponenty systému,
@@ -486,7 +491,7 @@
             Architektura Jenkins CI z pohledu servlet kontejneru je znázorněna na obrázku \ref{imgArchitekturaServlet}.
             Jsou zde zachyceny především komponenty, které přímo souvisejí s činností servlet kontejneru.
 
-            \begin{figure}[ht]
+            \begin{figure}[h!t]
                 \begin{center}
                     \scalebox{0.63}{\includegraphics{img/web-server.jpg}}
                     \caption{Přehled architektury systému Jenkins CI z pohledu vestavěného servlet kontejneru}
@@ -505,13 +510,14 @@
             na obrázku \ref{imgArchitekturaSpusteni}.
 
             Nejprve je spuštěna vstupní metoda celé aplikace \texttt{Main.java::main} z komponenty\\\texttt{extras-executable-war}.
-            Po počáteční inicializaci je spuštěna metoda \texttt{Launcher.java::main}, která provede nastartování a 
-            zavedení servlet kontejneru. Po spuštění servlet kontejneru je provedena inicializace a spuštění
+            Po počáteční inicializaci je předáno řízení aplikace metodě \\\texttt{Launcher.java::main}
+            z archivu \texttt{winstone.jar}, která provede nastartování a 
+            zavedení servlet kontejneru. Následně je provedena inicializace a spuštění
             jediného servletu aplikace Jenkins CI a tím je servlet Stapler. %TODO reference na stapler
             Pokud se podaří úspěšně spustit tento servlet, tak je spuštění celé aplikace Jenkins CI z pohledu
             servlet kontejneru úspěšně hotovo a aplikace běží.
 
-            \begin{figure}[ht]
+            \begin{figure}[h!t]
                 \begin{center}
                     \scalebox{0.63}{\includegraphics{img/web-server.jpg}}
                     \caption{Průběh spouštění aplikace Jekins CI při spouštění pomocí vestavěného servlet kontejneru}
@@ -519,7 +525,33 @@
                 \end{center}
             \end{figure}
 
-        
+
+        \subsection{Průběh komunikace prostřednictvím servlet kontejneru}
+            Po úspěšném zavedení a spuštění aplikace provádí servlet kontejner
+            zpracovávání příchozích požadavků a předává je aplikaci Jenkins CI. 
+            Typický zobecněný průběh komunikace servlet kontejneru s aplikací je znázorněn
+            na obrázku \ref{imgKomunikace}. 
+
+            \begin{figure}[h!t]
+                \begin{center}
+                    \scalebox{0.63}{\includegraphics{img/web-server.jpg}}
+                    \caption{Průběh komunikace aplikace Jekins CI prostřednictvím vestavěného servlet kontejneru}
+                    \label{imgArchitekturaSpusteni}
+                \end{center}
+            \end{figure}
+
+            Při komunikaci je příchozí HTTP požadavek zpracován pomocí servlet kontejneru 
+            a následně předán patřičnému servletu (dle nastavení pravidel pro směřování požadavků).
+            Jelikož je v aplikaci pouze jediný servlet Stapler, tak je požadavek předán jemu.
+            Tato komponenta následně provede netriviálním způsobem rozhodnutí, které
+            části aplikace předat požadavek k vykonání  nebo zda náleží nějakému rozšiřujícímu modulu.
+            Následně obráceným postupem probíhá zaslání HTTP odpovědi klientovi.
+
+            Je zde zachycena pouze jedna z možných činností
+            servlet kontejneru a tou je zpracovávání komunikace protokolem HTTTP. 
+            Další činnosti kontejneru budou rozebírány později.
+
+ 
 
 
     \section{Zpětná kompatibilita}
@@ -534,16 +566,19 @@
 
         %parametry aspon do přílohy
 
-    \section{Zjištěné problémy}
-        Rozdílná verze Javy - Undertow v. 7, Jenkins v. 6 => nutnost převést Jenkins na verzi 7,
-        což mírně omezuje okamžité využití v hlavní větvi, ale do budoucna určitě bude nějaký přechod
+        \subsection{Zjištěné problémy}
+            Rozdílná verze Javy - Undertow v. 7, Jenkins v. 6 => nutnost převést Jenkins na verzi 7,
+            což mírně omezuje okamžité využití v hlavní větvi, ale do budoucna určitě bude nějaký přechod
 
-    \section{Varianta ponechání Winstonu}
 
-    \section{Varianta nahrazení Jetty i Winstonu}
-
-    \section{Zvolená varianta}
+    \section{Zvolení způsobu integrace serveru Undertow}
         Způsob vyhodnocení správnosti výsledného řešení pomocí testů jenkins
+
+        \subsection{Varianta ponechání Winstonu}
+
+        \subsection{Varianta nahrazení Jetty i Winstonu}
+
+
 
 
 
@@ -553,4 +588,5 @@
 %=========================================================================
 
 
-3
+
+
