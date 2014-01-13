@@ -741,7 +741,33 @@
 
 
 \chapter{Závěr}
-    Zhodnocení aktuálního stavu a budoucí výhled a plán
+    Začátek této práce se věnoval seznámení s integračním serverem Jenkins CI,
+    se servery Jetty a Winstone, které jsou součástí jeho servlet kontejneru,
+    a se serverem Undertow, jehož integrace do Jenkins CI je hlavní
+    náplní této práce. V následující části byla analyzována architektura aplikace Jenkins CI
+    a také stav servlet kontejneru, který je v něm integrován.
+
+    Cílem plánované integrace je nabídnout novou a výkonnější alternativu k současnému řešení.
+    Po seznámení se s podmínkami pro integraci byly
+    zkoumány možnosti provedení samotné integrace serveru Undertow do Jenkins CI.
+    Byly prozkoumány dva způsoby integrace. První možností je nahrazení pouze komponenty
+    Jetty, která vykonává většinu práce v aktuálním kontejneru, zatímco druhá varianta
+    zahrunje nahrazení obou součástí. 
+    Po důkladném zvážení různých aspektů integrace byla 
+    zvolena varianta, kdy budou nahrazeny obě komponenty současného 
+    servlet kontejneru a tudíž proběhne zcela nová implementace.
+
+    V průběhu práce nebyly objeveny překážky, které by znemožňovaly další
+    pokračování práce na integraci serveru Undertow do Jenkins CI.
+    Dalším krokem v navazujícím diplomovém projektu bude provedení
+    integrace tak a její důkladné otestování.
+    Po vytvoření funkční implementace bude výsledná aplikace testována 
+    z hlediska výkonu a porovnávána s původním řešením.
+
+    Pokud by byla potvrzena vyšší výkonnost nové implementace, tak
+    by tento přístup mohl nahradit stávající řešení nebo
+    být jeho novou a lepší alternativou.
+
 
 %=========================================================================
 
