@@ -657,8 +657,8 @@
                 \item{\textbf{Srovnání proveditelnosti:} První varianta představuje provedení 
                     úprav pouze v částech, kde je přímo integrován server Jetty, 
                     zatímco v druhé variantě je potřeba prvést znovu celou implementace
-                    integrace servlet kontejneru.
-                     
+                    integrace servlet kontejneru. 
+                                         
                     V tomto případě je úprava stávajícího kódu aplikace
                     zřejmě snazším přístupem a také umožňuje provedení rychlejší
                     implementace, protože není nutné návrhovat celý modul,
@@ -699,10 +699,42 @@
             lepší výkonnost celé aplikace než druhá varianta.
 
         \subsection{Zjištěné problémy}
-            Rozdílná verze Javy - Undertow v. 7, Jenkins v. 6 => nutnost převést Jenkins na verzi 7,
-            což mírně omezuje okamžité využití v hlavní větvi, ale do budoucna určitě bude nějaký přechod
+            Při analyzování možností integrace byly zjištěny dva problémy.
+            Prvním problémem je, že server Undertow
+            je určen pro běh pod virtuálním strojem, který odpovídá specifikaci jazyka
+            Java verze 7 zatímco server Jenkins CI využívá verzi 6. 
+            Server Jenkins CI využívá starší verzi z důvodu zpětné kompatibility
+            řešení. 
+            
+            Specifikace jazyka je plně zpětně kompatibilní, takže server Jenkins CI
+            může být spuštěn s novější verzí virtuálního stroje, ale pro okamžité začlenění
+            serveru Undertow do Jenkins CI je tato skutečnost problém. Pokud by ovšem
+            provedená integrace dávala dobré výsledky, tak by bylo buď možné 
+            upravit kód serveru Undertow tak, aby odpovídal starší specifikaci.
+            V těchto verzích jazyka není zásadní rozdíl a úprava by byla jistě
+            možná, ale velmi pracná a stále by potřebovala údržbu při příchodu
+            novvých verzi serveru Undertow. Další možností je
+            zvýšit tlak na přechod celé aplikace na vyšší specifikaci jazyka,
+            což jistě výhledově nastane, ale není jisté kdy. 
 
-            Undertow neobsahuje SPDY, ale plánuje to
+            V této práci bude tento problém vyřešen převedením aplikace Jenkins CI na vyšší verzi,
+            což představuje úpravu několika konfigurací.
+
+            \medskip        
+            Druhým problémem je, že při integraci serveru Jetty do Jenkins CI byla přidána
+            při spuštění serveru využít protokol SPDY, jehož implemntace
+            není v současné době v serveru Undertow dostupná. Nicméně tato možnost
+            je zavedena jen krátce a zřejmě ještě není využívána žádnými komponentami,
+            takže by neměl být problém, kdyby nová implementace neobsahovala tuto volbu.
+            
+            Je důležité dodat, že požadavek na implementaci tohoto 
+            protokolu byl v komunitě serveru Undertow vznesen
+            a je také zaznamenán v systému pro sledování chyb\footnote{
+                Plánovaná implementace protokolu SPDY v serveru Undertow:
+                \texttt{https://issues.jboss.org/browse/UNDERTOW-9}}.
+            Je tedy možné, že tato funkcionalita bude v blízké době době do serveru
+            Undertow přidána.
+            
 
 
 
