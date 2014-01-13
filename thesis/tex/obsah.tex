@@ -523,7 +523,7 @@
 
             \begin{figure}[h!t]
                 \begin{center}
-                    \scalebox{0.63}{\includegraphics{img/web-server.jpg}}
+                    \scalebox{0.64}{\includegraphics{img/jenkinsStart.png}}
                     \caption{Průběh spouštění aplikace Jekins CI při spouštění pomocí vestavěného servlet kontejneru}
                     \label{imgArchitekturaSpusteni}
                 \end{center}
@@ -533,12 +533,12 @@
         \subsection{Průběh komunikace prostřednictvím servlet kontejneru}
             Po úspěšném zavedení a spuštění aplikace provádí servlet kontejner
             zpracovávání příchozích požadavků a předává je aplikaci Jenkins CI. 
-            Typický zobecněný průběh komunikace servlet kontejneru s aplikací je znázorněn
+            Typický zjednodušený průběh komunikace servlet kontejneru s aplikací je znázorněn
             na obrázku \ref{imgKomunikace}. 
 
             \begin{figure}[h!t]
                 \begin{center}
-                    \scalebox{0.63}{\includegraphics{img/web-server.jpg}}
+                    \scalebox{0.64}{\includegraphics{img/jenkinsCommunication.png}}
                     \caption{Průběh komunikace aplikace Jekins CI prostřednictvím vestavěného servlet kontejneru}
                     \label{imgKomunikace}
                 \end{center}
@@ -583,12 +583,12 @@
             Jednotlivé parametry zde nejsou rozebírány, ale následující analýza
             se zaměřuje především na klíčové bodů funkčnosti servlet kontejneru.
             Pro zachování zpětné kompatibility musí servet kontejner v aplikaci 
-            Jenkins CI poskytovat následující funkcionalitu:
+            Jenkins CI poskytovat následující funkce:
 
             \begin{itemize}
-                \item{\textbf{Komunikovat nešifrovaným protokolem HTTP}}
-                \item{\textbf{Komunikovat šifrovaným protokolem HTTPS}}
-                \item{\textbf{Komunikovat protokolem AJP13}} 
+                \item{\textbf{Komunikaci nešifrovaným protokolem HTTP}}
+                \item{\textbf{Komunikaci šifrovaným protokolem HTTPS}}
+                \item{\textbf{Komunikaci protokolem AJP13}} 
                 \item{\textbf{Umožnit přihlašování a správu přístupových práv} }
                 \item{\textbf{Umožnit restartování a ukončování aplikace přes speciální port}}
             \end{itemize}
@@ -609,28 +609,26 @@
             je možnost ukončit nebo restartovat aplikaci pomocí zaslání
             speciálního požadavku na specifický port. 
 
-            Po integraci serveru Jetty do kontejneru byla přidána ještě možnost
+            Po integraci serveru Jetty do servlet kontejneru byla přidána ještě možnost
             komunikace protokolem SPDY, ale tento protokol ještě není 
             v Jenkins CI více využíván a tudíž jeho implementace není zásadní.
 
              
         \subsection{Bezpečnostní architektura v Jenkins CI} \label{secSecurityArchitecture}
-                    \cite{securityArchitecture}, \cite{securityArchitectureWinstone}
-
-
+                    \cite{securityArchitectureJenkins}, \cite{securityArchitectureWinstone}
 
 
     \section{Návrh způsobu integrace serveru Undertow}
+
+        \subsection{Srovnání variant integrace}
+
+        \subsection{Zvolení způsobu integrace}
 
         \subsection{Zjištěné problémy}
             Rozdílná verze Javy - Undertow v. 7, Jenkins v. 6 => nutnost převést Jenkins na verzi 7,
             což mírně omezuje okamžité využití v hlavní větvi, ale do budoucna určitě bude nějaký přechod
 
             Undertow neobsahuje SPDY, ale plánuje to
-
-        \subsection{Varianta ponechání Winstonu}
-
-        \subsection{Varianta nahrazení Jetty i Winstonu}
 
 
 
