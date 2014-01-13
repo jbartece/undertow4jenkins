@@ -365,14 +365,13 @@
                     testy, které prokazují, že je výkonnější než server Jetty. V tomto           
                     testování\footnote{Porovnání rychlosti, odezvy a celkové výkonnosti serverů Undertow, Jetty a jiných: 
                     \\\texttt{http://www.techempower.com/benchmarks/\#section=data-r8\&hw=ec2\&test=plaintext}}
-                    byl server Undertow i více 3,5 krát rychlejší než server Jetty a dosahoval menší
-                    až třetinové odezvy.
-            
-            Na obrá
+                    byl server Undertow i více 3,5 krát rychlejší než server Jetty v počtu zpracovaných
+                    požadavků za jednotku času. Při porovnávání doby odezvy serveru na požadavek
+                    dosahoval server Undertow třetinového času než server Jetty.
         
                     Po dokončení diplomového projektu a provedení plánované
-                    integrace uskutečním vlastní porovnání těchto dvou implementací a pokusím se potvrdit
-                    tyto výsledky.}
+                    integrace bude uskutečněno vlastní porovnání těchto dvou implementací s cílem potvrdit
+                    nebo vyvrátit tyto výsledky.}
 
                 \item{\textbf{Spolehlivost:} Dalším důležitým aspektem je spolehlivost daného serveru. 
                         Server Jetty má za sebou již dlouhou historii a je integrován ve velkém množství
@@ -435,7 +434,6 @@
                     je oproti tomu robustnější a rozsáhlejší, ale neumožňuje tak velké přizpůsobování potřebám
                     uživatele jako například využití jen několika malých částí jeho funkčnosti či jejich
                     kombinování. }
-
             \end{itemize}
         
 
@@ -493,7 +491,7 @@
 
             \begin{figure}[h!t]
                 \begin{center}
-                    \scalebox{0.63}{\includegraphics{img/web-server.jpg}}
+                    \scalebox{0.7}{\includegraphics{img/architecture.png}}
                     \caption{Přehled architektury systému Jenkins CI z pohledu vestavěného servlet kontejneru}
                     \label{imgArchitekturaServlet}
                 \end{center}
@@ -536,7 +534,7 @@
                 \begin{center}
                     \scalebox{0.63}{\includegraphics{img/web-server.jpg}}
                     \caption{Průběh komunikace aplikace Jekins CI prostřednictvím vestavěného servlet kontejneru}
-                    \label{imgArchitekturaSpusteni}
+                    \label{imgKomunikace}
                 \end{center}
             \end{figure}
 
@@ -572,7 +570,6 @@
 
 
     \section{Zvolení způsobu integrace serveru Undertow}
-        Způsob vyhodnocení správnosti výsledného řešení pomocí testů jenkins
 
         \subsection{Varianta ponechání Winstonu}
 
