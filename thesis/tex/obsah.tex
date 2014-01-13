@@ -456,7 +456,7 @@
         a další vykonává server Jetty.
         
 
-        \subsection{Architektura Jenkins CI z pohledu servlet kontejneru} \ref{secArchitektura}
+        \subsection{Architektura Jenkins CI z pohledu servlet kontejneru} \label{secArchitecture}
             Na vysoké úrovni pohledu lze architekturu serveru Jenkins CI rozdělit do tří částí:
             
             \begin{itemize}
@@ -514,6 +514,13 @@
             Pokud se podaří úspěšně spustit tento servlet, tak je spuštění celé aplikace Jenkins CI z pohledu
             servlet kontejneru úspěšně hotovo a aplikace běží.
 
+            Zjištění, které komponenty má servlet kontejner při svém startu zavést
+            se nachází v souboru \texttt{web.xml}, což je standardní konfigurační soubor
+            pro webové aplikace v jazyce Java EE. Může se zde nacházet také
+            konfigurace uživatelských účtů pro přístup k aplikaci a specifikování
+            různých druhů přístupových práv.
+
+
             \begin{figure}[h!t]
                 \begin{center}
                     \scalebox{0.63}{\includegraphics{img/web-server.jpg}}
@@ -559,16 +566,16 @@
         při samotné implementaci.
 
         Stávající servlet kontejner je v Jenkins CI již dlouhou dobu a 
-        mnoho uživatelů a komponent systému přímo používají specifické
+        mnoho uživatelů a komponent systému přímo používá specifické
         parametry, které pocházejí z kontejneru Winstone~\cite{kohsukeTopic}. Nová implementace
         tudíž musí zachovat naprosto stejný formát parametrů, aby 
         se výměnou servlet kontejneru nestala část aplikace nebo rozšiřujících modulů nefunkční.
         Také je potřeba zachovat výchozí hodnoty jednotlivých nastavení.
 
-        \subsection{Funkcionalita servlet kontejneru}
+        \subsection{Funkcionality servlet kontejneru}
             Při spouštění aplikace je před předáním řízení aplikace servlet kontejneru
             část parametrů zpracována komponentou \texttt{extras-executable-war} (blíže 
-            rozebrána v kapitole \ref{secArchitektura}) a zbylé parametry jsou přímo
+            rozebrána v kapitole \ref{secArchitecture}) a zbylé parametry jsou přímo
             předány kontejneru, který podle nich nastaví svou činnost. Kompletní
             soupis parametrů, které jsou implementovatovány v servlet kontejneru
             je v příloze \ref{prilohaParametry}.
@@ -579,27 +586,37 @@
             Jenkins CI poskytovat následující funkcionalitu:
 
             \begin{itemize}
-                \item{\textbf{Možnost řízení přihlašování a přístupových práv} 
-                    \cite{securityArchitecture}, \cite{securityArchitectureWinstone}
-                    }
-                \item{\textbf{Komunikovat protokolem HTTP}}
-                \item{\textbf{Komunikovat protokolem HTTPS}}
-                \item{\textbf{Komunikovat protokolem AJP13}}
+                \item{\textbf{Komunikovat nešifrovaným protokolem HTTP}}
+                \item{\textbf{Komunikovat šifrovaným protokolem HTTPS}}
+                \item{\textbf{Komunikovat protokolem AJP13}} 
+                \item{\textbf{Umožnit přihlašování a správu přístupových práv} }
+                \item{\textbf{Umožnit restartování a ukončování aplikace přes speciální port}}
             \end{itemize}
+
+            %v budoucnu by možná bylo vhodné popis protokolu AJP13 rozvést
+            Protokoly HTTP a HTTPS jsou velmi běžnými protokoly používanými pro 
+            komunikaci aplikací ve webovém prostředí a v této práci je očekáváno, 
+            že čtenář je s němi již seznámen. Protokol AJP13 je speciálním
+            typem protokolu, který se využívá především pro efektivnější komunikaci
+            webového serveru a servlet kontejneru \cite{ajp13Web}.
             
+            Další činností kontejneru je správa přístupových práv a přihlašování
+            uživatelů. Tato problematika je blíže rozebírána v následující 
+            kapitole \ref{secSecurityArchitecture}.
 
+            Poslední z hlavních funkcionalit, které nabízí servlet kontejner v Jenkins CI
+            a je nutné ji zachovat,
+            je možnost ukončit nebo restartovat aplikaci pomocí zaslání
+            speciálního požadavku na specifický port. 
 
-        
-            SPDY - aktuálně není v Jenkins využíván, pouze je podporován Jetty
+            Po integraci serveru Jetty do kontejneru byla přidána ještě možnost
+            komunikace protokolem SPDY, ale tento protokol ještě není 
+            v Jenkins CI více využíván a tudíž jeho implementace není zásadní.
 
+             
+        \subsection{Bezpečnostní architektura v Jenkins CI} \label{secSecurityArchitecture}
+                    \cite{securityArchitecture}, \cite{securityArchitectureWinstone}
 
-
-            
-            Zjištění, které komponenty má servlet kontejner při svém startu zavést
-            se nachází v souboru \texttt{web.xml}, což je standardní konfigurační soubor
-            pro webové aplikace v jazyce Java EE. Může se zde nacházet také
-            konfigurace uživatelských účtů pro přístup k aplikaci a specifikování
-            různých druhů přístupových práv.
 
 
 
@@ -608,6 +625,8 @@
         \subsection{Zjištěné problémy}
             Rozdílná verze Javy - Undertow v. 7, Jenkins v. 6 => nutnost převést Jenkins na verzi 7,
             což mírně omezuje okamžité využití v hlavní větvi, ale do budoucna určitě bude nějaký přechod
+
+            Undertow neobsahuje SPDY, ale plánuje to
 
         \subsection{Varianta ponechání Winstonu}
 
