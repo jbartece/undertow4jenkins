@@ -514,9 +514,9 @@
             Pokud se podaří úspěšně spustit tento servlet, tak je spuštění celé aplikace Jenkins CI z pohledu
             servlet kontejneru úspěšně hotovo a aplikace běží.
 
-            Zjištění, které komponenty má servlet kontejner při svém startu zavést
+            Zjištění, které komponenty má servlet kontejner při svém startu zavést,
             se nachází v souboru \texttt{web.xml}, což je standardní konfigurační soubor
-            pro webové aplikace v jazyce Java EE. Může se zde nacházet také
+            pro webové aplikace v jazyce Java~EE. Může se zde nacházet také
             konfigurace uživatelských účtů pro přístup k aplikaci a specifikování
             různých druhů přístupových práv.
 
@@ -577,7 +577,7 @@
             část parametrů zpracována komponentou \texttt{extras-executable-war} (blíže 
             rozebrána v kapitole \ref{secArchitecture}) a zbylé parametry jsou přímo
             předány kontejneru, který podle nich nastaví svou činnost. Kompletní
-            soupis parametrů, které jsou implementovatovány v servlet kontejneru
+            soupis parametrů, které jsou implementovatovány v servlet kontejneru,
             je v příloze \ref{prilohaParametry}.
 
             Jednotlivé parametry zde nejsou rozebírány, ale následující analýza
@@ -619,10 +619,84 @@
 
 
     \section{Návrh způsobu integrace serveru Undertow}
+        Na základě analýzy, která proběhla v předchozích kapitolách,
+        je v této kapitole zvolen způsob
+        integrace serveru Undertow do systému Jenkins CI. 
+        Obě navržené možné varianty integrace jsou porovnány z různych
+        hledisek a je zvolen způsob, kterým bude následně implementace provedena.
 
-        \subsection{Srovnání variant integrace}
+        Na závěr kapitoly jsou popsány problémy, které byly objeny při analýze a 
+        mají dopad na samotnou integraci a její výsledky.
+                
+        \subsection{Varianty integrace}
+            Pro integraci serveru Undertow do systému Jenkins CI jsou možné tyto dva přístupy:
+
+            \begin{enumerate}
+                \item{Nahrazení pouze serveru Jetty v servlet kontejneru a ponechání
+                    zbytku implementace kontejneru Winstone, což by představovalo
+                    pouze úpravy části stávajícího kódu. }
+
+                \item{Nahrazení jak serveru Jetty tak kontejneru Winstone. 
+                    Tento přístup v podstatě znamená provedení celé implementace
+                    servlet kontejneru pro Jenkins CI úplně znovu.}
+            \end{enumerate}
+
+            \noindent Obě varianty integrace mají své klady a zápory. 
+            Srovnáme je z hlediska výkonu, proveditelnosti a zpětné kompatibility
+            implementace, abychom mohli následně zvolit vhodnější variantu:
+
+            \begin{itemize}
+                \item{\textbf{Srovnání výkonu:} V první variantě integrace je ponechána stále
+                 velmi stará implementace kontejneru Winstone, která zřejmě stále ještě
+                 obsahuje nepotřebné součásti a samotný způsob inicializace není optimalizován
+                 pro potřeby serveru Undertow, takže by mohla zbytečně zpomalovat aplikaci.
+                 Zatímco nová implementace může být přimo optimalizována pro potřeby 
+                 serveru Undertow a poskytovat lepší výkon i kratší dobu spuštění aplikace, 
+                 která není zanedbatelná při spouštění integračníchc testů.}
+
+                \item{\textbf{Srovnání proveditelnosti:} První varianta představuje provedení 
+                    úprav pouze v částech, kde je přímo integrován server Jetty, 
+                    zatímco v druhé variantě je potřeba prvést znovu celou implementace
+                    integrace servlet kontejneru.
+                     
+                    V tomto případě je úprava stávajícího kódu aplikace
+                    zřejmě snazším přístupem a také umožňuje provedení rychlejší
+                    implementace, protože není nutné návrhovat celý modul,
+                    ale pouze jeho části.}
+
+                \item{\textbf{Srovnání zpětné kompatibility:} Dosažení zpětné kompatibility
+                    u první varianty je snazší, jelikož jsou viditelná místa, která je 
+                    potřeba reimplementovat a nezanedbat. Nicméně druhá varianta
+                    nemá žádné faktické nevýhody oproti variantě první pro dosažení
+                    stejné úrovně zpětné kompatibility.}
+
+                \item{\textbf{Další hlediska:} Jelikož dlouhodobý vývoj servlet kontejneru
+                    v Jenkins CI je na okraji zájmu a jsou prováděny především nejnutnější úpravy, 
+                    tak celý kód poněkud zdegeneroval a je obtížně čitelný, což
+                    je velká závada u open source projektu. Tato skutečnost
+                    může bránit dalším přispěvovatelům k provádění potřebných změn.
+
+                    Z tohoto pohledu by nová implementace mohla přinést mnohem čitělnější
+                    způsob řešení a zbavit se zbytečností z původní realizace servlet kontejneru.}
+            \end{itemize}
+
+
+            Bez ohledu na zvolený způsob integrace bude jeho výsledkem především nový archiv \texttt{.jar},
+            který bude obsahovat příslušnou integraci. Pro jeho využití v systému Jenkins CI je potřeba
+            upravit několik konfigurací a případně upravit jeho načítání při spouštění aplikace v modulu
+            \texttt{extras-executable-war}, což bylo rozebíráno v kapitole \ref{secArchitecture}.
+
 
         \subsection{Zvolení způsobu integrace}
+            Při výběru varianty integrace serveru Undertow do Jenkins CI byly zváženy
+            výhody a nevýhody, které byly popsány v předchozí kapitole. Při nahrazení pouze serveru Jetty
+            by provedení integrace zřejmě probíhalo podstatně snadněji než ve variantě druhé,
+            ale z kvalitativního pohledu se tato varianta jeví jako méně vhodná. 
+
+            Při implementaci budou tedy nahrazeny obě komponenty stávajícího servlet kontejneru
+            a bude tudíž provedena celá implementace znovu s využitím serveru Undertow. Tato
+            varianta by měla přinést lepší čitelnost zdrojového kódu a poskytnout 
+            lepší výkonnost celé aplikace než druhá varianta.
 
         \subsection{Zjištěné problémy}
             Rozdílná verze Javy - Undertow v. 7, Jenkins v. 6 => nutnost převést Jenkins na verzi 7,
