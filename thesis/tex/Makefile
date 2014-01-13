@@ -15,7 +15,7 @@ $(CO).ps: $(CO).dvi
 	dvips $(CO)
 
 $(CO).pdf: clean
-	vlna -v KkSsVvZzOoUuAIai ${CO}.tex
+	#vlna -v KkSsVvZzOoUuAIai ${CO}.tex
 	pdflatex $(CO)
 	bibtex $(CO)
 	pdflatex $(CO)

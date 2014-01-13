@@ -358,16 +358,16 @@
             v Jenkins CI, tak bychom měli srovnávat server Jetty se serverem Undertow.
 
             \medskip
-            Budeme tedy srovnávat servery Undertow a Jetty a jejich výhody a nevýhody
+            Budeme tedy srovnávat servery Undertow a Jetty, jejich výhody a nevýhody
             vzhledem k využití v systému Jenkins CI:
             \begin{itemize}
                 \item {\textbf{Rychlost:} Server Undertow je aktuálně ještě stále ve verzi \emph{beta}, ale už přesto existují
-                    testy, které prokazují, že je výkonnější než server Jetty. V tomto           
+                    testy v kterých se ukázal být výkonnější než server Jetty. V tomto           
                     testování\footnote{Porovnání rychlosti, odezvy a celkové výkonnosti serverů Undertow, Jetty a jiných: 
                     \\\texttt{http://www.techempower.com/benchmarks/\#section=data-r8\&hw=ec2\&test=plaintext}}
-                    byl server Undertow i více 3,5 krát rychlejší než server Jetty v počtu zpracovaných
+                    byl server Undertow i 3,5 krát rychlejší než server Jetty v počtu zpracovaných
                     požadavků za jednotku času. Při porovnávání doby odezvy serveru na požadavek
-                    dosahoval server Undertow třetinového času než server Jetty.
+                    dosáhl server Undertow až třetinového času než server Jetty.
         
                     Po dokončení diplomového projektu a provedení plánované
                     integrace bude uskutečněno vlastní porovnání těchto dvou implementací s cílem potvrdit
@@ -410,19 +410,18 @@
 
                 \item{\textbf{Velikost:} Jelikož je servlet kontejner přímo integrován do archivu ve kterém
                     je systém Jenkins CI distribuován, tak komunita dbá na to, aby přidávané komponenty
-                    nebyly příliš velké. Z důvodu velikosti byla v minulosti zavržena například
-                    myšlenka využít aplikační server \emph{JBoss AS 7} jako náhradu za kontejner
-                    Winstone\footnote{Diskuze o velikosti archivu Jenkins CI: \texttt{link}}. %TODO link
-                    
+                    nebyly příliš velké a průběžně sleduje aktuální velikost
+                    výsledného archivu\footnote{Stránka, kde je v systému Jenkins CI automatizovaně
+                    sledována velikost archivu aplikace:\\ 
+                    \texttt{https://wiki.jenkins-ci.org/display/JENKINS/Jenkins+WAR+Size+Tracker}}.  
+                                       
                     Po integraci Jetty vzrostla velikost servlet kontejneru o 1,5 MB na celkovou
                     velikost 1,8 MB. U serveru Undertow je uváděno, že jeho archiv má méně
                     než 1 MB a konečná velikost po integraci bude také záležet na využitých komponentách
                     a rozsahu implementace. Přesto z pohledu velikosti výsledného archivu
                     se jeví server Undertow jako výhodnější, ale rozdíl oproti serveru Jetty není zásadní.
                     Rozdíl je zřejmě přibližně 1MB, což jsou necelé 2\% z aktuální velikosti
-                    Jenkins CI\footnote{Stránka, kde je v systému Jenkins CI automatizovaně
-                    sledována velikost archivu aplikace:\\ 
-                    \texttt{https://wiki.jenkins-ci.org/display/JENKINS/Jenkins+WAR+Size+Tracker}}.}
+                    Jenkins CI (cca 66 MB).}
 
                 %Tato část by měla být pečlivě překontrolována
                 \item{\textbf{Konfigurovatelnost:} Server Undertow je velmi flexibilní a způsob
@@ -457,7 +456,7 @@
         a další vykonává server Jetty.
         
 
-        \subsection{Architektura Jenkins CI z pohledu servlet kontejneru}
+        \subsection{Architektura Jenkins CI z pohledu servlet kontejneru} \ref{secArchitektura}
             Na vysoké úrovni pohledu lze architekturu serveru Jenkins CI rozdělit do tří částí:
             
             \begin{itemize}
@@ -545,31 +544,70 @@
             části aplikace předat požadavek k vykonání  nebo zda náleží nějakému rozšiřujícímu modulu.
             Následně obráceným postupem probíhá zaslání HTTP odpovědi klientovi.
 
-            Je zde zachycena pouze jedna z možných činností
-            servlet kontejneru a tou je zpracovávání komunikace protokolem HTTTP. 
+            Byla zde zachycena pouze jedna z možných činností
+            servlet kontejneru a tou je zpracovávání komunikace protokolem HTTP. 
             Další činnosti kontejneru budou rozebírány později.
 
  
 
 
-    \section{Zpětná kompatibilita}
-        zachování funkčnosti parametrů - závisí na tom různé komponenty a pluginy Jenkins. 
-        Odcitovat Keysukeho článek na docs.gmail.  
-        
-        Možnost řízení security věcí -- \cite{securityArchitecture}, \cite{securityArchitectureWinstone}
-        komunikace přes HTTP
-        komunikace přes HTTPS
-        AJP13     
-        SPDY - aktuálně není v Jenkins využíván, pouze je podporován Jetty
+    \section{Zpětná kompatibilita servlet kontejner v Jenkins CI}
+        V této kapitole jsou blíže rozebírány a analyzovány jednotlivé funkce servlet
+        kontejneru v Jenkins CI. Analýza jeho funkčnosti je zaměřena především na 
+        návrh nového servlet kontejneru, který vznikne integrací serveru Undertow.
+        Z této kapitoly vyplynou hlavní požadavky, které bude potřeba řešit 
+        při samotné implementaci.
 
-        %parametry aspon do přílohy
+        Stávající servlet kontejner je v Jenkins CI již dlouhou dobu a 
+        mnoho uživatelů a komponent systému přímo používají specifické
+        parametry, které pocházejí z kontejneru Winstone~\cite{kohsukeTopic}. Nová implementace
+        tudíž musí zachovat naprosto stejný formát parametrů, aby 
+        se výměnou servlet kontejneru nestala část aplikace nebo rozšiřujících modulů nefunkční.
+        Také je potřeba zachovat výchozí hodnoty jednotlivých nastavení.
+
+        \subsection{Funkcionalita servlet kontejneru}
+            Při spouštění aplikace je před předáním řízení aplikace servlet kontejneru
+            část parametrů zpracována komponentou \texttt{extras-executable-war} (blíže 
+            rozebrána v kapitole \ref{secArchitektura}) a zbylé parametry jsou přímo
+            předány kontejneru, který podle nich nastaví svou činnost. Kompletní
+            soupis parametrů, které jsou implementovatovány v servlet kontejneru
+            je v příloze \ref{prilohaParametry}.
+
+            Jednotlivé parametry zde nejsou rozebírány, ale následující analýza
+            se zaměřuje především na klíčové bodů funkčnosti servlet kontejneru.
+            Pro zachování zpětné kompatibility musí servet kontejner v aplikaci 
+            Jenkins CI poskytovat následující funkcionalitu:
+
+            \begin{itemize}
+                \item{\textbf{Možnost řízení přihlašování a přístupových práv} 
+                    \cite{securityArchitecture}, \cite{securityArchitectureWinstone}
+                    }
+                \item{\textbf{Komunikovat protokolem HTTP}}
+                \item{\textbf{Komunikovat protokolem HTTPS}}
+                \item{\textbf{Komunikovat protokolem AJP13}}
+            \end{itemize}
+            
+
+
+        
+            SPDY - aktuálně není v Jenkins využíván, pouze je podporován Jetty
+
+
+
+            
+            Zjištění, které komponenty má servlet kontejner při svém startu zavést
+            se nachází v souboru \texttt{web.xml}, což je standardní konfigurační soubor
+            pro webové aplikace v jazyce Java EE. Může se zde nacházet také
+            konfigurace uživatelských účtů pro přístup k aplikaci a specifikování
+            různých druhů přístupových práv.
+
+
+
+    \section{Návrh způsobu integrace serveru Undertow}
 
         \subsection{Zjištěné problémy}
             Rozdílná verze Javy - Undertow v. 7, Jenkins v. 6 => nutnost převést Jenkins na verzi 7,
             což mírně omezuje okamžité využití v hlavní větvi, ale do budoucna určitě bude nějaký přechod
-
-
-    \section{Zvolení způsobu integrace serveru Undertow}
 
         \subsection{Varianta ponechání Winstonu}
 
