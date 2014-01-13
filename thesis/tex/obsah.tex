@@ -178,7 +178,7 @@
             
         \subsection{Architektura serveru}
             Architektura systému Jenkins CI je poměrně komplikovaná a~pro tuto práci není nutné ji detailně celou znát.
-            Bude popsána na vysoké úrovni abstrakce a~zaměří se na komponenty, které se přímo týkají této práce
+            Bude popsána na vysoké úrovni abstrakce a~zaměří se pouze na komponenty, které se přímo týkají této práce
             a~budou dále v~textu odkazovány nebo blíže rozebírány. \ref{imgJenkinsArchitecture}
             %TODO Stapler
        
@@ -349,13 +349,96 @@
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     \section{Server Undertow} \label{undertow}
-        %TODO
-        Obecné informace, k~čemu je dobrý, srovnání s~Jetty, odkazy na výsledky testování výkonu
+        Undertow je nový webový server, který vzniká za podpory sekce JBoss (firma Red Hat),
+        a je vytvořen v jazyce Java. 
+        Vzniká především aby byl výchozím webovým serverem v aplikačním serveru WildFly 8.
+        V současné době je ve fázi beta verze programu, ale je již plně použitelný.
 
-        Jak se používá, jak se s~ním pracuje a~programuje, detailněji
-         argumenty v~pdfku k~wildfly8 - bezpecnost, rychlost, ...
-        \cite{undertowWeb}
+        Informace v této kapitole jsou čerpány z webových stránek projektu \cite{undertowWeb}.
+        Jelikož je aplikace poměrně nová, tak k ní existuje jen poměrně nedostatečná 
+        dokumentace. Některé informace z této kapitoly musely být čerpány z
+        vygenerované projektové dokumentace.
 
+        \subsection{Vlastnosti serveru}
+            Server Undertow je zaměřen na to, aby byl plně integrovatelný do libovolných aplikací
+            a aby byl co nejmenší a nejjednodušší. Samotný
+            archiv s jádrem aplikace je menší než 1MB a při běhu aplikace potřebuje
+            méně než 4MB dynamicky alokované paměti. 
+
+            Je navržen takovým způsobem, aby při implementaci mohl uživatel využít
+            jen tu část aplikace, kterou potřebuje a patřičně si ji upravit
+            pro své vlastní potřeby.
+            Tohoto přístupu je dosaženo kombinováním a řetězením
+            obslužných funkcí (angl. \emph{handler}), které server poskytuje.
+            Díky tomuto přístupu je server velmi flexibilní a v jeho důsledku
+            také patřičně rychlý, protože uživatele nebrzdí funkcionality
+            serveru, které nutně nepotřebuje a nevyužívá.
+            Při komunikaci umožňuje server podporu jak pro asynchronní, tak
+            pro synchronní komunikaci.
+
+            Dalšími funcionalitami, které server poskytuje, jsou možnost integrace
+            servlet kontejneru odpovídajícího specifikaci verze 3.1,
+            využití plné podpory webových soketů nebo 
+            podpory technologie \emph{HTTP upgrade}.
+
+        
+        %V budoucnu rozšířit - jít více do hloubky
+        \subsection{Praktický způsob využití serveru}
+            Server Undertow obsahuje velké množství funkcionalit, které lze
+            využít při integraci do cílové aplikace. V následujícím 
+            textu bude na dvou příkladech ukázán způsob implementace
+            jednoduchého serveru, který umožní pochopit jakým způsobem
+            se se serverem Undertow pracuje.
+
+            \medskip
+            Prvním příkladem je ukázková aplikace, která pouze naslouchá
+            na zvoleném portu a na jakoukoliv příchozí odpověď odpoví
+            typickým textem \uv{Hello World}. Celý kód této aplikace vypadá následovně:
+       
+            \begin{verbatim}
+public class HelloWorldServer {
+
+  public static void main(final String[] args) {
+    Undertow server = Undertow.builder()
+      .addListener(8080, "localhost")
+      .setHandler(new HttpHandler() {
+        @Override
+        public void handleRequest(final HttpServerExchange exchange) 
+            throws Exception {
+          exchange.getResponseHeaders()
+            .put(Headers.CONTENT_TYPE, "text/plain");
+          exchange.getResponseSender().send("Hello World");
+        }
+      }).build();
+    server.start();
+  }
+}
+            \end{verbatim}
+
+            Třída \texttt{Undertow} vždy reprezentuje instanci samotného
+            webového serveru a je ji nutné definovat prakticky vždy. Funkcí
+            \texttt{addListener} je serveru sděleno na kterém portu
+            a síťové adrese 
+            má naslouchat příchozím požadavkům. 
+            Pomocí funkce \texttt{setHandler} je k danému portu
+            přiřazena metoda, která se stará o zpracovávání 
+            požadavků zaslaných na server a odesílání odpovědí.
+            V tomto případě pouze jen odpoví již zmíněným řetězcem
+            \uv{Hello World}.
+
+            Je důležité poznamenat, že pro každé naslouchání na 
+            nějakém portu musí být vytvořena nová instance serveru.
+
+            Pro zjednodušení implementace při zpracovávání
+            požadavků poskytuje Undertow entitu \texttt{HttpServerExchange},
+            která je abstrakcí nad samotnou fyzickou podobou
+            komunikace. Díky tomu na této úrovni uživatel nemusí řešit, 
+            zda pracuje např. s HTTP nebo HTTPS.
+
+
+
+
+        
         \subsection{Srovnání serverů Undertow a~Jetty}\label{srovnani}
             Stávající servlet kontejner v~Jenkins CI je sice tvořen
             kombinací kontejneru Winstone a~serveru Jetty, ale veškerou
