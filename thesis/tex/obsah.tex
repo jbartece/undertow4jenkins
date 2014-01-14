@@ -40,9 +40,8 @@
     Tato kapitola se zaměřuje na teoretické základy práce, které je nutné nebo vhodné znát pro pochopení zpracovávané problematiky.
     Je zde detailněji popsán systém Jenkins CI (kapitola~\ref{jenkins}) ke kterému se tato práce přímo váže. S~ním je spojeno seznámení
     se servery Winstone (kapitola \ref{winstone}) a~Jetty (kapitola \ref{jetty}), jejichž kombinace je současně v~Jenkins CI integrována.
-    Po popisu těchto serverů je rozebíráno průběh jejich využití v~servlet kontejneru Jenkins CI a~průběh jeho vývoje (kapitola \ref{vyvojWinstone}). 
-    Pro tuto práci je důležité poruzumět pojmům \emph{servlet kontejnerem} a~webovým server, jejichž
-    vysvětlením  se zabývá kapitola \ref{servletWebserver}.
+    Po popisu těchto serverů je rozebírán průběh jejich využití v~servlet kontejneru Jenkins CI a~průběh jeho vývoje (kapitola \ref{vyvojWinstone}). 
+    V kapitole \ref{servletWebserver} jsou vysvětleny často zde používané pojmy \emph{servlet kontejner} a~webový server.
 
     Větší důraz je dále věnován serveru Undertow (kapitola \ref{undertow}), který byl vybrán jako nový webový server pro Jenkins CI. V~tomto případě je provedena hlubší studie
     tohoto nástroje, aby na jejím základě bylo možné pochopit a~provést samotnou integraci s~Jenkins CI, která je jádrem této práce. 
@@ -50,7 +49,7 @@
     %je menší prostor také vymezen pro nástroj Maven (kapitola \ref{maven}), který se používá k řízení překladu serveru Jenkins CI, a je v této práci několikrát zmiňován. 
 
     Uvedené informace mají spíše informativní charakter, aby poskytly ucelený úvod do zkoumané problematiky. Jsou zaměřeny především na informace týkající se samotné
-    integrace. Pro případné získání detailnějších informací jsou uvedeny patřičné zdroje, kde je lze hledat.
+    integrace. Pro případné získání detailnějších informací jsou uvedeny patřičné zdroje, kde je lze nalézt.
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     \section {Jenkins CI} \label{jenkins}
@@ -58,24 +57,24 @@
         MIT\footnote{Licence MIT: \texttt{http://opensource.org/licenses/MIT}} \cite{jenkinsGovernance}.
         Je velmi populární a~využíván malými i~velkými firmami jako je například firma Red Hat, kde tento program běží na stovkách serverů.
         Původní název tohoto projektu je Hudson\footnote{Webové stránky projektu Hudson: \texttt{http://hudson-ci.org/}}. 
-        Když se vývoje tohoto projektu ujala firma Oracle, tak se tento projekt
-        rozštěpil a~vznikla komunitní verze projektu, což je server Jenkins CI. Přesto se v~některých částech tohoto projektu 
+        Když se jeho vývoje ujala firma Oracle, tak se projekt
+        rozštěpil a~vznikla jeho komunitní verze, kterou je projekt Jenkins CI. Přesto se v~některých částech tohoto projektu 
         stále objevuje název Hudson, ale jedná se pouze pozůstatek z~původního projektu.
 
         Zkratka CI je z~anglického spojení \emph{continuous integration}, což lze do češtiny přeložit jako kontinuální nebo průběžná 
-        integrace. Krátké seznámení se z~touto metodologií je v~následující kapitole.
+        integrace. Krátké seznámení s~touto metodologií je v~následující kapitole.
 
-        Informace v~této kapitole byly především čerpány z~knihy \cite{jenkinsBook}, kde lze nalézt další informace o~serveru Jenkins CI,
+        Informace v~této kapitole byly čerpány především  z~knihy \cite{jenkinsBook}, kde lze nalézt další informace o~serveru Jenkins CI,
         a~také z~webové stránky projektu \cite{jenkinsWeb}.
 
         \subsection{Kontinuální integrace a~využití Jenkins CI}
             V~minulosti byla integrace programu do výsledného produktu velmi náročným procesem a~často ztraceným časem.
             S~vydáním každé verze programu se musel postup probíhající před vydáním produktu opakovat a~pro vývojářský tým
-            to prakticky znamenalo zdržení se. Pokud se v~tomto procesu odhalil nějaký problém, což bylo běžné, 
-            tak jeho řešení bylo z~důvodu nedostatku času a~jeho pozdního objevení mnohem problematičtější,
+            to prakticky znamenalo zdržení. Pokud se v~tomto procesu odhalil nějaký problém (což bylo běžné),
+            tak jeho řešení bylo z~důvodu nedostatku času a~jeho pozdního objevení mnohem problematičtější
             než kdyby byl tento problém odhalen dříve.
 
-            Kontinuální integrace je moderní přístup k~vývoji softwaru, který mění způsob myšlení nad celým procesem vývoje
+            Kontinuální integrace je moderní přístup k~vývoji softwaru, který mění způsob přemýšlení nad celým procesem vývoje
             a~snaží se předcházet problémům popsaným výše a~především ušetřit čas. V~tomto přístupu je využíván nějaký
             kvalitní nástroj, který automatizovaně provádí specifikované kroky, které provázejí integraci softwaru a~jeho vydání.
 
@@ -94,16 +93,16 @@
                 \item Automatické nahrání nové verze produktu na server
             \end{itemize} 
 
-            Uživatelé mohou kdykoliv přidat využití libovolné funkcionality systému a~tudíž neopakovat stále stejné kroky. 
+            Uživatelé mohou kdykoliv přidat využití libovolné funkcionality systému a neopakovat stále stejné kroky. 
             
 
         \subsection{Způsoby použití aplikace}
             Celý program je napsán v~jazyce Java a~je tedy plně přenositelný mezi platformami. Architektura je navržena tak, aby byla 
-            lehce rozšiřitelná pomocí tzv. \emph{pluginů}, kterých je pro Jenkins vytvořené velké množství. 
+            lehce rozšiřitelná pomocí tzv. \emph{pluginů}, kterých je pro něj vytvořené velké množství. 
             
             Jenkins CI je určen pro běh na serveru a~je dostupný přes webové rozhraní (ale může být samozřejmě spuštěn
-            na libovolném osobním počátači). Komunikuje pomocí protokolu \emph{HTTP}, 
-            který je založen na modelu \emph{požadavek-odpověď} (anglicky \emph{request-response}). Jelikož tento způsob komunikace
+            na libovolném osobním počítači). Komunikuje pomocí protokolu \emph{HTTP}, 
+            který je založen na modelu \emph{požadavek-odpověď} (angl. \emph{request-response}). Jelikož tento způsob komunikace
             je velmi běžný, tak není v~programu přímo implementován, ale využívá k~němu externí nástroje. 
             Dalším nástrojem, který pro svou činnost Jenkins potřebuje, je servlet kontejner ve kterém samotná 
             aplikace poběží.
@@ -142,7 +141,8 @@
             překlad se používá nástroj Maven\footnote{Více informací o~nástroji Maven lze získat na stránce 
             \texttt{http://maven.apache.org/}}.
             %,který je krátce zmíněn v kapitole \ref{maven}. 
-            Pro provedení překladu bez spouštění jednotkových testů je potřeba použít tento příkaz:
+            
+            Překlad aplikace bez spuštění jednotkových testů lze provést tímto příkazem:
             \begin{verbatim}
                 mvn clean install -pl war -am -DskipTests
             \end{verbatim}
@@ -155,12 +155,12 @@
             \begin{verbatim}
                 mvn clean package
             \end{verbatim}
-            Další nevýhodou integračních testů je, že je běžný stav, kdy některé testy, aplikace která je překládaná z~aktuálních zdrojových souborů,
+            Další nevýhodou integračních testů je, že je běžný stav, kdy některé testy aplikace, která je překládaná z~aktuálních zdrojových souborů,
             končí s~chybou. Proto je při kontrole nutné porovnávat výsledky testů před provedením změn a~po jejich provedením. Tento způsob
             kontroly aplikace bude využit při hodnocení navazující diplomové práce.
 
             \medskip
-            Po úspěšnm překladu aplikace vznikne v~adresáři \texttt{./war/target/} archiv \texttt{jenkins.war}, 
+            Po úspěšném překladu aplikace vznikne v~adresáři \texttt{./war/target/} archiv \texttt{jenkins.war}, 
             který obsahuje celou přeloženou webovou aplikaci včetně nástrojů na 
             kterých závisí. Z~tohoto archivu je možné aplikaci přímo spustit pomocí příkazu:
 
@@ -190,7 +190,7 @@
             \end{figure}     
 
             Základem architektury je část \emph{Model}, což jsou objekty, které obsahují stav
-            a~data aplikace. Každý model je přímo navázán na konkrétní URL s~tím, že kořenový
+            a~data aplikace. Každý model je přímo navázán na konkrétní URL adresu s~tím, že kořenový
             model (dostupný pod URL \uv{/}) je pevně daná instance s~názvem \texttt{Hudson}.
             Data z~objektů modelu jsou následně zobrazovány ve webovém rozhraní aplikace.
             Pro toto zobrazování je využita techonologie Jelly.
@@ -221,19 +221,19 @@
     \section{Webový server a~servlet kontejner} \label{servletWebserver}
         V~této kapitole jsou vysvětleny pojmy webový server a~servlet kontejner, které se 
         na mnoha místech této práce objevují. Porozumění těmto pojmům je důležité, protože bez
-        jejich znalosti by následující kapitoly byly obtížněji pochopitelné pochopitelné.
+        jejich znalosti by následující kapitoly byly obtížněji pochopitelné.
         
         Informace zde uvedené byly čerpány z~článku \cite{webserverVsServletPage}.
 
         \subsection{Webový server}
             Webový server je program, který zprostředkovává komunikaci přes síť s~klienty, kteří
             se k~němu připojí a~požadují po něm nějaká data. Tato komunikace probíhá pomocí protokolu \emph{HTTP}, 
-            který je založen na modelu \emph{požadavek-odpověd} (anglicky \emph{request-response}).
+            který je založen na modelu \emph{požadavek-odpověd} (angl. \emph{request-response}).
             Model této komunikace je zachycen na obrázku \ref{imgWebserver}.
             
             Typický způsob komunikace webového serveru je, 
             že klient pomocí URL adresy specifikuje požadavek na nějaká
-            data a~server v~odpovědi tato data pošle. Pokud by neexistoval za webovým serverem nějaký další
+            data a~server mu v~odpovědi tato data pošle. Pokud by neexistoval za webovým serverem nějaký další
             program, tak by webový server vždy odpovídal na stejný požadavek stále stejnou odpovědí.
 
             \begin{figure}[ht]
@@ -246,14 +246,16 @@
 
         \subsection{Servlet kontejner} \label{servletKontejner}
             Jelikož dostávat stále stejná statická data při stejném požadavku není dostatečná funkcionalita serveru,
-            tak existují způsoby jak zajistit dynamickou práci s~daty na serveru (a~tudíž i~měnící se odpovědi na stejný dotaz).
-            Jedním ze způsobů jak této činnosti docílit je využití tzv. \emph{servletů},
+            tak existují způsoby jak zajistit dynamickou práci s~daty na serveru a~tudíž i~poskytovat
+            měnící se odpovědi na stejný dotaz.
+            Jedním ze způsobů jak této funkce docílit je využití tzv. \emph{servletů},
             které jsou navrženy pro programovací jazyk Java.
 
             Servlet je standardní program (konkrétně jedna třída) napsaný v~jazyce Java, 
             který implementuje rozhraní \texttt{javax.servlet}.
             Implementace tohoto rozhraní ho zavazuje k~definování několika metod, ale jinak se jedná o~běžnou
-            třídu z~které jsou při zpracovávání požadavků vytvářeny její instance.
+            třídu z~které jsou při zpracovávání požadavků vytvářeny její instance. Po obdržení nějakého
+            požadavku provádí zpracování vstupních dat a následně odeslání patřičné odpovědi.
 
             Základní myšlenkou servlet kontejneru je umožnit dynamicky vytvářet odpovědi (často webové stránky)
             pomocí vykonávání servletů. Samotný servlet kontejner je program, který poskytuje běhové prostředí pro vykonávání servletů,
@@ -301,7 +303,7 @@
         další informace o~zmíněných technologiích a~o~tomto serveru.
         
         Aktuální využití serveru Jetty v~aplikaci Jenkins CI je podrobněji rozebráno
-        v~kapitole \ref{vyvojWinstone} a~jeho srovnáním se serverem Undertow se 
+        v~kapitole~\ref{vyvojWinstone} a~jeho srovnáním se serverem Undertow se 
         zabývá kapitola \ref{srovnani}.
         
 
@@ -310,7 +312,7 @@
         Další komponentou serveru Jenkins CI je servlet kontejner Winstone.
         Winstone je velmi jednoduchý a~poskytuje funkcionalitu
         servlet kontejneru aniž by byl zatížen velkým množstvím požadavků, které jsou ve specifikaci jazyka Java EE.
-        Nikdy neposkytoval veškeré služby servlet kontejneru, které specifikace jazykPlugins are responsible for a~definuje. 
+        Nikdy neposkytoval veškeré služby servlet kontejneru, které specifikace jazyka definuje. 
         V~jeho názvu je zahrnutý pouze pojem servlet kontejner, ale tato aplikace vykonává i~služby
         webového serveru odpovídající popisu v~kapitole \ref{servletWebserver}.
 
@@ -322,8 +324,8 @@
         Uvedené informace byly čerpány z~oficiální stránky projektu Winstone \cite{winstoneWeb}.
 
         \subsection{Nedostatky servlet kontejneru Winstone}
-            Původní myšlenka jednoduchého servlet kontejneru byla pro projekt Jenkins CI zajímavá.
-            Kontejner Winstone má několik zásadních nedostatků kvůli kterým bylo časem jeho využití
+            Původní myšlenka jednoduchého servlet kontejneru byla pro projekt Jenkins CI zajímavá, ale
+            kontejner Winstone má několik zásadních nedostatků kvůli kterým bylo časem jeho využití
             v~Jenkins CI problematické \cite{kohsukeTopic}. 
 
             Vývoj projektu Winstone již před delší dobou ustal a~tím pádem nebyla poskytována 
@@ -333,7 +335,7 @@
 
             Zpočátku možnosti servlet kontejneru postačovaly, ale časem je potřeba, aby 
             byly přidávány nové funkcionality, které odpovídají aktuálním trendům
-            a~novým specifikacím. Příkladem mohou být nové specifikace servlet kontejneru,
+            a~novým specifikacím. Příkladem mohou být nové specifikace servlet kontejneru nebo
             vývoj nových technologií jako webové sokety.
 
 
