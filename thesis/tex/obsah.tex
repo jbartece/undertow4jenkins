@@ -382,13 +382,14 @@
             podpory technologie \emph{HTTP upgrade}.
 
         
-        %V budoucnu rozšířit - jít více do hloubky
-        \subsection{Praktický způsob využití serveru}
+        %V budoucnu rozšířit - jít více do hloubky principu na kterých Undertow pracuje
+        \subsection{Praktický způsob práce se serverem}
             Server Undertow obsahuje velké množství funkcionalit, které lze
             využít při integraci do cílové aplikace. V následujícím 
             textu bude na dvou příkladech ukázán způsob implementace
             jednoduchého serveru, který umožní pochopit jakým způsobem
-            se se serverem Undertow pracuje.
+            se se serverem Undertow pracuje. Obsah těchto příkladů 
+            bude jistě využit také při integraci s Jenkins CI.
 
             \medskip
             Prvním příkladem je ukázková aplikace, která pouze naslouchá
@@ -424,18 +425,53 @@ public class HelloWorldServer {
             přiřazena metoda, která se stará o zpracovávání 
             požadavků zaslaných na server a odesílání odpovědí.
             V tomto případě pouze jen odpoví již zmíněným řetězcem
-            \uv{Hello World}.
+            \uv{Hello World}. Samotné vytvoření požadavku a jeho
+            odeslání provede metoda pomocí entity \texttt{HttpServerExchange},
+            která zpracovává komunikaci a obsahuje o ni množství další informací
+            (např. informace z hlavičky dotazu).
 
             Je důležité poznamenat, že pro každé naslouchání na 
             nějakém portu musí být vytvořena nová instance serveru.
 
-            Pro zjednodušení implementace při zpracovávání
-            požadavků poskytuje Undertow entitu \texttt{HttpServerExchange},
-            která je abstrakcí nad samotnou fyzickou podobou
-            komunikace. Díky tomu na této úrovni uživatel nemusí řešit, 
-            zda pracuje např. s HTTP nebo HTTPS.
+            \medskip
+            Druhý příklad ukazuje jakým způsobem aplikace umožňuje 
+            přidat funkcionalitu servlet kontejneru do webového serveru.
+            V následujícím příkladu je zobrazen pouze efektivní kód aplikace.
 
+            \begin{verbatim}
+DeploymentInfo servletBuilder = deployment()
+   .setClassLoader(ServletServer.class.getClassLoader())
+   .setContextPath("/app")
+   .setDeploymentName("app.war")
+   .addServlets(
+      servlet("MyServlet", CustomServlet.class)
+        .addInitParam("paramKey", "paramValue")
+        .addMapping("/servlet"));
 
+DeploymentManager manager = defaultContainer().addDeployment(servletBuilder);
+manager.deploy();
+
+Undertow server = Undertow.builder()
+   addListener(8080, "localhost")
+   .setHandler(manager.start())
+   .build();
+server.start();
+            \end{verbatim}
+
+            V prvním kroku ukázkového příkladu se provádí nastavování
+            webové aplikace, která bude zavedena v servlet kontejneru.
+            Tyto informace se ukládají do entity \texttt{DeploymentInfo}.
+            Nejprve je nastavena aplikaci hlavní třída kontejneru pomocí metody
+            \texttt{setClassLoader}. Metodou \texttt{setContextPath} je
+            definován tvar URL adresy pod kterou bude na serveru tato
+            aplikace dostupná. Důležitá je metoda \texttt{addServlets}
+            pomocí které se přidají jednotlivé součásti aplikace
+            a nastaví se jejich dostupnost v aplikaci metodou \texttt{addMapping}.
+
+            Po nastavení konfigurace aplikace proběhne metodami \texttt{addDeployment}
+            a \texttt{deploy} připravení aplikace po spuštění. Ve zbytku kódu
+            je spuštěna instance serveru obdobným způsobem
+            jako byla ukázána v předchozím příkladu.
 
 
         
