@@ -18,12 +18,12 @@
     a~vhodný pro Jenkins CI. Jelikož tento server je nový a~je sponzorován firmou Red Hat, tak lze předpokládat, že jeho vývoj
     bude nadále pokračovat a~nebude zastarávat.
 
-    Cílem této práce je nahradit server Jetty a~případně i~serveu Winstone pomocí serveru Undertow 
+    Cílem této práce je nahradit server Jetty a~případně i~server Winstone pomocí serveru Undertow 
     a~integrovat jej se serverem Jenkins CI. Při integraci je kladen důraz na snahu
-    zachovat zpětnou kompatibilitu se starým řešením. 
+    zachovat zpětnou kompatibilitu s původním řešením. 
 
     V~rámci tohoto semestrálního projektu jsou nejprve rozebrány potřebné informace týkající se jednotlivých nástrojů a~plánované integrace.
-    Následně je detailně analyzována architektura Jenkins CI a~způsob jeho integrace se servery Winstone a~Jetty. V~následující části
+    Následně je detailně analyzována architektura Jenkins CI a~způsob jeho integrace se servery Winstone a~Jetty. V~navazující části
     je diskutována varianta nahrazení pouze serveru Jetty a~varianta nahrazení serveru Jetty i~Winstone pomocí serveru Undertow. 
     Z~provedené analýzy je zvolena jedna varianta, která je vybrána pro následnou integraci.
 
@@ -191,7 +191,7 @@
 
             Základem architektury je část \emph{Model}, což jsou objekty, které obsahují stav
             a~data aplikace. Každý model je přímo navázán na konkrétní URL s~tím, že kořenový
-            model (dostupný pod URL \uv{/}) je pevně daná instance s~názvem\texttt{Hudson}.
+            model (dostupný pod URL \uv{/}) je pevně daná instance s~názvem \texttt{Hudson}.
             Data z~objektů modelu jsou následně zobrazovány ve webovém rozhraní aplikace.
             Pro toto zobrazování je využita techonologie Jelly.
 
@@ -199,8 +199,8 @@
             provádí konkrétní propojování požadavků dle zadané URL s~patřičnými objekty
             z~modelu a~spouštění vykonávání jejich metod. Stapler je
             jediným servletem, který je v~aplikaci Jenkins CI zaveden do
-            servlet kontejneru při spuštění aplikace.
-            Pojmy servlet a~servlet kontejner jsou blíže vysvětleny v~kapitole \ref{servletKontejner}.
+            servlet kontejneru při spuštění aplikace (pojmy servlet a~servlet kontejner 
+            jsou vysvětleny v~kapitole \ref{servletKontejner}).
             Povědomí o~jeho
             činnosti je potřebné, protože s~ním bude v~této práci dále pracováno.
             Průběh vybírání patřičných metod pomocí této komponenty je přesně
@@ -917,23 +917,20 @@ server.start();
     náplní této práce. V~následující části byla analyzována architektura aplikace Jenkins CI
     a~také stav servlet kontejneru, který je v~něm integrován.
 
-    Cílem plánované integrace je nabídnout novou a~výkonnější alternativu k~současnému řešení.
     Po seznámení se s~podmínkami pro integraci byly
     zkoumány možnosti provedení samotné integrace serveru Undertow do Jenkins CI.
-    Byly prozkoumány dva způsoby integrace. První možností je nahrazení pouze komponenty
-    Jetty, která vykonává většinu práce v~aktuálním kontejneru, zatímco druhá varianta
-    zahrunje nahrazení obou součástí. 
+    Byly zkoumány dva způsoby integrace. Jednou možností je nahrazení pouze komponenty
+    Jetty, která vykonává většinu práce v~aktuálním kontejneru, zatímco druhou variantou je
+    nahrazení obou součástí. 
     Po důkladném zvážení různých aspektů integrace byla 
     zvolena varianta, kdy budou nahrazeny obě komponenty současného 
     servlet kontejneru a~tudíž proběhne zcela nová implementace.
 
-    V~průběhu práce nebyly objeveny překážky, které by znemožňovaly další
-    pokračování práce na integraci serveru Undertow do Jenkins CI.
-    Dalším krokem v~navazujícím diplomovém projektu bude provedení
-    integrace tak a~její důkladné otestování.
-    Po vytvoření funkční implementace bude výsledná aplikace testována 
-    z~hlediska výkonu a~porovnávána s~původním řešením.
-
+    Nebyly objeveny žádné překážky, které by znemožňovaly
+    pokračování v této práci. Dal-ším krokem v~navazujícím diplomovém projektu bude provedení
+    samotné integrace a~její důkladné otestování.
+    Po vytvoření funkční implementace bude výsledná aplikace porovnávána
+    z~hlediska výkonu s~původním řešením.
     Pokud by byla potvrzena vyšší výkonnost nové implementace, tak
     by tento přístup mohl nahradit stávající řešení nebo
     být jeho novou a~lepší alternativou.
