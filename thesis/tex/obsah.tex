@@ -20,7 +20,7 @@
 
     Cílem této práce je nahradit server Jetty a~případně i~server Winstone pomocí serveru Undertow 
     a~integrovat jej se serverem Jenkins CI. Při integraci je kladen důraz na snahu
-    zachovat zpětnou kompatibilitu s původním řešením. 
+    zachovat zpětnou kompatibilitu s~původním řešením. 
 
     V~rámci tohoto semestrálního projektu jsou nejprve rozebrány potřebné informace týkající se jednotlivých nástrojů a~plánované integrace.
     Následně je detailně analyzována architektura Jenkins CI a~způsob jeho integrace se servery Winstone a~Jetty. V~navazující části
@@ -41,7 +41,7 @@
     Je zde detailněji popsán systém Jenkins CI (kapitola~\ref{jenkins}) ke kterému se tato práce přímo váže. S~ním je spojeno seznámení
     se servery Winstone (kapitola \ref{winstone}) a~Jetty (kapitola \ref{jetty}), jejichž kombinace je současně v~Jenkins CI integrována.
     Po popisu těchto serverů je rozebírán průběh jejich využití v~servlet kontejneru Jenkins CI a~průběh jeho vývoje (kapitola \ref{vyvojWinstone}). 
-    V kapitole \ref{servletWebserver} jsou vysvětleny často zde používané pojmy \emph{servlet kontejner} a~webový server.
+    V~kapitole \ref{servletWebserver} jsou vysvětleny často zde používané pojmy \emph{servlet kontejner} a~webový server.
 
     Větší důraz je dále věnován serveru Undertow (kapitola \ref{undertow}), který byl vybrán jako nový webový server pro Jenkins CI. V~tomto případě je provedena hlubší studie
     tohoto nástroje, aby na jejím základě bylo možné pochopit a~provést samotnou integraci s~Jenkins CI, která je jádrem této práce. 
@@ -93,7 +93,7 @@
                 \item Automatické nahrání nové verze produktu na server
             \end{itemize} 
 
-            Uživatelé mohou kdykoliv přidat využití libovolné funkcionality systému a neopakovat stále stejné kroky. 
+            Uživatelé mohou kdykoliv přidat využití libovolné funkcionality systému a~neopakovat stále stejné kroky. 
             
 
         \subsection{Způsoby použití aplikace}
@@ -255,7 +255,7 @@
             který implementuje rozhraní \texttt{javax.servlet}.
             Implementace tohoto rozhraní ho zavazuje k~definování několika metod, ale jinak se jedná o~běžnou
             třídu z~které jsou při zpracovávání požadavků vytvářeny její instance. Po obdržení nějakého
-            požadavku provádí zpracování vstupních dat a následně odeslání patřičné odpovědi.
+            požadavku provádí zpracování vstupních dat a~následně odeslání patřičné odpovědi.
 
             Základní myšlenkou servlet kontejneru je umožnit dynamicky vytvářet odpovědi (často webové stránky)
             pomocí vykonávání servletů. Samotný servlet kontejner je program, který poskytuje běhové prostředí pro vykonávání servletů,
@@ -378,15 +378,15 @@
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     \section{Server Undertow} \label{undertow}
-        Undertow je nový webový server, který vzniká za podpory sekce JBoss (firma Red Hat),
+        Undertow je nový webový server, který vzniká za podpory firmy Red Hat a~její sekce JBoss,
         a~je vytvořen v~jazyce Java. 
         Vzniká především aby byl výchozím webovým serverem v~aplikačním serveru WildFly 8.
         V~současné době je ve fázi beta verze programu, ale je již plně použitelný.
 
-        Informace v~této kapitole jsou čerpány z~webových stránek projektu \cite{undertowWeb}.
+        Informace v~této kapitole byly čerpány z~webových stránek projektu \cite{undertowWeb}.
         Jelikož je aplikace poměrně nová, tak k~ní existuje jen poměrně nedostatečná 
         dokumentace. Některé informace z~této kapitoly musely být čerpány
-z~vygenerované projektové dokumentace.
+        z~vygenerované projektové dokumentace.
 
         \subsection{Vlastnosti serveru}
             Server Undertow je zaměřen na to, aby byl plně integrovatelný do libovolných aplikací
@@ -395,16 +395,16 @@ z~vygenerované projektové dokumentace.
             méně než 4MB dynamicky alokované paměti. 
 
             Je navržen takovým způsobem, aby při implementaci mohl uživatel využít
-            jen tu část aplikace, kterou potřebuje a~patřičně si ji upravit
+            jen část aplikace, kterou nutně potřebuje, a~patřičně si ji upravit
             pro své vlastní potřeby.
             Tohoto přístupu je dosaženo kombinováním a~řetězením
             obslužných funkcí (angl. \emph{handler}), které server poskytuje.
             Díky tomuto přístupu je server velmi flexibilní a~v~jeho důsledku
             také patřičně rychlý, protože uživatele nebrzdí funkcionality
             serveru, které nutně nepotřebuje a~nevyužívá.
+            
             Při komunikaci umožňuje server podporu jak pro asynchronní, tak
             pro synchronní komunikaci.
-
             Dalšími funcionalitami, které server poskytuje, jsou možnost integrace
             servlet kontejneru odpovídajícího specifikaci verze 3.1,
             využití plné podpory webových soketů nebo 
@@ -455,7 +455,7 @@ public class HelloWorldServer {
             požadavků zaslaných na server a~odesílání odpovědí.
             V~tomto případě pouze jen odpoví již zmíněným řetězcem
             \uv{Hello World}. Samotné vytvoření požadavku a~jeho
-            odeslání provede metoda pomocí entity \texttt{HttpServerExchange},
+            odeslání provede tato metoda pomocí entity \texttt{HttpServerExchange},
             která zpracovává komunikaci a~obsahuje o~ni množství další informací
             (např. informace z~hlavičky dotazu).
 
@@ -508,7 +508,7 @@ server.start();
             Stávající servlet kontejner v~Jenkins CI je sice tvořen
             kombinací kontejneru Winstone a~serveru Jetty, ale veškerou
             časově kriticky náročnou práci při běhu aplikace vykonává server
-            Jetty. Proto pokud chceme srovnávat aktuální řešení servlet kontejneru
+            Jetty. Proto pokud chceme srovnávat aktuální a plánované řešení servlet kontejneru
             v~Jenkins CI, tak bychom měli srovnávat server Jetty se serverem Undertow.
 
             \medskip
@@ -533,7 +533,7 @@ server.start();
                         což mu dodává velkou důvěryhodnost a~lze očekávat, že bude pracovat velmi 
                         spolehlivě. 
                         
-                        U~server Undertow ještě nebyla dokončena první finální verze,
+                        U~serveru Undertow ještě nebyla dokončena první finální verze,
                         takže lze předpokládat, že může obsahovat ještě drobné nedostatky,
                         které budou časem opravovány. Jelikož tento server bude integrován
                         v~novém aplikačním serveru WildFly 8, tak lze předpokládat,
@@ -571,7 +571,7 @@ server.start();
                                        
                     Po integraci Jetty vzrostla velikost servlet kontejneru o~1,5 MB na celkovou
                     velikost 1,8 MB. U~serveru Undertow je uváděno, že jeho archiv má méně
-                    než 1 MB a~konečná velikost po integraci bude také záležet na využitých komponentách
+                    než 1 MB, ale~konečná velikost po integraci bude také záležet na využitých komponentách
                     a~rozsahu implementace. Přesto z~pohledu velikosti výsledného archivu
                     se jeví server Undertow jako výhodnější, ale rozdíl oproti serveru Jetty není zásadní.
                     Rozdíl je zřejmě přibližně 1MB, což jsou necelé 2\% z~aktuální velikosti
@@ -594,7 +594,7 @@ server.start();
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Analýza současného stavu servlet kontejneru a~návrh integrace}
-    Tato kapitola se zabývá důkladnější analýzou a~zkoumáním architektury aplikace Jenkins CI
+    Tato kapitola se zabývá důkladnější analýzou a~zkoumáním architektury aplikace Jenkins~CI
     z~pohledu jejího vestavěného kontejneru a~jeho možných úprav (kapitola \ref{secArchitecture}). 
     V~další části jsou konkretizovány jednotlivé činnosti, které současný servlet kontejner provádí
     a~které musí nová implementace také poskytovat (kapitola \ref{secKompatibilita}).
@@ -603,7 +603,7 @@ server.start();
     následně implementován.
 
     Jelikož k~této problematice je minimum oficiální zdrojů, které by danou problematiku blíže popisovaly, 
-    tak velká část zde uváděných informací byla čerpána přímo ze zdrojových kódů aplikace a~komponent Jenkins CI.
+    tak podstatná část zde uváděných informací byla čerpána přímo ze zdrojových kódů aplikace a~komponent Jenkins CI.
     
     \section{Aktuální stav architektury servlet kontejneru v~Jenkins~CI}\label{secArchitecture}
         V~následujících dvou podkapitolách bude blíže analyzována architektura
@@ -611,8 +611,8 @@ server.start();
         pro pochopení návazností jednotlivých komponent, které budou později upravovány.
 
         Jak již bylo uvedeno v~kapitole \ref{vyvojWinstone}, současný servlet kontejner 
-        v~Jenkins CI se skládá z~nástojů Winstone a~Jetty, které byly popisovány
-        v~předchozí kapitole. Velká část servlet
+        v~Jenkins CI se skládá z~nástojů Winstone a~Jetty, které byly také popisovány
+        v~předchozích kapitolách. Velká část servlet
         kontejneru Winstone byla odstraněna a~zůstala pouze část, která
         provádí zpracování parametrů
         programu po spuštění aplikace. Činnost webového serveru, servlet kontejneru
@@ -623,8 +623,8 @@ server.start();
             Na vysoké úrovni pohledu lze architekturu serveru Jenkins CI rozdělit do tří částí:
             
             \begin{itemize}
-                \item{\textbf{Jádro aplikace} do kterého patřím nejnutnější základní komponenty systému,
-                    části, které jsou pro Jenkins CI specifické a~vznikaly a~vznikají v~rámci tohoto projektu.}
+                \item{\textbf{Jádro aplikace} do kterého patří nejnutnější základní komponenty systému a
+                    části, které jsou pro Jenkins CI specifické a~vznikají v~rámci tohoto projektu.}
 
                 \item{\textbf{Přídavné moduly} aplikace, které jsou do ní dynamicky přidávány jako archivy javových programů
                     \texttt{.jar}. Tyto součásti jsou většinou nutné pro standardní běh aplikace a~je s~nimi aplikace
@@ -637,7 +637,7 @@ server.start();
 
                 \item{\textbf{Rozšiřující moduly} (angl. plugins) jsou samostatné menší programy, které nějakým
                     způsobem přidávají funkcionalitu serveru Jenkins CI. Typicky nejsou dodávány s~aplikací
-                    a~uživatel si je může stáhnout popř. si nějaký vlastní modul vytvořit.
+                    a~uživatel si je může stáhnout nebo si nějaký vlastní modul vytvořit.
                     
                     Samotná aplikace se dodává jen s~těmi nejnutnějšími součástmi a~ponechává na uživatelích, které
                     další funkcionality si do systému doinstalují. V~současné době již existují stovky takových
@@ -649,7 +649,7 @@ server.start();
             ve tvaru \texttt{Název\_třídy::Název\_metody}.
 
             Architektura Jenkins CI z~pohledu servlet kontejneru je znázorněna na obrázku \ref{imgArchitekturaServlet}.
-            Jsou zde zachyceny především komponenty, které přímo souvisejí s~činností servlet kontejneru.
+            Jsou zde zachyceny především komponenty, které přímo souvisejí s~jeho činností.
 
             \begin{figure}[h!t]
                 \begin{center}
@@ -661,7 +661,7 @@ server.start();
 
             
             Archiv \texttt{winstone.jar} obsahuje servlet kontejner pro Jenkins CI. Název je nyní sice mírně matoucí
-            (způsoben předchozí implementací, ale aktuálně jsou součástí tohoto archivu komponenty Winstone a~Jetty.
+            (způsoben předchozí implementací), ale aktuálně jsou součástí tohoto archivu komponenty Winstone a~Jetty.
 
             Velmi podstatnu součásti aplikace z~pohledu servlet kontejneru je komponenta\\\texttt{extras-executable-war}. 
             Tato součást aplikace je sice malá, ale obsahuje metodu \texttt{main}, kterou se aplikace spouští 
@@ -674,9 +674,9 @@ server.start();
             z~archivu \texttt{winstone.jar}, která provede nastartování
             a~zavedení servlet kontejneru. Následně je provedena inicializace a~spuštění
             jediného servletu aplikace Jenkins CI a~tím je servlet Stapler (bližší informace o~tomto
-            servletu jsou v~kapitole \ref{secJenkinsArchitektura}) . 
+            servletu jsou v~kapitole \ref{secJenkinsArchitektura}). 
             Pokud se podaří úspěšně spustit tento servlet, tak je spuštění celé aplikace Jenkins CI z~pohledu
-            servlet kontejneru úspěšně hotovo a~aplikace běží.
+            servlet kontejneru úspěšně provedené a~aplikace běží.
 
             Zjištění, které komponenty má servlet kontejner při svém startu zavést,
             se nachází v~souboru \texttt{web.xml}, což je standardní konfigurační soubor
@@ -713,7 +713,7 @@ server.start();
             Jelikož je v~aplikaci pouze jediný servlet Stapler, tak je požadavek předán jemu.
             Tato komponenta následně provede netriviálním způsobem rozhodnutí, které
             části aplikace předat požadavek k~vykonání  nebo zda náleží nějakému rozšiřujícímu modulu.
-            Následně obráceným postupem probíhá zaslání HTTP odpovědi klientovi.
+            Následně stejnou cestou probíhá zaslání HTTP odpovědi zpět klientovi.
 
             Byla zde zachycena pouze jedna z~možných činností
             servlet kontejneru a~tou je zpracovávání komunikace protokolem HTTP. 
@@ -743,13 +743,13 @@ server.start();
             předány kontejneru, který podle nich nastaví svou činnost. Kompletní
             soupis parametrů, které jsou implementovatovány v~servlet kontejneru,
             je v~příloze \ref{prilohaParametry}.
-
             Jednotlivé parametry zde nejsou rozebírány, ale následující analýza
             se zaměřuje především na klíčové bodů funkčnosti servlet kontejneru.
+
             Pro zachování zpětné kompatibility musí servet kontejner v~aplikaci 
             Jenkins CI poskytovat následující funkce:
             
-
+            \newpage
             \begin{itemize}
                 \item{\textbf{Komunikaci nešifrovaným protokolem HTTP}}
                 \item{\textbf{Komunikaci šifrovaným protokolem HTTPS}}
@@ -777,7 +777,7 @@ server.start();
             Poslední z~hlavních funkcionalit, které nabízí servlet kontejner v~Jenkins CI
             a~je nutné ji zachovat,
             je možnost ukončit nebo restartovat aplikaci pomocí zaslání
-            speciálního požadavku na specifický port. 
+            speciálního požadavku na zvolený port. 
 
             Po integraci serveru Jetty do servlet kontejneru byla přidána ještě možnost
             komunikace protokolem SPDY, ale tento protokol ještě není 
@@ -794,7 +794,7 @@ server.start();
         Na základě analýzy, která proběhla v~předchozích kapitolách,
         je v~této kapitole zvolen způsob
         integrace serveru Undertow do systému Jenkins CI. 
-        Obě navržené možné varianty integrace jsou porovnány z~různych
+        Obě navržené možné varianty integrace jsou porovnány z~různých
         hledisek a~je zvolen způsob, kterým bude následně implementace provedena.
 
         Na závěr kapitoly jsou popsány problémy, které byly objeny při analýze
@@ -821,14 +821,15 @@ server.start();
                 \item{\textbf{Srovnání výkonu:} V~první variantě integrace je ponechána stále
                  velmi stará implementace kontejneru Winstone, která zřejmě stále ještě
                  obsahuje nepotřebné součásti a~samotný způsob inicializace není optimalizován
-                 pro potřeby serveru Undertow, takže by mohla zbytečně zpomalovat aplikaci.
-                 Zatímco nová implementace může být přimo optimalizována pro potřeby 
+                 pro potřeby serveru Undertow, takže by mohlo docházet ke zbytečnému
+                 zpomalování aplikace.
+                 Nová implementace může být přímo optimalizována pro potřeby 
                  serveru Undertow a~poskytovat lepší výkon i~kratší dobu spuštění aplikace, 
-                 která není zanedbatelná při spouštění integračníchc testů.}
+                 která není zanedbatelná při spouštění integračních testů.}
 
                 \item{\textbf{Srovnání proveditelnosti:} První varianta představuje provedení 
                     úprav pouze v~částech, kde je přímo integrován server Jetty, 
-                    zatímco v~druhé variantě je potřeba prvést znovu celou implementace
+                    zatímco v~druhé variantě je potřeba provést znovu celou implementaci
                     integrace servlet kontejneru. 
                                          
                     V~tomto případě je úprava stávajícího kódu aplikace
@@ -838,9 +839,9 @@ server.start();
 
                 \item{\textbf{Srovnání zpětné kompatibility:} Dosažení zpětné kompatibility
                     u~první varianty je snazší, jelikož jsou viditelná místa, která je 
-                    potřeba reimplementovat a~nezanedbat. Nicméně druhá varianta
-                    nemá žádné faktické nevýhody oproti variantě první pro dosažení
-                    stejné úrovně zpětné kompatibility.}
+                    potřeba znovu implementovat a~nezanedbat. Nicméně druhá varianta
+                    nemá žádné faktické nevýhody k dosažení 
+                    stejné úrovně zpětné kompatibility jako varianta první.}
 
                 \item{\textbf{Další hlediska:} Jelikož dlouhodobý vývoj servlet kontejneru
                     v~Jenkins CI je na okraji zájmu a~jsou prováděny především nejnutnější úpravy, 
@@ -872,35 +873,36 @@ server.start();
 
         \subsection{Zjištěné problémy}
             Při analyzování možností integrace byly zjištěny dva problémy.
+
             Prvním problémem je, že server Undertow
             je určen pro běh pod virtuálním strojem, který odpovídá specifikaci jazyka
-            Java verze 7 zatímco server Jenkins CI využívá verzi 6. 
+            Java verze 7, zatímco server Jenkins CI využívá verzi 6. 
             Server Jenkins CI využívá starší verzi z~důvodu zpětné kompatibility
             řešení. 
             
             Specifikace jazyka je plně zpětně kompatibilní, takže server Jenkins CI
             může být spuštěn s~novější verzí virtuálního stroje, ale pro okamžité začlenění
-            serveru Undertow do Jenkins CI je tato skutečnost problém. Pokud by ovšem
-            provedená integrace dávala dobré výsledky, tak by bylo buď možné 
+            serveru Undertow do Jenkins~CI je tato skutečnost problém. Pokud by ovšem
+            provedená integrace poskytovala dobré výsledky, tak by bylo možné 
             upravit kód serveru Undertow tak, aby odpovídal starší specifikaci.
             V~těchto verzích jazyka není zásadní rozdíl a~úprava by byla jistě
             možná, ale velmi pracná a~stále by potřebovala údržbu při příchodu
-            novvých verzi serveru Undertow. Další možností je
-            zvýšit tlak na přechod celé aplikace na vyšší specifikaci jazyka,
-            což jistě výhledově nastane, ale není jisté kdy. 
+            nových verzí serveru Undertow. Další možností je
+            zvýšit tlak na přechod celé aplikace na novější verzi specifikace jazyka,
+            což výhledově jistě nastane, ale není jisté kdy. 
 
             V~této práci bude tento problém vyřešen převedením aplikace Jenkins CI na vyšší verzi,
             což představuje úpravu několika konfigurací.
 
             \medskip        
             Druhým problémem je, že při integraci serveru Jetty do Jenkins CI byla přidána
-            při spuštění serveru využít protokol SPDY, jehož implemntace
+            možnost využít protokol SPDY, jehož implementace
             není v~současné době v~serveru Undertow dostupná. Nicméně tato možnost
             je zavedena jen krátce a~zřejmě ještě není využívána žádnými komponentami,
             takže by neměl být problém, kdyby nová implementace neobsahovala tuto volbu.
             
-            Je důležité dodat, že požadavek na implementaci tohoto 
-            protokolu byl v~komunitě serveru Undertow vznesen
+            Je důležité dodat, že požadavek na implementaci 
+            protokolu SPDY byl v~komunitě serveru Undertow vznesen
             a~je také zaznamenán v~systému pro sledování chyb\footnote{
                 Plánovaná implementace protokolu SPDY v~serveru Undertow:
                 \texttt{https://issues.jboss.org/browse/UNDERTOW-9}}.
@@ -929,10 +931,10 @@ server.start();
     servlet kontejneru a~tudíž proběhne zcela nová implementace.
 
     Nebyly objeveny žádné překážky, které by znemožňovaly
-    pokračování v této práci. Dal-ším krokem v~navazujícím diplomovém projektu bude provedení
+    pokračování v~této práci. Dal-ším krokem v~navazujícím diplomovém projektu bude provedení
     samotné integrace a~její důkladné otestování.
     Po vytvoření funkční implementace bude výsledná aplikace porovnávána
-    z~hlediska výkonu s~původním řešením.
+    s~původním řešením z~hlediska výkonu.
     Pokud by byla potvrzena vyšší výkonnost nové implementace, tak
     by tento přístup mohl nahradit stávající řešení nebo
     být jeho novou a~lepší alternativou.
