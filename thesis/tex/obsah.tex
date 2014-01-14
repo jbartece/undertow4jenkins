@@ -30,8 +30,8 @@
     Samotná implementace integrace není předmětem tohoto semestrálního projektu a~bude provedena až v~navazujícím diplomovém projektu. 
     V~rámci dimplomového projektu bude také provedeno testování výkonu modifikovaného systému Jenkins CI a~celkové shodnocení navržených
     a~provedených změn. 
-    Zadání této práce bylo vytvořeno firmou Red Hat s jejiž spoluprácí tato diplomová práce vzniká. Pokud budou výsledky práce
-    dobré, tak její výstup může být následně využit i v praxi.
+    Zadání této práce bylo vytvořeno firmou Red Hat s~jejiž spoluprácí tato diplomová práce vzniká. Pokud budou výsledky práce
+    dobré, tak její výstup může být následně využit i~v~praxi.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -176,19 +176,46 @@
             Pokud se aplikaci povede spustit, tak je již možné libovolně pracovat pouze s~prohlížeče. Detaily práce s~aplikací Jenkins CI
             lze nalézt v~této knize \cite{jenkinsBook}, ale tyto informace jsou již nad rámec této publikace.
             
-        \subsection{Architektura serveru}
+        \subsection{Architektura serveru}   \label{secJenkinsArchitektura}
             Architektura systému Jenkins CI je poměrně komplikovaná a~pro tuto práci není nutné ji detailně celou znát.
             Bude popsána na vysoké úrovni abstrakce a~zaměří se pouze na komponenty, které se přímo týkají této práce
-            a~budou dále v~textu odkazovány nebo blíže rozebírány. \ref{imgJenkinsArchitecture}
-            %TODO Stapler
+            a~budou dále v~textu odkazovány nebo blíže rozebírány. Přehled architektury je na obrázku~\ref{imgJenkinsArchitecture}.
        
             \begin{figure}[ht]
                 \begin{center}
-                    \scalebox{0.70}{\includegraphics{img/jenkinsArchitecture.png}}
+                    \scalebox{0.65}{\includegraphics{img/jenkinsArchitecture.png}}
                     \caption{Přehled architektury serveru Jenkins CI \cite{architectureOverview}}
                     \label{imgJenkinsArchitecture}
                 \end{center}
             \end{figure}     
+
+            Základem architektury je část \emph{Model}, což jsou objekty, které obsahují stav
+            a~data aplikace. Každý model je přímo navázán na konkrétní URL s~tím, že kořenový
+            model (dostupný pod URL \uv{/}) je pevně daná instance s~názvem\texttt{Hudson}.
+            Data z~objektů modelu jsou následně zobrazovány ve webovém rozhraní aplikace.
+            Pro toto zobrazování je využita techonologie Jelly.
+
+            Velmi podstatnou součástí aplikace je prvek \emph{Stapler}. Tento objekt
+            provádí konkrétní propojování požadavků dle zadané URL s~patřičnými objekty
+            z~modelu a~spouštění vykonávání jejich metod. Stapler je
+            jediným servletem, který je v~aplikaci Jenkins CI zaveden do
+            servlet kontejneru při spuštění aplikace.
+            Pojmy servlet a~servlet kontejner jsou blíže vysvětleny v~kapitole \ref{servletKontejner}.
+            Povědomí o~jeho
+            činnosti je potřebné, protože s~ním bude v~této práci dále pracováno.
+            Průběh vybírání patřičných metod pomocí této komponenty je přesně
+            definován a~lze jej najít v~uživatelské příručce\footnote{
+                Způsob zpracovávání požadavků komponentou Stapler:
+                \texttt{http://stapler.kohsuke.org/reference.html}}, 
+                ale není nutné jej zde rozebírat.
+
+            Architektura serveru je přizpůsobena tak, aby byla snadno rozšiřitelná
+            pomocí rozšiřujících modulů (angl. \emph{plugins}). Popis technologie Jelly
+            i~tvorba rozšiřujících modulů je nad rámec této práce a~lze tyto informace
+            najít v~odkazované literatuře.
+        
+            Informace v~této kapitole byly čerpány z~tohoto dokumentu \cite{architectureOverview}
+            a~z~webových stránek projektu Stapler \cite{staplerWeb}.
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     \section{Webový server a~servlet kontejner} \label{servletWebserver}
@@ -217,7 +244,7 @@
                 \end{center}
             \end{figure}
 
-        \subsection{Servlet kontejner}
+        \subsection{Servlet kontejner} \label{servletKontejner}
             Jelikož dostávat stále stejná statická data při stejném požadavku není dostatečná funkcionalita serveru,
             tak existují způsoby jak zajistit dynamickou práci s~daty na serveru (a~tudíž i~měnící se odpovědi na stejný dotaz).
             Jedním ze způsobů jak této činnosti docílit je využití tzv. \emph{servletů},
@@ -350,29 +377,29 @@
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     \section{Server Undertow} \label{undertow}
         Undertow je nový webový server, který vzniká za podpory sekce JBoss (firma Red Hat),
-        a je vytvořen v jazyce Java. 
-        Vzniká především aby byl výchozím webovým serverem v aplikačním serveru WildFly 8.
-        V současné době je ve fázi beta verze programu, ale je již plně použitelný.
+        a~je vytvořen v~jazyce Java. 
+        Vzniká především aby byl výchozím webovým serverem v~aplikačním serveru WildFly 8.
+        V~současné době je ve fázi beta verze programu, ale je již plně použitelný.
 
-        Informace v této kapitole jsou čerpány z webových stránek projektu \cite{undertowWeb}.
-        Jelikož je aplikace poměrně nová, tak k ní existuje jen poměrně nedostatečná 
-        dokumentace. Některé informace z této kapitoly musely být čerpány z
-        vygenerované projektové dokumentace.
+        Informace v~této kapitole jsou čerpány z~webových stránek projektu \cite{undertowWeb}.
+        Jelikož je aplikace poměrně nová, tak k~ní existuje jen poměrně nedostatečná 
+        dokumentace. Některé informace z~této kapitoly musely být čerpány
+z~vygenerované projektové dokumentace.
 
         \subsection{Vlastnosti serveru}
             Server Undertow je zaměřen na to, aby byl plně integrovatelný do libovolných aplikací
-            a aby byl co nejmenší a nejjednodušší. Samotný
-            archiv s jádrem aplikace je menší než 1MB a při běhu aplikace potřebuje
+            a~aby byl co nejmenší a~nejjednodušší. Samotný
+            archiv s~jádrem aplikace je menší než 1MB a~při běhu aplikace potřebuje
             méně než 4MB dynamicky alokované paměti. 
 
             Je navržen takovým způsobem, aby při implementaci mohl uživatel využít
-            jen tu část aplikace, kterou potřebuje a patřičně si ji upravit
+            jen tu část aplikace, kterou potřebuje a~patřičně si ji upravit
             pro své vlastní potřeby.
-            Tohoto přístupu je dosaženo kombinováním a řetězením
+            Tohoto přístupu je dosaženo kombinováním a~řetězením
             obslužných funkcí (angl. \emph{handler}), které server poskytuje.
-            Díky tomuto přístupu je server velmi flexibilní a v jeho důsledku
+            Díky tomuto přístupu je server velmi flexibilní a~v~jeho důsledku
             také patřičně rychlý, protože uživatele nebrzdí funkcionality
-            serveru, které nutně nepotřebuje a nevyužívá.
+            serveru, které nutně nepotřebuje a~nevyužívá.
             Při komunikaci umožňuje server podporu jak pro asynchronní, tak
             pro synchronní komunikaci.
 
@@ -385,15 +412,15 @@
         %V budoucnu rozšířit - jít více do hloubky principu na kterých Undertow pracuje
         \subsection{Praktický způsob práce se serverem}
             Server Undertow obsahuje velké množství funkcionalit, které lze
-            využít při integraci do cílové aplikace. V následujícím 
+            využít při integraci do cílové aplikace. V~následujícím 
             textu bude na dvou příkladech ukázán způsob implementace
             jednoduchého serveru, který umožní pochopit jakým způsobem
             se se serverem Undertow pracuje. Obsah těchto příkladů 
-            bude jistě využit také při integraci s Jenkins CI.
+            bude jistě využit také při integraci s~Jenkins CI.
 
             \medskip
             Prvním příkladem je ukázková aplikace, která pouze naslouchá
-            na zvoleném portu a na jakoukoliv příchozí odpověď odpoví
+            na zvoleném portu a~na jakoukoliv příchozí odpověď odpoví
             typickým textem \uv{Hello World}. Celý kód této aplikace vypadá následovně:
        
             \begin{verbatim}
@@ -417,18 +444,18 @@ public class HelloWorldServer {
             \end{verbatim}
 
             Třída \texttt{Undertow} vždy reprezentuje instanci samotného
-            webového serveru a je ji nutné definovat prakticky vždy. Funkcí
+            webového serveru a~je ji nutné definovat prakticky vždy. Funkcí
             \texttt{addListener} je serveru sděleno na kterém portu
-            a síťové adrese 
+            a~síťové adrese 
             má naslouchat příchozím požadavkům. 
-            Pomocí funkce \texttt{setHandler} je k danému portu
-            přiřazena metoda, která se stará o zpracovávání 
-            požadavků zaslaných na server a odesílání odpovědí.
-            V tomto případě pouze jen odpoví již zmíněným řetězcem
-            \uv{Hello World}. Samotné vytvoření požadavku a jeho
+            Pomocí funkce \texttt{setHandler} je k~danému portu
+            přiřazena metoda, která se stará o~zpracovávání 
+            požadavků zaslaných na server a~odesílání odpovědí.
+            V~tomto případě pouze jen odpoví již zmíněným řetězcem
+            \uv{Hello World}. Samotné vytvoření požadavku a~jeho
             odeslání provede metoda pomocí entity \texttt{HttpServerExchange},
-            která zpracovává komunikaci a obsahuje o ni množství další informací
-            (např. informace z hlavičky dotazu).
+            která zpracovává komunikaci a~obsahuje o~ni množství další informací
+            (např. informace z~hlavičky dotazu).
 
             Je důležité poznamenat, že pro každé naslouchání na 
             nějakém portu musí být vytvořena nová instance serveru.
@@ -436,7 +463,7 @@ public class HelloWorldServer {
             \medskip
             Druhý příklad ukazuje jakým způsobem aplikace umožňuje 
             přidat funkcionalitu servlet kontejneru do webového serveru.
-            V následujícím příkladu je zobrazen pouze efektivní kód aplikace.
+            V~následujícím příkladu je zobrazen pouze efektivní kód aplikace.
 
             \begin{verbatim}
 DeploymentInfo servletBuilder = deployment()
@@ -458,20 +485,20 @@ Undertow server = Undertow.builder()
 server.start();
             \end{verbatim}
 
-            V prvním kroku ukázkového příkladu se provádí nastavování
-            webové aplikace, která bude zavedena v servlet kontejneru.
+            V~prvním kroku ukázkového příkladu se provádí nastavování
+            webové aplikace, která bude zavedena v~servlet kontejneru.
             Tyto informace se ukládají do entity \texttt{DeploymentInfo}.
             Nejprve je nastavena aplikaci hlavní třída kontejneru pomocí metody
             \texttt{setClassLoader}. Metodou \texttt{setContextPath} je
             definován tvar URL adresy pod kterou bude na serveru tato
             aplikace dostupná. Důležitá je metoda \texttt{addServlets}
             pomocí které se přidají jednotlivé součásti aplikace
-            a nastaví se jejich dostupnost v aplikaci metodou \texttt{addMapping}.
+            a~nastaví se jejich dostupnost v~aplikaci metodou \texttt{addMapping}.
 
             Po nastavení konfigurace aplikace proběhne metodami \texttt{addDeployment}
-            a \texttt{deploy} připravení aplikace po spuštění. Ve zbytku kódu
+            a~\texttt{deploy} připravení aplikace po spuštění. Ve zbytku kódu
             je spuštěna instance serveru obdobným způsobem
-            jako byla ukázána v předchozím příkladu.
+            jako byla ukázána v~předchozím příkladu.
 
 
         
@@ -644,7 +671,8 @@ server.start();
             Po počáteční inicializaci je předáno řízení aplikace metodě \\\texttt{Launcher.java::main}
             z~archivu \texttt{winstone.jar}, která provede nastartování
             a~zavedení servlet kontejneru. Následně je provedena inicializace a~spuštění
-            jediného servletu aplikace Jenkins CI a~tím je servlet Stapler. %TODO reference na stapler
+            jediného servletu aplikace Jenkins CI a~tím je servlet Stapler (bližší informace o~tomto
+            servletu jsou v~kapitole \ref{secJenkinsArchitektura}) . 
             Pokud se podaří úspěšně spustit tento servlet, tak je spuštění celé aplikace Jenkins CI z~pohledu
             servlet kontejneru úspěšně hotovo a~aplikace běží.
 
@@ -700,11 +728,11 @@ server.start();
         při samotné implementaci.
 
         Stávající servlet kontejner je v~Jenkins CI již dlouhou dobu
-        a~mnoho uživatelů a~komponent systému přímo používá specifické
+        a~mnoho uživatelů a~komponent systému přímo používá jeho specifické
         parametry, které pocházejí z~kontejneru Winstone~\cite{kohsukeTopic}. Nová implementace
         tudíž musí zachovat naprosto stejný formát parametrů, aby 
         se výměnou servlet kontejneru nestala část aplikace nebo rozšiřujících modulů nefunkční.
-        Také je potřeba zachovat výchozí hodnoty jednotlivých nastavení.
+        Také je potřeba zachovat výchozí hodnoty jednotlivých parametrů.
 
         \subsection{Funkcionality servlet kontejneru}
             Při spouštění aplikace je před předáním řízení aplikace servlet kontejneru
@@ -718,6 +746,7 @@ server.start();
             se zaměřuje především na klíčové bodů funkčnosti servlet kontejneru.
             Pro zachování zpětné kompatibility musí servet kontejner v~aplikaci 
             Jenkins CI poskytovat následující funkce:
+            
 
             \begin{itemize}
                 \item{\textbf{Komunikaci nešifrovaným protokolem HTTP}}
@@ -734,9 +763,14 @@ server.start();
             typem protokolu, který se využívá především pro efektivnější komunikaci
             webového serveru a~servlet kontejneru \cite{ajp13Web}.
             
-            Další činností kontejneru je správa přístupových práv a~přihlašování
-            uživatelů. Tato problematika je blíže rozebírána v~následující 
-            kapitole \ref{secSecurityArchitecture}.
+            Další činností kontejneru, kterou může vykonávat 
+            je správa přístupových práv a~umožnění autentizace uživatelů. 
+            Konkrétní uživatelské účty mohou být specifikovány
+            při spouštění servlet kontejneru nebo načítány ze
+            standardního konfiguračního
+            souboru webové aplikace \texttt{web.xml}.
+            %Tato problematika je blíže rozebírána v~následující kapitole \ref{secSecurityArchitecture}.
+
 
             Poslední z~hlavních funkcionalit, které nabízí servlet kontejner v~Jenkins CI
             a~je nutné ji zachovat,
@@ -747,10 +781,11 @@ server.start();
             komunikace protokolem SPDY, ale tento protokol ještě není 
             v~Jenkins CI více využíván a~tudíž jeho implementace není zásadní.
 
-             
-        \subsection{Bezpečnostní architektura v~Jenkins CI} \label{secSecurityArchitecture}
-                    \cite{securityArchitectureJenkins}, \cite{securityArchitectureWinstone}
-                    %TODO
+        
+        %Možnost rozšířiš informace o security architektuře     
+        %\subsection{Bezpečnostní architektura v~Jenkins CI} \label{secSecurityArchitecture}
+        %            \cite{securityArchitectureJenkins}, \cite{securityArchitectureWinstone}
+        %            
 
 
     \section{Návrh způsobu integrace serveru Undertow} \label{secNavrh}
