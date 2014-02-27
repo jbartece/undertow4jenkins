@@ -5,7 +5,7 @@ thesis/tex/.obsah.tex.swp
 
 thesis/docs/
 thesis/sablona/
-
+src
 # Package Files #
 *.jar
 *.war
