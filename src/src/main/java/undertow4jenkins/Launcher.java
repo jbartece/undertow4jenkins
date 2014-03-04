@@ -6,6 +6,11 @@ package undertow4jenkins;
  */
 public class Launcher implements Runnable {
 
+    /**
+     * Field for usage, which can be overridden outside this class
+     */
+    public static String USAGE;
+    
     public void run() {
     }
 
@@ -13,6 +18,11 @@ public class Launcher implements Runnable {
      * @param args
      */
     public static void main(String[] args) {
+        System.out.println("Undertow4Jenkins: main");
+        
+        for(String arg : args) {
+            System.out.println("Arg: " + arg);
+        }
     }
 
 }
