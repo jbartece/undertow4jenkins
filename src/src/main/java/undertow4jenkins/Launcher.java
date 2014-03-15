@@ -16,7 +16,7 @@ public class Launcher {
     
     @SuppressWarnings("unused")
     private Options options;
-
+ 
     /**
      * Field for usage, which can be overridden outside this class
      */
@@ -25,6 +25,7 @@ public class Launcher {
     public Launcher(Options options) {
         log.debug("constructor");
         this.options = options;
+        log.info(options.toString());
     }
 
     public void run() {
