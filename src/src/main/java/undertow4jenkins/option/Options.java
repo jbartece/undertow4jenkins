@@ -1,7 +1,14 @@
 package undertow4jenkins.option;
 
-public class Options {
+import java.lang.reflect.Field;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import undertow4jenkins.util.Configuration;
+
+public class Options {
+    
     public String webroot;
     public String warfile;
 
@@ -55,6 +62,51 @@ public class Options {
     public String simpleAccessLoggerFormat;
     public String simpleAccessLoggerFile;
     
+    public Options() {
+        loadOptionsDefaultValues();
+    }
+
+    private void loadOptionsDefaultValues() {
+        String propertyPrefix = "Options.defaultValue.";
+        
+        for(Field f : getClass().getFields()) {
+            String propertyName = propertyPrefix + f.getName();
+            if(Configuration.isPropertySet(propertyName)) {
+                setFieldDefaultValue(f, propertyName);
+            }
+        }
+    }
+
+    private void setFieldDefaultValue(Field f, String propertyName) {
+        Logger log = LoggerFactory.getLogger(getClass());
+        Class<?> fieldClass = f.getType();
+        
+        try {
+            if (fieldClass.equals(String.class)) {
+                f.set(this, Configuration.getProperty(propertyName));
+            }
+            else {
+                if(fieldClass.equals(Integer.class)) {
+                    f.set(this, Configuration.getIntProperty(propertyName));
+                }
+                else {
+                    if(fieldClass.equals(Boolean.class)) {
+                        f.set(this, Configuration.getBoolProperty(propertyName));
+                    }
+                    else {
+                        log.warn("Class undertow4jenkins.option.Options has option with type, "
+                                + "which is not supported!");
+                    }
+                }
+            }
+
+            // TODO set properly error messages
+        } catch (IllegalArgumentException e) {
+            log.error(e.getMessage(), e);
+        } catch (IllegalAccessException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
     
     /**
      * Prints values of all non null options
