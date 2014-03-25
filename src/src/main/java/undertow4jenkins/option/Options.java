@@ -18,7 +18,7 @@ public class Options {
 
     //
     public Integer httpPort;
-    public Integer httpListenAdress;
+    public String httpListenAdress;
     public Boolean httpDoHostnameLookups;
     public Integer httpKeepAliceTimeout;
 
@@ -35,7 +35,7 @@ public class Options {
     //
     public Boolean spdy;
     public Integer ajp13Port;
-    public Integer ajp13ListenAdress;
+    public String ajp13ListenAdress;
     public Boolean controlPort;
 
     //
