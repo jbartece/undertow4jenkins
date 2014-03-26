@@ -2,14 +2,12 @@ package undertow4jenkins;
 
 import static io.undertow.servlet.Servlets.defaultContainer;
 import static io.undertow.servlet.Servlets.deployment;
-import static io.undertow.servlet.Servlets.listener;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.PathHandler;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
-import io.undertow.servlet.api.ListenerInfo;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -21,7 +19,6 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.EventListener;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -31,6 +28,7 @@ import javax.servlet.ServletException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import undertow4jenkins.loader.ListenerLoader;
 import undertow4jenkins.loader.ServletLoader;
 import undertow4jenkins.option.OptionParser;
 import undertow4jenkins.option.Options;
@@ -133,7 +131,9 @@ public class Launcher {
         DeploymentInfo servletBuilder = deployment()
                 .setClassLoader(Launcher.class.getClassLoader())
                 .setContextPath("/")
-                .addListener(createListener("hudson.WebAppMain"))
+                .addListener(
+                        new ListenerLoader(this.jenkinsWarClassLoader)
+                                .createListener("hudson.WebAppMain"))
                 // TODO - check
                 .setDeploymentName("Jenkins CI")
                 .addServlets(new ServletLoader(jenkinsWarClassLoader).getServlets());
@@ -153,23 +153,6 @@ public class Launcher {
                 .build();
         server.start();
 
-    }
-
-    // <listener>
-    // <listener-class>hudson.WebAppMain</listener-class>
-    // </listener>
-    private ListenerInfo createListener(String listenerClassName) {
-        ClassLoader classLoader = this.jenkinsWarClassLoader;
-
-        try {
-            Class<? extends EventListener> clazz = Class.forName(listenerClassName, true,
-                    classLoader)
-                    .asSubclass(EventListener.class);
-            return listener(clazz);
-        } catch (ClassNotFoundException e) {
-            log.error("Loading of listener class failed!", e);
-            return null;
-        }
     }
 
     /**
