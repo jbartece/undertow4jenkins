@@ -14,6 +14,7 @@ import javax.servlet.ServletException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import undertow4jenkins.loader.FilterLoader;
 import undertow4jenkins.loader.ListenerLoader;
 import undertow4jenkins.loader.ServletLoader;
 import undertow4jenkins.option.OptionParser;
@@ -65,12 +66,15 @@ public class Launcher {
         DeploymentInfo servletBuilder = deployment()
                 .setClassLoader(Launcher.class.getClassLoader())
                 .setContextPath("/")
-                .addListener(
-                        new ListenerLoader(this.jenkinsWarClassLoader)
-                                .createListener("hudson.WebAppMain"))
-                // TODO - check
                 .setDeploymentName("Jenkins CI")
+                .addListener(
+                        new ListenerLoader(jenkinsWarClassLoader)
+                                .createListener("hudson.WebAppMain"))
                 .addServlets(new ServletLoader(jenkinsWarClassLoader).getServlets());
+        
+        FilterLoader filterLoader = new FilterLoader(jenkinsWarClassLoader);
+        servletBuilder.addFilters(filterLoader.createFilters());
+        filterLoader.addFilterMappings(servletBuilder);
 
         DeploymentManager manager = defaultContainer().addDeployment(servletBuilder);
         manager.deploy();
