@@ -2,20 +2,22 @@ package undertow4jenkins;
 
 import static io.undertow.servlet.Servlets.defaultContainer;
 import static io.undertow.servlet.Servlets.deployment;
-
-import java.io.IOException;
-
 import io.undertow.Undertow;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
+import io.undertow.servlet.api.ErrorPage;
+
+import java.io.IOException;
 
 import javax.servlet.ServletException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import undertow4jenkins.loader.ErrorPageLoader;
 import undertow4jenkins.loader.FilterLoader;
 import undertow4jenkins.loader.ListenerLoader;
+import undertow4jenkins.loader.MimeLoader;
 import undertow4jenkins.loader.ServletLoader;
 import undertow4jenkins.option.OptionParser;
 import undertow4jenkins.option.Options;
@@ -50,34 +52,24 @@ public class Launcher {
             WarWorker.extractFilesFromWar(options.warfile, pathToTmpDir);
             // Create class loader to load classed from jenkins.war archive.
             // It is needed to load servlet classes such as Stapler.
-            this.jenkinsWarClassLoader = WarWorker.createJarsClassloader(options.warfile, pathToTmpDir);
-        } catch (IOException e) {
-            log.error("War archive extraction", e);
-        }
-        try {
+            this.jenkinsWarClassLoader = WarWorker.createJarsClassloader(options.warfile,
+                    pathToTmpDir);
+
             startUndertow();
         } catch (ServletException e) {
             log.error("Start of embedded Undertow server failed!", e);
+        } catch (IOException e) {
+            log.error("War archive extraction", e);
+        } catch (ClassNotFoundException e) {
+            log.error("Initiating servlet container", e);
         }
 
     }
 
-    private void startUndertow() throws ServletException {
+    private void startUndertow() throws ServletException, ClassNotFoundException {
 
-        DeploymentInfo servletBuilder = deployment()
-                .setClassLoader(Launcher.class.getClassLoader())
-                .setContextPath("/")
-                .setDeploymentName("Jenkins CI")
-                .addListener(
-                        new ListenerLoader(jenkinsWarClassLoader)
-                                .createListener("hudson.WebAppMain"))
-                .addServlets(new ServletLoader(jenkinsWarClassLoader).getServlets());
-
-        FilterLoader filterLoader = new FilterLoader(jenkinsWarClassLoader);
-        servletBuilder.addFilters(filterLoader.createFilters());
-        filterLoader.addFilterMappings(servletBuilder);
-
-        DeploymentManager manager = defaultContainer().addDeployment(servletBuilder);
+        DeploymentManager manager = defaultContainer().addDeployment(
+                createServletContainerDeployment());
         manager.deploy();
 
         // HttpHandler servletHandler = manager.start();
@@ -92,6 +84,26 @@ public class Launcher {
                 .build();
         server.start();
 
+    }
+
+    private DeploymentInfo createServletContainerDeployment() throws ClassNotFoundException {
+        DeploymentInfo servletContainerBuilder = deployment()
+                .setClassLoader(Launcher.class.getClassLoader())
+                .setContextPath("/")
+                .setDeploymentName("Jenkins CI")
+                .addListener(
+                        new ListenerLoader(jenkinsWarClassLoader)
+                                .createListener("hudson.WebAppMain"))
+                .addServlets(new ServletLoader(jenkinsWarClassLoader).getServlets())
+                .addErrorPage(ErrorPageLoader.createErrorPage())
+                .addMimeMappings(MimeLoader
+                        .createMimeMappings(jenkinsWarClassLoader));
+
+        FilterLoader filterLoader = new FilterLoader(jenkinsWarClassLoader);
+        servletContainerBuilder.addFilters(filterLoader.createFilters());
+        filterLoader.addFilterMappings(servletContainerBuilder);
+        
+        return servletContainerBuilder;
     }
 
     /**
