@@ -35,10 +35,10 @@ public class FilterLoader {
     // <filter-name>plugins-filter</filter-name>
     // <filter-class>hudson.util.PluginServletFilter</filter-class>
     // </filter>
-    private final String[] filterNames = { "encoding-filter", "compression-filter",
+    private static final String[] filterNames = { "encoding-filter", "compression-filter",
             "authentication-filter", "csrf-filter", "plugins-filter" };
 
-    private final String[] filterClasses = { "hudson.util.CharacterEncodingFilter",
+    private static final String[] filterClasses = { "hudson.util.CharacterEncodingFilter",
             "org.kohsuke.stapler.compression.CompressionFilter", "hudson.security.HudsonFilter",
             "hudson.security.csrf.CrumbFilter", "hudson.util.PluginServletFilter" };
 
@@ -63,20 +63,16 @@ public class FilterLoader {
     // <url-pattern>/*</url-pattern>
     // </filter-mapping>
 
-    private final String[] filterMappingNames = { "encoding-filter", "compression-filter",
+    private static final String[] filterMappingNames = { "encoding-filter", "compression-filter",
             "authentication-filter", "csrf-filter", "plugins-filter" };
 
-    private final String[] filterMappingUrls = { "/*", "/*", "/*", "/*", "/*" };
+    private static final String[] filterMappingUrls = { "/*", "/*", "/*", "/*", "/*" };
 
-    private final Logger log = LoggerFactory.getLogger(getClass());
+    private static final Logger log = LoggerFactory
+            .getLogger("undertow4jenkins.loader.FilterLoader");
 
-    private ClassLoader classLoader;
-
-    public FilterLoader(ClassLoader cl) {
-        this.classLoader = cl;
-    }
-
-    public List<FilterInfo> createFilters() {
+    public static List<FilterInfo> createFilters(ClassLoader classLoader)
+            throws ClassNotFoundException {
         if (filterNames.length != filterClasses.length) {
             log.error("Different count of filter names and classes!");
             return null;
@@ -84,13 +80,13 @@ public class FilterLoader {
 
         List<FilterInfo> filters = new ArrayList<FilterInfo>();
         for (int i = 0; i < filterNames.length; i++) {
-            filters.add(createFilterInfo(filterNames[i], filterClasses[i]));
+            filters.add(createFilterInfo(filterNames[i], filterClasses[i], classLoader));
         }
 
         return filters;
     }
 
-    public void addFilterMappings(DeploymentInfo servletBuilder) {
+    public static void addFilterMappings(DeploymentInfo servletBuilder) {
         if (filterMappingNames.length != filterMappingUrls.length) {
             log.error("Different count of filter names and urls!");
             return;
@@ -98,20 +94,16 @@ public class FilterLoader {
 
         for (int i = 0; i < filterMappingNames.length; i++) {
             servletBuilder.addFilterUrlMapping(filterMappingNames[i], filterMappingUrls[i],
-                    DispatcherType.REQUEST); //TODO check the default dispatcher type
+                    DispatcherType.REQUEST); // TODO check the default dispatcher type
         }
     }
 
-    private FilterInfo createFilterInfo(String filterName, String filterClassName) {
-        try {
-            Class<? extends Filter> clazz = Class.forName(filterClassName, true,
-                    this.classLoader).asSubclass(Filter.class);
+    private static FilterInfo createFilterInfo(String filterName, String filterClassName,
+            ClassLoader classLoader) throws ClassNotFoundException {
+        Class<? extends Filter> clazz = Class.forName(filterClassName, true,
+                classLoader).asSubclass(Filter.class);
 
-            return filter(filterName, clazz);
-        } catch (ClassNotFoundException e) {
-            log.error("Loading of listener class failed!", e);
-            return null;
-        }
+        return filter(filterName, clazz);
     }
 
 }

@@ -16,7 +16,7 @@ public class MimeLoader {
             { "ear", "application/octet-stream" }, { "rar", "application/octet-stream" },
             { "webm", "video/webm" } };
 
-    public static List<MimeMapping> createMimeMappings(ClassLoader jenkinsWarClassLoader) {
+    public static List<MimeMapping> createMimeMappings() {
         List<MimeMapping> mappingList = new ArrayList<MimeMapping>(); 
         
         for(String[] arr : mappingConfig)  {

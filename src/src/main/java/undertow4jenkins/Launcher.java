@@ -5,7 +5,6 @@ import static io.undertow.servlet.Servlets.deployment;
 import io.undertow.Undertow;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
-import io.undertow.servlet.api.ErrorPage;
 
 import java.io.IOException;
 
@@ -86,23 +85,27 @@ public class Launcher {
 
     }
 
+    // TODO use this information
+    // <env-entry>
+    // <env-entry-name>HUDSON_HOME</env-entry-name>
+    // <env-entry-type>java.lang.String</env-entry-type>
+    // <env-entry-value></env-entry-value>
+    // </env-entry>
     private DeploymentInfo createServletContainerDeployment() throws ClassNotFoundException {
         DeploymentInfo servletContainerBuilder = deployment()
                 .setClassLoader(Launcher.class.getClassLoader())
                 .setContextPath("/")
                 .setDeploymentName("Jenkins CI")
-                .addListener(
-                        new ListenerLoader(jenkinsWarClassLoader)
-                                .createListener("hudson.WebAppMain"))
-                .addServlets(new ServletLoader(jenkinsWarClassLoader).getServlets())
+                .addListener(ListenerLoader
+                        .createListener("hudson.WebAppMain", jenkinsWarClassLoader))
+                .addServlets(ServletLoader.getServlets(jenkinsWarClassLoader))
                 .addErrorPage(ErrorPageLoader.createErrorPage())
                 .addMimeMappings(MimeLoader
-                        .createMimeMappings(jenkinsWarClassLoader));
+                        .createMimeMappings());
 
-        FilterLoader filterLoader = new FilterLoader(jenkinsWarClassLoader);
-        servletContainerBuilder.addFilters(filterLoader.createFilters());
-        filterLoader.addFilterMappings(servletContainerBuilder);
-        
+        servletContainerBuilder.addFilters(FilterLoader.createFilters(jenkinsWarClassLoader));
+        FilterLoader.addFilterMappings(servletContainerBuilder);
+
         return servletContainerBuilder;
     }
 
