@@ -2,10 +2,10 @@ package undertow4jenkins;
 
 import static io.undertow.servlet.Servlets.defaultContainer;
 import static io.undertow.servlet.Servlets.deployment;
-import io.undertow.Handlers;
+
+import java.io.IOException;
+
 import io.undertow.Undertow;
-import io.undertow.server.HttpHandler;
-import io.undertow.server.handlers.PathHandler;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
 
@@ -19,7 +19,7 @@ import undertow4jenkins.loader.ListenerLoader;
 import undertow4jenkins.loader.ServletLoader;
 import undertow4jenkins.option.OptionParser;
 import undertow4jenkins.option.Options;
-import undertow4jenkins.util.WarClassLoader;
+import undertow4jenkins.util.WarWorker;
 
 /**
  * @author Jakub Bartecek <jbartece@redhat.com>
@@ -33,26 +33,27 @@ public class Launcher {
 
     private ClassLoader jenkinsWarClassLoader;
 
+    private static final String pathToTmpDir = "/tmp/undertow4jenkins/extractedWar/";
+
     /**
      * Field for usage, which can be overridden outside this class
      */
     public static String USAGE;
 
     public Launcher(Options options) {
-        log.debug("constructor");
-
         this.options = options;
         log.info(options.toString());
-
-        // Create class loader to load classed from jenkins.war archive.
-        // It is needed to load servlet classes such as Stapler.
-        this.jenkinsWarClassLoader = WarClassLoader.createJarsClassloader(options.warfile);
-
     }
 
     public void run() {
-        log.debug("run");
-
+        try {
+            WarWorker.extractFilesFromWar(options.warfile, pathToTmpDir);
+            // Create class loader to load classed from jenkins.war archive.
+            // It is needed to load servlet classes such as Stapler.
+            this.jenkinsWarClassLoader = WarWorker.createJarsClassloader(options.warfile, pathToTmpDir);
+        } catch (IOException e) {
+            log.error("War archive extraction", e);
+        }
         try {
             startUndertow();
         } catch (ServletException e) {
@@ -71,7 +72,7 @@ public class Launcher {
                         new ListenerLoader(jenkinsWarClassLoader)
                                 .createListener("hudson.WebAppMain"))
                 .addServlets(new ServletLoader(jenkinsWarClassLoader).getServlets());
-        
+
         FilterLoader filterLoader = new FilterLoader(jenkinsWarClassLoader);
         servletBuilder.addFilters(filterLoader.createFilters());
         filterLoader.addFilterMappings(servletBuilder);
@@ -79,14 +80,14 @@ public class Launcher {
         DeploymentManager manager = defaultContainer().addDeployment(servletBuilder);
         manager.deploy();
 
-        HttpHandler servletHandler = manager.start();
-        PathHandler pathHandler = Handlers.path(Handlers.redirect("/"))
-                .addPrefixPath("/", servletHandler);
+        // HttpHandler servletHandler = manager.start();
+        // PathHandler pathHandler = Handlers.path(Handlers.redirect("/"))
+        // .addPrefixPath("/", servletHandler);
 
         Undertow server = Undertow.builder()
                 .addHttpListener(options.httpPort, "localhost")
                 // .addAjpListener(options.ajp13Port, options.ajp13ListenAdress)
-                .setHandler(pathHandler)
+                .setHandler(manager.start())
                 .setWorkerThreads(options.handlerCountMax) // TODO
                 .build();
         server.start();
