@@ -12,7 +12,7 @@ public class ServletLoader {
 
     private static String[] servletClasses = { "org.kohsuke.stapler.Stapler" };
 
-    public static List<ServletInfo> getServlets(ClassLoader classLoader)
+    public static List<ServletInfo> createServlets(ClassLoader classLoader)
             throws ClassNotFoundException {
         List<ServletInfo> servlets = new ArrayList<ServletInfo>();
 

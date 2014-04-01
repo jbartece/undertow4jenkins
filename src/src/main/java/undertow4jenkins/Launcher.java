@@ -73,10 +73,6 @@ public class Launcher {
                 createServletContainerDeployment());
         manager.deploy();
 
-        // HttpHandler servletHandler = manager.start();
-        // PathHandler pathHandler = Handlers.path(Handlers.redirect("/"))
-        // .addPrefixPath("/", servletHandler);
-
         Undertow server = Undertow.builder()
                 .addHttpListener(options.httpPort, "localhost")
                 // .addAjpListener(options.ajp13Port, options.ajp13ListenAdress)
@@ -87,14 +83,6 @@ public class Launcher {
 
     }
 
-    
-    
-    // TODO use this information
-    // <env-entry>
-    // <env-entry-name>HUDSON_HOME</env-entry-name>
-    // <env-entry-type>java.lang.String</env-entry-type>
-    // <env-entry-value></env-entry-value>
-    // </env-entry>
     private DeploymentInfo createServletContainerDeployment() throws ClassNotFoundException {
         DeploymentInfo servletContainerBuilder = deployment()
                 .setClassLoader(jenkinsWarClassLoader)
@@ -102,19 +90,19 @@ public class Launcher {
                 .setMajorVersion(2)
                 .setMinorVersion(4)
                 .setDeploymentName("Jenkins CI")
-                .addListener(ListenerLoader
-                        .createListener("hudson.WebAppMain", jenkinsWarClassLoader))
-                .addServlets(ServletLoader.getServlets(jenkinsWarClassLoader))
+                .addListener(
+                        ListenerLoader.createListener("hudson.WebAppMain", jenkinsWarClassLoader))
+                .addServlets(ServletLoader.createServlets(jenkinsWarClassLoader))
                 .addErrorPage(ErrorPageLoader.createErrorPage())
+                .addFilters(FilterLoader.createFilters(jenkinsWarClassLoader))
                 .addMimeMappings(MimeLoader.createMimeMappings());
 
-        servletContainerBuilder.addFilters(FilterLoader.createFilters(jenkinsWarClassLoader));
         FilterLoader.addFilterMappings(servletContainerBuilder);
 
-        //Load static resources from extracted war archive
+        // Load static resources from extracted war archive
         servletContainerBuilder.setResourceManager(
                 new FileResourceManager(new File(pathToTmpDir), 0L));
-        
+
         return servletContainerBuilder;
     }
 
