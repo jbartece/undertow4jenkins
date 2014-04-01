@@ -25,13 +25,13 @@ public class WebXmlContent {
 
     public List<SecurityConstraint> securityConstraints = new ArrayList<SecurityConstraint>();
 
-    public LoginConfig loginConfig = new LoginConfig();
+    public LoginConfig loginConfig;
 
     public List<EnvEntry> envEntries = new ArrayList<EnvEntry>();
 
     public List<MimeMapping> mimeMappings = new ArrayList<MimeMapping>();
 
-    public ErrorPage errorPage;
+    public List<ErrorPage> errorPages = new ArrayList<ErrorPage>();
 
     public static class Servlet {
 
@@ -129,6 +129,18 @@ public class WebXmlContent {
         public String exceptionType;
 
         public String location;
+    }
+
+    @Override
+    public String toString() {
+        return "WebXmlContent [webAppVersion=" + webAppVersion + ", \ndisplayName=" + displayName
+                + ", \ndescription=" + description + ", \nservlets=" + servlets
+                + ", \nservletsMapping=" + servletsMapping + ", \nfilters=" + filters
+                + ", \nfilterMappings=" + filterMappings + ", \nlisteners=" + listeners
+                + ", \nsecurityRoles=" + securityRoles + ", \nsecurityConstraints="
+                + securityConstraints + ", \nloginConfig=" + loginConfig + ", \nenvEntries="
+                + envEntries + ", \nmimeMappings=" + mimeMappings + ", \nerrorPages=" + errorPages
+                + "]";
     }
 
 }

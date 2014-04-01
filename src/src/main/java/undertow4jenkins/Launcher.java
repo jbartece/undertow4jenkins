@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.servlet.ServletException;
+import javax.xml.stream.XMLStreamException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +23,8 @@ import undertow4jenkins.loader.MimeLoader;
 import undertow4jenkins.loader.ServletLoader;
 import undertow4jenkins.option.OptionParser;
 import undertow4jenkins.option.Options;
+import undertow4jenkins.parser.WebXmlContent;
+import undertow4jenkins.parser.WebXmlParser;
 import undertow4jenkins.util.WarWorker;
 
 /**
@@ -36,7 +39,7 @@ public class Launcher {
 
     private ClassLoader jenkinsWarClassLoader;
 
-    private static final String pathToTmpDir = "/tmp/undertow4jenkins/extractedWar/";
+    private final String pathToTmpDir = "/tmp/undertow4jenkins/extractedWar/";
 
     /**
      * Field for usage, which can be overridden outside this class
@@ -56,6 +59,11 @@ public class Launcher {
             this.jenkinsWarClassLoader = WarWorker.createJarsClassloader(options.warfile,
                     pathToTmpDir);
 
+            WebXmlParser parser = new WebXmlParser();
+            WebXmlContent webXmlContent = parser.parse(pathToTmpDir + "WEB-INF/web.xml");
+            
+            log.debug(webXmlContent.toString());
+            
             startUndertow();
         } catch (ServletException e) {
             log.error("Start of embedded Undertow server failed!", e);
@@ -63,6 +71,8 @@ public class Launcher {
             log.error("War archive extraction failed!", e);
         } catch (ClassNotFoundException e) {
             log.error("Initiating servlet container failed!", e);
+        } catch (XMLStreamException e) {
+            log.error("Parsing web.xml failed!", e);
         }
 
     }
