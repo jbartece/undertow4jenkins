@@ -24,6 +24,7 @@ import undertow4jenkins.loader.ServletLoader;
 import undertow4jenkins.option.OptionParser;
 import undertow4jenkins.option.Options;
 import undertow4jenkins.parser.WebXmlContent;
+import undertow4jenkins.parser.WebXmlFormatException;
 import undertow4jenkins.parser.WebXmlParser;
 import undertow4jenkins.util.WarWorker;
 
@@ -72,6 +73,8 @@ public class Launcher {
         } catch (ClassNotFoundException e) {
             log.error("Initiating servlet container failed!", e);
         } catch (XMLStreamException e) {
+            log.error("Parsing web.xml failed!", e);
+        } catch( WebXmlFormatException e) {
             log.error("Parsing web.xml failed!", e);
         }
 
