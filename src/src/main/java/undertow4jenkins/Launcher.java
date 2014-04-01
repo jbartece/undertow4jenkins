@@ -87,6 +87,8 @@ public class Launcher {
 
     }
 
+    
+    
     // TODO use this information
     // <env-entry>
     // <env-entry-name>HUDSON_HOME</env-entry-name>
@@ -96,7 +98,9 @@ public class Launcher {
     private DeploymentInfo createServletContainerDeployment() throws ClassNotFoundException {
         DeploymentInfo servletContainerBuilder = deployment()
                 .setClassLoader(jenkinsWarClassLoader)
-                .setContextPath("/")
+                .setContextPath("")
+                .setMajorVersion(2)
+                .setMinorVersion(4)
                 .setDeploymentName("Jenkins CI")
                 .addListener(ListenerLoader
                         .createListener("hudson.WebAppMain", jenkinsWarClassLoader))
