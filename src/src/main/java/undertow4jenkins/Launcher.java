@@ -3,9 +3,11 @@ package undertow4jenkins;
 import static io.undertow.servlet.Servlets.defaultContainer;
 import static io.undertow.servlet.Servlets.deployment;
 import io.undertow.Undertow;
+import io.undertow.server.handlers.resource.FileResourceManager;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
 
+import java.io.File;
 import java.io.IOException;
 
 import javax.servlet.ServletException;
@@ -58,9 +60,9 @@ public class Launcher {
         } catch (ServletException e) {
             log.error("Start of embedded Undertow server failed!", e);
         } catch (IOException e) {
-            log.error("War archive extraction", e);
+            log.error("War archive extraction failed!", e);
         } catch (ClassNotFoundException e) {
-            log.error("Initiating servlet container", e);
+            log.error("Initiating servlet container failed!", e);
         }
 
     }
@@ -93,19 +95,22 @@ public class Launcher {
     // </env-entry>
     private DeploymentInfo createServletContainerDeployment() throws ClassNotFoundException {
         DeploymentInfo servletContainerBuilder = deployment()
-                .setClassLoader(Launcher.class.getClassLoader())
+                .setClassLoader(jenkinsWarClassLoader)
                 .setContextPath("/")
                 .setDeploymentName("Jenkins CI")
                 .addListener(ListenerLoader
                         .createListener("hudson.WebAppMain", jenkinsWarClassLoader))
                 .addServlets(ServletLoader.getServlets(jenkinsWarClassLoader))
                 .addErrorPage(ErrorPageLoader.createErrorPage())
-                .addMimeMappings(MimeLoader
-                        .createMimeMappings());
+                .addMimeMappings(MimeLoader.createMimeMappings());
 
         servletContainerBuilder.addFilters(FilterLoader.createFilters(jenkinsWarClassLoader));
         FilterLoader.addFilterMappings(servletContainerBuilder);
 
+        //Load static resources from extracted war archive
+        servletContainerBuilder.setResourceManager(
+                new FileResourceManager(new File(pathToTmpDir), 0L));
+        
         return servletContainerBuilder;
     }
 
