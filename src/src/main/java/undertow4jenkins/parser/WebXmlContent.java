@@ -121,7 +121,7 @@ public class WebXmlContent {
 
         public String extension;
 
-        public String mimeMapping;
+        public String mimeType;
     }
 
     public static class ErrorPage {
