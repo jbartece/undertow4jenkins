@@ -144,9 +144,9 @@ public class WebXmlParser {
                         else
                             return errorPage;
                     }
-                    
-                    //TODO throw exception because of unsupported parametr in web.xml
-                    
+
+                    // TODO throw exception because of unsupported parametr in web.xml
+
                 default:
                     break;
             }
@@ -718,8 +718,13 @@ public class WebXmlParser {
         return null; // Never happens. Method above always throws exception
     }
 
-    private String getWebAppVersion(XMLStreamReader xmlReader) {
-        return xmlReader.getAttributeValue(null, "version");
+    private String getWebAppVersion(XMLStreamReader xmlReader) throws WebXmlFormatException {
+        try {
+            return xmlReader.getAttributeValue(null, "version");
+        } catch (IllegalStateException e) {
+            throwMalformedWebXml("web-app");
+        }
+        return null;
     }
 
     private void throwMalformedWebXml(String entryType) throws WebXmlFormatException {
