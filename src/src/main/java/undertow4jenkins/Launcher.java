@@ -62,10 +62,12 @@ public class Launcher {
 
             WebXmlParser parser = new WebXmlParser();
             WebXmlContent webXmlContent = parser.parse(pathToTmpDir + "WEB-INF/web.xml");
-            
-            log.debug(webXmlContent.toString());
-            
-            startUndertow();
+
+            if(log.isDebugEnabled())
+                log.debug("Loaded content of web.xml:\n" + webXmlContent.toString());
+
+            Undertow undertowInstance = initUndertow(webXmlContent);
+            undertowInstance.start();
         } catch (ServletException e) {
             log.error("Start of embedded Undertow server failed!", e);
         } catch (IOException e) {
@@ -74,13 +76,14 @@ public class Launcher {
             log.error("Initiating servlet container failed!", e);
         } catch (XMLStreamException e) {
             log.error("Parsing web.xml failed!", e);
-        } catch( WebXmlFormatException e) {
+        } catch (WebXmlFormatException e) {
             log.error("Parsing web.xml failed!", e);
         }
 
     }
 
-    private void startUndertow() throws ServletException, ClassNotFoundException {
+    private Undertow initUndertow(WebXmlContent webXmlContent) throws ServletException,
+            ClassNotFoundException {
 
         DeploymentManager manager = defaultContainer().addDeployment(
                 createServletContainerDeployment());
@@ -92,8 +95,7 @@ public class Launcher {
                 .setHandler(manager.start())
                 .setWorkerThreads(options.handlerCountMax) // TODO
                 .build();
-        server.start();
-
+        return server;
     }
 
     private DeploymentInfo createServletContainerDeployment() throws ClassNotFoundException {

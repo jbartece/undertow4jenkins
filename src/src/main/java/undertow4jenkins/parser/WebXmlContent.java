@@ -40,6 +40,12 @@ public class WebXmlContent {
         public String servletClass;
 
         public List<InitParam> initParams = new ArrayList<InitParam>();
+
+        @Override
+        public String toString() {
+            return "Servlet [servletName=" + servletName + ", servletClass=" + servletClass
+                    + ", initParams=" + initParams + "]";
+        }
     }
 
     public static class InitParam {
@@ -47,6 +53,11 @@ public class WebXmlContent {
         public String paramName;
 
         public String paramValue;
+
+        @Override
+        public String toString() {
+            return "InitParam [paramName=" + paramName + ", paramValue=" + paramValue + "]";
+        }
     }
 
     public static class ServletMapping {
@@ -54,6 +65,12 @@ public class WebXmlContent {
         public String servletName;
 
         public String urlPattern;
+
+        @Override
+        public String toString() {
+            return "ServletMapping [servletName=" + servletName + ", urlPattern=" + urlPattern
+                    + "]";
+        }
     }
 
     public static class Filter {
@@ -61,6 +78,11 @@ public class WebXmlContent {
         public String filterName;
 
         public String filterClass;
+
+        @Override
+        public String toString() {
+            return "Filter [filterName=" + filterName + ", filterClass=" + filterClass + "]";
+        }
     }
 
     public static class FilterMapping {
@@ -68,16 +90,31 @@ public class WebXmlContent {
         public String filterName;
 
         public String urlPattern;
+
+        @Override
+        public String toString() {
+            return "FilterMapping [filterName=" + filterName + ", urlPattern=" + urlPattern + "]";
+        }
     }
 
     public static class Listener {
 
         public String listenerClass;
+
+        @Override
+        public String toString() {
+            return "Listener [listenerClass=" + listenerClass + "]";
+        }
     }
 
     public static class SecurityRole {
 
         public String roleName;
+
+        @Override
+        public String toString() {
+            return "SecurityRole [roleName=" + roleName + "]";
+        }
     }
 
     public static class SecurityConstraint {
@@ -85,6 +122,12 @@ public class WebXmlContent {
         public WebResourceCollection webResourceCollection;
 
         public AuthConstraint authConstraint;
+
+        @Override
+        public String toString() {
+            return "SecurityConstraint [webResourceCollection=" + webResourceCollection
+                    + ", authConstraint=" + authConstraint + "]";
+        }
     }
 
     public static class WebResourceCollection {
@@ -92,11 +135,22 @@ public class WebXmlContent {
         public String webResourceName;
 
         public String urlPattern;
+
+        @Override
+        public String toString() {
+            return "WebResourceCollection [webResourceName=" + webResourceName + ", urlPattern="
+                    + urlPattern + "]";
+        }
     }
 
     public static class AuthConstraint {
 
         public String roleName;
+
+        @Override
+        public String toString() {
+            return "AuthConstraint [roleName=" + roleName + "]";
+        }
     }
 
     public static class LoginConfig {
@@ -106,6 +160,12 @@ public class WebXmlContent {
         public String formLoginPage;
 
         public String formErrorPage;
+
+        @Override
+        public String toString() {
+            return "LoginConfig [authMethod=" + authMethod + ", formLoginPage=" + formLoginPage
+                    + ", formErrorPage=" + formErrorPage + "]";
+        }
     }
 
     public static class EnvEntry {
@@ -115,6 +175,12 @@ public class WebXmlContent {
         public String entryType;
 
         public String entryValue;
+
+        @Override
+        public String toString() {
+            return "EnvEntry [entryName=" + entryName + ", entryType=" + entryType
+                    + ", entryValue=" + entryValue + "]";
+        }
     }
 
     public static class MimeMapping {
@@ -122,6 +188,11 @@ public class WebXmlContent {
         public String extension;
 
         public String mimeType;
+
+        @Override
+        public String toString() {
+            return "MimeMapping [extension=" + extension + ", mimeType=" + mimeType + "]";
+        }
     }
 
     public static class ErrorPage {
@@ -129,6 +200,11 @@ public class WebXmlContent {
         public String exceptionType;
 
         public String location;
+
+        @Override
+        public String toString() {
+            return "ErrorPage [exceptionType=" + exceptionType + ", location=" + location + "]";
+        }
     }
 
     @Override
