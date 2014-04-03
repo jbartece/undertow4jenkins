@@ -1,13 +1,7 @@
 package undertow4jenkins;
 
-import static io.undertow.servlet.Servlets.defaultContainer;
-import static io.undertow.servlet.Servlets.deployment;
 import io.undertow.Undertow;
-import io.undertow.server.handlers.resource.FileResourceManager;
-import io.undertow.servlet.api.DeploymentInfo;
-import io.undertow.servlet.api.DeploymentManager;
 
-import java.io.File;
 import java.io.IOException;
 
 import javax.servlet.ServletException;
@@ -16,11 +10,6 @@ import javax.xml.stream.XMLStreamException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import undertow4jenkins.loader.ErrorPageLoader;
-import undertow4jenkins.loader.FilterLoader;
-import undertow4jenkins.loader.ListenerLoader;
-import undertow4jenkins.loader.MimeLoader;
-import undertow4jenkins.loader.ServletLoader;
 import undertow4jenkins.option.OptionParser;
 import undertow4jenkins.option.Options;
 import undertow4jenkins.parser.WebXmlContent;
@@ -63,10 +52,11 @@ public class Launcher {
             WebXmlParser parser = new WebXmlParser();
             WebXmlContent webXmlContent = parser.parse(pathToTmpDir + "WEB-INF/web.xml");
 
-            if(log.isDebugEnabled())
+            if (log.isDebugEnabled())
                 log.debug("Loaded content of web.xml:\n" + webXmlContent.toString());
 
-            Undertow undertowInstance = initUndertow(webXmlContent);
+            UndertowInitiator undertowInitiator= new UndertowInitiator(jenkinsWarClassLoader, options, pathToTmpDir);
+            Undertow undertowInstance = undertowInitiator.initUndertow(webXmlContent);
             undertowInstance.start();
         } catch (ServletException e) {
             log.error("Start of embedded Undertow server failed!", e);
@@ -80,45 +70,6 @@ public class Launcher {
             log.error("Parsing web.xml failed!", e);
         }
 
-    }
-
-    private Undertow initUndertow(WebXmlContent webXmlContent) throws ServletException,
-            ClassNotFoundException {
-
-        DeploymentManager manager = defaultContainer().addDeployment(
-                createServletContainerDeployment());
-        manager.deploy();
-
-        Undertow server = Undertow.builder()
-                .addHttpListener(options.httpPort, "localhost")
-                // .addAjpListener(options.ajp13Port, options.ajp13ListenAdress)
-                .setHandler(manager.start())
-                .setWorkerThreads(options.handlerCountMax) // TODO
-                .build();
-        return server;
-    }
-
-    private DeploymentInfo createServletContainerDeployment() throws ClassNotFoundException {
-        DeploymentInfo servletContainerBuilder = deployment()
-                .setClassLoader(jenkinsWarClassLoader)
-                .setContextPath("")
-                .setMajorVersion(2)
-                .setMinorVersion(4)
-                .setDeploymentName("Jenkins CI")
-                .addListener(
-                        ListenerLoader.createListener("hudson.WebAppMain", jenkinsWarClassLoader))
-                .addServlets(ServletLoader.createServlets(jenkinsWarClassLoader))
-                .addErrorPage(ErrorPageLoader.createErrorPage())
-                .addFilters(FilterLoader.createFilters(jenkinsWarClassLoader))
-                .addMimeMappings(MimeLoader.createMimeMappings());
-
-        FilterLoader.addFilterMappings(servletContainerBuilder);
-
-        // Load static resources from extracted war archive
-        servletContainerBuilder.setResourceManager(
-                new FileResourceManager(new File(pathToTmpDir), 0L));
-
-        return servletContainerBuilder;
     }
 
     /**
