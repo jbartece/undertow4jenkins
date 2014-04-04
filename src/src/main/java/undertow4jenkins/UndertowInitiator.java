@@ -18,6 +18,7 @@ import undertow4jenkins.loader.ErrorPageLoader;
 import undertow4jenkins.loader.FilterLoader;
 import undertow4jenkins.loader.ListenerLoader;
 import undertow4jenkins.loader.MimeLoader;
+import undertow4jenkins.loader.SecurityLoader;
 import undertow4jenkins.loader.ServletLoader;
 import undertow4jenkins.option.Options;
 import undertow4jenkins.parser.WebXmlContent;
@@ -61,9 +62,15 @@ public class UndertowInitiator {
                 .setContextPath("")
                 .setDeploymentName(options.warfile)
                 .addListeners(ListenerLoader.createListener(webXmlContent.listeners, classLoader))
-                .addServlets(ServletLoader.createServlets(webXmlContent.servlets, webXmlContent.servletsMapping, classLoader))
-                .addErrorPages(ErrorPageLoader.createErrorPage(webXmlContent.errorPages))
+                .addServlets(
+                        ServletLoader.createServlets(webXmlContent.servlets,
+                                webXmlContent.servletsMapping, classLoader))
                 .addFilters(FilterLoader.createFilters(webXmlContent.filters, classLoader))
+                .addSecurityRoles(SecurityLoader.createSecurityRoles(webXmlContent.securityRoles))
+                .addSecurityConstraints(
+                        SecurityLoader.createSecurityConstraints(webXmlContent.securityConstraints))
+                .setLoginConfig(SecurityLoader.createLoginConfig(webXmlContent.loginConfig))
+                .addErrorPages(ErrorPageLoader.createErrorPage(webXmlContent.errorPages))
                 .addMimeMappings(MimeLoader.createMimeMappings(webXmlContent.mimeMappings));
 
         FilterLoader.addFilterMappings(webXmlContent.filterMappings, servletContainerBuilder);
@@ -74,13 +81,14 @@ public class UndertowInitiator {
         servletContainerBuilder.setResourceManager(
                 new FileResourceManager(new File(pathToTmpDir), 0L));
 
+        //TODO solve env-entry
+        
         return servletContainerBuilder;
     }
 
     private void setDisplayName(String displayName, DeploymentInfo servletContainerBuilder) {
         if (displayName != null)
             servletContainerBuilder.setDisplayName(displayName);
-
     }
 
     private void setServletAppVersion(String version, DeploymentInfo servletContainerBuilder) {

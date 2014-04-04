@@ -52,8 +52,8 @@ public class Launcher {
             WebXmlParser parser = new WebXmlParser();
             WebXmlContent webXmlContent = parser.parse(pathToTmpDir + "WEB-INF/web.xml");
 
-            if (log.isDebugEnabled())
-                log.debug("Loaded content of web.xml:\n" + webXmlContent.toString());
+            // if (log.isDebugEnabled())
+            // log.debug("Loaded content of web.xml:\n" + webXmlContent.toString());
 
             UndertowInitiator undertowInitiator = new UndertowInitiator(jenkinsWarClassLoader,
                     options, pathToTmpDir);

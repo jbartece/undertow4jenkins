@@ -109,15 +109,11 @@ public class WebXmlContent {
 
     public static class SecurityConstraint {
 
+        // TODO should be list
         public WebResourceCollection webResourceCollection;
 
-        public AuthConstraint authConstraint;
+        public List<String> rolesAllowed;
 
-        @Override
-        public String toString() {
-            return "SecurityConstraint [webResourceCollection=" + webResourceCollection
-                    + ", authConstraint=" + authConstraint + "]";
-        }
     }
 
     public static class WebResourceCollection {
@@ -130,16 +126,6 @@ public class WebXmlContent {
         public String toString() {
             return "WebResourceCollection [webResourceName=" + webResourceName + ", urlPattern="
                     + urlPattern + "]";
-        }
-    }
-
-    public static class AuthConstraint {
-
-        public String roleName;
-
-        @Override
-        public String toString() {
-            return "AuthConstraint [roleName=" + roleName + "]";
         }
     }
 

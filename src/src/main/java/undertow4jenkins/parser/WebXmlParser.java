@@ -2,13 +2,14 @@ package undertow4jenkins.parser;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
-import undertow4jenkins.parser.WebXmlContent.AuthConstraint;
 import undertow4jenkins.parser.WebXmlContent.EnvEntry;
 import undertow4jenkins.parser.WebXmlContent.ErrorPage;
 import undertow4jenkins.parser.WebXmlContent.Filter;
@@ -327,10 +328,10 @@ public class WebXmlParser {
         String tagContent = null;
         String tagName;
 
-        // TODO change inner classes to collections
+        // TODO change WebResourceCollection to collection
         SecurityConstraint securityConstraint = new SecurityConstraint();
         WebResourceCollection webResourceCollection = null;
-        AuthConstraint authConstraint = null;
+        List<String> authConstraint = null;
 
         while (xmlReader.hasNext()) {
             switch (xmlReader.next()) {
@@ -339,7 +340,7 @@ public class WebXmlParser {
                         webResourceCollection = new WebResourceCollection();
 
                     if (xmlReader.getLocalName().equals("auth-constraint"))
-                        authConstraint = new AuthConstraint();
+                        authConstraint = new ArrayList<String>(3);
                     break;
 
                 case XMLStreamConstants.CHARACTERS:
@@ -376,13 +377,13 @@ public class WebXmlParser {
 
                     if (tagName.equals("auth-constraint")) {
                         if (authConstraint != null)
-                            securityConstraint.authConstraint = authConstraint;
+                            securityConstraint.rolesAllowed = authConstraint;
                         continue;
                     }
 
                     if (tagName.equals("role-name")) {
                         if (authConstraint != null)
-                            authConstraint.roleName = tagContent;
+                            authConstraint.add(tagContent);
                         else
                             throwMalformedWebXml("security-constraint");
                         continue;
