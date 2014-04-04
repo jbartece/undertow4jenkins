@@ -21,7 +21,7 @@ public class WebXmlContent {
 
     public List<Listener> listeners = new ArrayList<Listener>();
 
-    public List<SecurityRole> securityRoles = new ArrayList<SecurityRole>();
+    public List<String> securityRoles = new ArrayList<String>();
 
     public List<SecurityConstraint> securityConstraints = new ArrayList<SecurityConstraint>();
 
@@ -104,16 +104,6 @@ public class WebXmlContent {
         @Override
         public String toString() {
             return "Listener [listenerClass=" + listenerClass + "]";
-        }
-    }
-
-    public static class SecurityRole {
-
-        public String roleName;
-
-        @Override
-        public String toString() {
-            return "SecurityRole [roleName=" + roleName + "]";
         }
     }
 

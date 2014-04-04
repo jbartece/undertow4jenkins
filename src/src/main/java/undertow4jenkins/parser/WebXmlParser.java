@@ -18,7 +18,6 @@ import undertow4jenkins.parser.WebXmlContent.Listener;
 import undertow4jenkins.parser.WebXmlContent.LoginConfig;
 import undertow4jenkins.parser.WebXmlContent.MimeMapping;
 import undertow4jenkins.parser.WebXmlContent.SecurityConstraint;
-import undertow4jenkins.parser.WebXmlContent.SecurityRole;
 import undertow4jenkins.parser.WebXmlContent.Servlet;
 import undertow4jenkins.parser.WebXmlContent.ServletMapping;
 import undertow4jenkins.parser.WebXmlContent.WebResourceCollection;
@@ -410,13 +409,13 @@ public class WebXmlParser {
     // <security-role>
     // <role-name>admin</role-name>
     // </security-role>
-    private SecurityRole loadSecurityRole(XMLStreamReader xmlReader) throws WebXmlFormatException,
+    private String loadSecurityRole(XMLStreamReader xmlReader) throws WebXmlFormatException,
             XMLStreamException {
         String tagContent = null;
         String tagName;
 
-        SecurityRole securityRole = new SecurityRole();
-
+        String roleName = null;
+        
         while (xmlReader.hasNext()) {
             switch (xmlReader.next()) {
                 case XMLStreamConstants.CHARACTERS:
@@ -427,15 +426,15 @@ public class WebXmlParser {
                     tagName = xmlReader.getLocalName();
 
                     if (tagName.equals("role-name")) {
-                        securityRole.roleName = tagContent;
+                        roleName = tagContent;
                         continue;
                     }
 
                     if (tagName.equals("security-role")) {
-                        if (securityRole.roleName == null)
+                        if (roleName == null)
                             throwExceptionNotSpecifiedParameter("Security-role", "role-name");
                         else
-                            return securityRole;
+                            return roleName;
                     }
                     break;
 
