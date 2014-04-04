@@ -11,27 +11,27 @@ public class WebXmlContent {
 
     public String description;
 
-    public List<Servlet> servlets = new ArrayList<Servlet>();
+    public List<Servlet> servlets = new ArrayList<Servlet>(3);
 
-    public List<ServletMapping> servletsMapping = new ArrayList<ServletMapping>();
+    public List<ServletMapping> servletsMapping = new ArrayList<ServletMapping>(3);
 
     public List<Filter> filters = new ArrayList<Filter>();
 
     public List<FilterMapping> filterMappings = new ArrayList<FilterMapping>();
 
-    public List<Listener> listeners = new ArrayList<Listener>();
+    public List<Listener> listeners = new ArrayList<Listener>(3);
 
-    public List<String> securityRoles = new ArrayList<String>();
+    public List<String> securityRoles = new ArrayList<String>(7);
 
-    public List<SecurityConstraint> securityConstraints = new ArrayList<SecurityConstraint>();
+    public List<SecurityConstraint> securityConstraints = new ArrayList<SecurityConstraint>(3);
 
     public LoginConfig loginConfig;
 
-    public List<EnvEntry> envEntries = new ArrayList<EnvEntry>();
+    public List<EnvEntry> envEntries = new ArrayList<EnvEntry>(5);
 
     public List<MimeMapping> mimeMappings = new ArrayList<MimeMapping>();
 
-    public List<ErrorPage> errorPages = new ArrayList<ErrorPage>();
+    public List<ErrorPage> errorPages = new ArrayList<ErrorPage>(3);
 
     public static class Servlet {
 
