@@ -7,22 +7,14 @@ import java.util.List;
 
 public class MimeLoader {
 
-    // <mime-mapping>
-    // <extension>xml</extension>
-    // <mime-type>application/xml</mime-type>
-    // </mime-mapping>
-    private static String[][] mappingConfig = { { "xml", "application/xml" },
-            { "log", "text/plain" }, { "war", "application/octet-stream" },
-            { "ear", "application/octet-stream" }, { "rar", "application/octet-stream" },
-            { "webm", "video/webm" } };
+    public static List<MimeMapping> createMimeMappings(
+            List<undertow4jenkins.parser.WebXmlContent.MimeMapping> mappingsDataCol) {
+        List<MimeMapping> mappingList = new ArrayList<MimeMapping>();
 
-    public static List<MimeMapping> createMimeMappings() {
-        List<MimeMapping> mappingList = new ArrayList<MimeMapping>(); 
-        
-        for(String[] arr : mappingConfig)  {
-            mappingList.add(new MimeMapping(arr[0], arr[1]));
+        for (undertow4jenkins.parser.WebXmlContent.MimeMapping mappingData : mappingsDataCol) {
+            mappingList.add(new MimeMapping(mappingData.extension, mappingData.mimeType));
         }
-        
+
         return mappingList;
     }
 

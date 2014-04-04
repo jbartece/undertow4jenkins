@@ -55,7 +55,8 @@ public class Launcher {
             if (log.isDebugEnabled())
                 log.debug("Loaded content of web.xml:\n" + webXmlContent.toString());
 
-            UndertowInitiator undertowInitiator= new UndertowInitiator(jenkinsWarClassLoader, options, pathToTmpDir);
+            UndertowInitiator undertowInitiator = new UndertowInitiator(jenkinsWarClassLoader,
+                    options, pathToTmpDir);
             Undertow undertowInstance = undertowInitiator.initUndertow(webXmlContent);
             undertowInstance.start();
         } catch (ServletException e) {
@@ -69,7 +70,7 @@ public class Launcher {
         } catch (WebXmlFormatException e) {
             log.error("Parsing web.xml failed!", e);
         }
-
+        // ClassCastException and RuntimeException also should be catched
     }
 
     /**

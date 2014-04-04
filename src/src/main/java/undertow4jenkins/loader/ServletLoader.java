@@ -6,34 +6,52 @@ import io.undertow.servlet.api.ServletInfo;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.Servlet;
+import undertow4jenkins.parser.WebXmlContent.InitParam;
+import undertow4jenkins.parser.WebXmlContent.Servlet;
+import undertow4jenkins.parser.WebXmlContent.ServletMapping;
 
 public class ServletLoader {
 
-    private static String[] servletClasses = { "org.kohsuke.stapler.Stapler" };
-
-    public static List<ServletInfo> createServlets(ClassLoader classLoader)
+    public static List<ServletInfo> createServlets(List<Servlet> servletDataCol,
+            List<ServletMapping> mappingDataCol, ClassLoader classLoader)
             throws ClassNotFoundException {
-        List<ServletInfo> servlets = new ArrayList<ServletInfo>();
+        List<ServletInfo> servlets = new ArrayList<ServletInfo>(3);
 
-        for (String servletStr : servletClasses) {
-            Class<? extends Servlet> servletClass = loadServletClass(servletStr, classLoader);
-            servlets.add(createServletInfo(servletClass));
+        for (Servlet servletData : servletDataCol) {
+            Class<? extends javax.servlet.Servlet> servletClass = loadServletClass(
+                    servletData.servletClass, classLoader);
+            servlets.add(createServletInfo(servletClass, servletData, mappingDataCol));
         }
 
         return servlets;
     }
 
-    private static ServletInfo createServletInfo(Class<? extends Servlet> clazzServlet) {
-        return servlet("Stapler", clazzServlet)
-                .addInitParam("default-encodings", "text/html=UTF-8")
-                .addMapping("/*");
+    private static ServletInfo createServletInfo(
+            Class<? extends javax.servlet.Servlet> servletClass,
+            Servlet servletData, List<ServletMapping> mappingData) {
+        String mapping = null;
+
+        for (ServletMapping servletMapping : mappingData) {
+            if (servletData.servletName.equals(servletMapping.servletName))
+                mapping = servletMapping.urlPattern;
+        }
+
+        if (mapping == null)
+            throw new RuntimeException("Servlet has to have specified servlet-mapping entry!");
+
+        ServletInfo servlet = servlet(servletData.servletName, servletClass)
+                .addMapping(mapping);
+
+        for(InitParam param : servletData.initParams) 
+            servlet.addInitParam(param.paramName, param.paramValue); 
+        
+        return servlet;
     }
 
-    private static Class<? extends Servlet> loadServletClass(String servletClassName,
+    private static Class<? extends javax.servlet.Servlet> loadServletClass(String servletClassName,
             ClassLoader classLoader) throws ClassNotFoundException {
         Class<?> clazz = Class.forName(servletClassName, true, classLoader);
-        return clazz.asSubclass(Servlet.class);
+        return clazz.asSubclass(javax.servlet.Servlet.class);
     }
 
 }

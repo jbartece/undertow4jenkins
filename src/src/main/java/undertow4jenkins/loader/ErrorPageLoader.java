@@ -1,17 +1,25 @@
 package undertow4jenkins.loader;
 
-import io.undertow.servlet.api.ErrorPage;
+import undertow4jenkins.parser.WebXmlContent.ErrorPage;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ErrorPageLoader {
 
-    public static ErrorPage createErrorPage() throws ClassNotFoundException {
-        String location = "/oops";
-        String exceptionType = "java.lang.Throwable";
+    public static List<io.undertow.servlet.api.ErrorPage> createErrorPage(
+            List<ErrorPage> data) throws ClassNotFoundException {
+        List<io.undertow.servlet.api.ErrorPage> errorPages =
+                new ArrayList<io.undertow.servlet.api.ErrorPage>(3);
 
-        Class<? extends Throwable> errorPageClass = Class.forName(exceptionType).asSubclass(
-                Throwable.class);
+        for (ErrorPage singleData : data) {
+            Class<? extends Throwable> errorPageClass =
+                    Class.forName(singleData.exceptionType).asSubclass(Throwable.class);
+            errorPages.add(
+                    new io.undertow.servlet.api.ErrorPage(singleData.location, errorPageClass));
+        }
 
-        return new ErrorPage(location, errorPageClass);
+        return errorPages;
     }
 
 }

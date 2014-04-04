@@ -59,16 +59,16 @@ public class UndertowInitiator {
         DeploymentInfo servletContainerBuilder = deployment()
                 .setClassLoader(classLoader)
                 .setContextPath("")
-                .setDeploymentName("Jenkins CI")
-                .addListener(
-                        ListenerLoader.createListener("hudson.WebAppMain", classLoader))
-                .addServlets(ServletLoader.createServlets(classLoader))
-                .addErrorPage(ErrorPageLoader.createErrorPage())
-                .addFilters(FilterLoader.createFilters(classLoader))
-                .addMimeMappings(MimeLoader.createMimeMappings());
+                .setDeploymentName(options.warfile)
+                .addListeners(ListenerLoader.createListener(webXmlContent.listeners, classLoader))
+                .addServlets(ServletLoader.createServlets(webXmlContent.servlets, webXmlContent.servletsMapping, classLoader))
+                .addErrorPages(ErrorPageLoader.createErrorPage(webXmlContent.errorPages))
+                .addFilters(FilterLoader.createFilters(webXmlContent.filters, classLoader))
+                .addMimeMappings(MimeLoader.createMimeMappings(webXmlContent.mimeMappings));
 
-        FilterLoader.addFilterMappings(servletContainerBuilder);
-        setServletAppVersion(servletContainerBuilder, webXmlContent.webAppVersion);
+        FilterLoader.addFilterMappings(webXmlContent.filterMappings, servletContainerBuilder);
+        setServletAppVersion(webXmlContent.webAppVersion, servletContainerBuilder);
+        setDisplayName(webXmlContent.displayName, servletContainerBuilder);
 
         // Load static resources from extracted war archive
         servletContainerBuilder.setResourceManager(
@@ -77,7 +77,13 @@ public class UndertowInitiator {
         return servletContainerBuilder;
     }
 
-    private void setServletAppVersion(DeploymentInfo servletContainerBuilder, String version) {
+    private void setDisplayName(String displayName, DeploymentInfo servletContainerBuilder) {
+        if (displayName != null)
+            servletContainerBuilder.setDisplayName(displayName);
+
+    }
+
+    private void setServletAppVersion(String version, DeploymentInfo servletContainerBuilder) {
         if (version == null)
             return;
 
