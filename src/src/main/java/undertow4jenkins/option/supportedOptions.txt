@@ -35,12 +35,8 @@ This options have to be supported
 "   --handlerCountMaxIdle    = set the max no of idle worker threads to allow. Default is 5\n" +
 "   \n" +
 "   --sessionTimeout         = set the http session timeout value in minutes. Default to what webapp specifies, and then to 60 minutes\n"+
-"   --mimeTypes=ARG          = define additional MIME type mappings. ARG would be EXT=MIMETYPE:EXT=MIMETYPE:...\n" +
-"                              (e.g., xls=application/vnd.ms-excel:wmf=application/x-msmetafile)\n" +
 "   --maxParamCount=N        = set the max number of parameters allowed in a form submission to protect\n" +
 "                              against hash DoS attack (oCERT #2011-003). Default is 10000.\n" +
-"   --usage / --help         = show this message\n" +
-"   --version                = show the version and quit\n" +
 "   \n" +
 "Security options:\n" +
 "   --realmClassName               = Set the realm class to use for user authentication. Defaults to ArgumentsRealm class\n" +
@@ -54,3 +50,12 @@ This options have to be supported
 "   --accessLoggerClassName        = Set the access logger class to use for user authentication. Defaults to disabled\n" +
 "   --simpleAccessLogger.format    = The log format to use. Supports combined/common/resin/custom (SimpleAccessLogger only)\n" +
 "   --simpleAccessLogger.file      = The location pattern for the log file(SimpleAccessLogger only)");
+
+
+
+
+Solved options: 
+"   --usage / --help         = show this message\n" +
+"   --version                = show the version and quit\n" +   // solved in Extras and also in Launcher
+"   --mimeTypes=ARG          = define additional MIME type mappings. ARG would be EXT=MIMETYPE:EXT=MIMETYPE:...\n" +
+"                              (e.g., xls=application/vnd.ms-excel:wmf=application/x-msmetafile)\n" +
