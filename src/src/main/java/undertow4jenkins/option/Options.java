@@ -36,17 +36,19 @@ public class Options {
     public Boolean spdy;
     public Integer ajp13Port;
     public String ajp13ListenAdress;
-    public Boolean controlPort;
+    public Integer controlPort;
 
     //
     public Integer handlerCountStartup;
     public Integer handlerCountMax;
     public Integer handlerCountMaxIdle;
-    public Integer sessionTimeout;
-    public String mimeTypes;
-
+    
     //
+    public Integer sessionTimeout;
+    public String mimeTypes; 
     public String maxParamCount;
+    
+    //
     public Boolean usage;
     public Boolean help;
     public Boolean version;

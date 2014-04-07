@@ -23,8 +23,6 @@ This options have to be supported
 "                              (the one that starts with '-----BEGIN RSA PRIVATE KEY-----')\n" +
 "   --httpsKeyManagerType    = the SSL KeyManagerFactory type (eg SunX509, IbmX509). Default is SunX509\n" +
 "   --spdy                   = Enable SPDY. See http://wiki.eclipse.org/Jetty/Feature/NPN\n" +
-"   --ajp13Port              = set the ajp13 listening port. -1 to disable, Default is disabled\n" +
-"   --ajp13ListenAddress     = set the ajp13 listening address. Default is all interfaces\n" +
 "   --controlPort            = set the shutdown/control port. -1 to disable, Default disabled\n" +
 "   \n" +
 "   --handlerCountStartup    = set the no of worker threads to spawn at startup. Default is 5\n" +
@@ -59,6 +57,10 @@ Solved options:
 
 "   --httpPort               = set the http listening port. -1 to disable, Default is 8080\n" +
 "   --httpListenAddress      = set the http listening address. Default is all interfaces\n" +
+
+"   --ajp13Port              = set the ajp13 listening port. -1 to disable, Default is disabled\n" +
+"   --ajp13ListenAddress     = set the ajp13 listening address. Default is all interfaces\n" +
+
 
 ##############################################################################################################################
 Options not used in Winstone 2.0:

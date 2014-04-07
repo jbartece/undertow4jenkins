@@ -79,15 +79,13 @@ public class UndertowInitiator {
                 log.warn("Unallowed httpPort value. Http listener is disabled!");
             }
             else {
-                log.info("HttpPort: " + options.httpPort + ", HttpListenAdress: "
-                        + options.httpListenAdress);
-
                 if (options.httpListenAdress != null)
                     serverBuilder.addHttpListener(options.httpPort, options.httpListenAdress);
                 else {
                     // Listen on all interfaces
                     serverBuilder.addHttpListener(options.httpPort, hostAllInterfacesString);
                 }
+                log.debug("Created HTTP listener");
             }
         }
     }
@@ -111,16 +109,35 @@ public class UndertowInitiator {
 
     }
 
-    // "   --ajp13Port              = set the ajp13 listening port. -1 to disable, Default is disabled\n" +
-    // "   --ajp13ListenAddress     = set the ajp13 listening address. Default is all interfaces\n" +
+    /**
+     * Creates AJP listener based on values from options.ajpPort, options.ajpListenAdress.
+     * 
+     * @param serverBuilder Prepared Undertow instance to which listener will be added
+     */
     private void setAjpListener(Builder serverBuilder) {
-        // TODO Auto-generated method stub
-
+        if(options.ajp13Port == null || options.ajp13Port == -1) 
+            return;
+        
+        if(options.ajp13Port < -1) {
+            log.warn("Unallowed ajpPort value. Ajp listener is disabled!");
+        }
+        else {
+            if(options.ajp13ListenAdress != null)
+                serverBuilder.addAjpListener(options.ajp13Port, options.ajp13ListenAdress);
+            else {
+                //Listen on all interfaces
+                serverBuilder.addAjpListener(options.ajp13Port, hostAllInterfacesString);
+            }
+            
+            log.debug("Created AJP listener");
+        }
     }
 
     // "   --controlPort            = set the shutdown/control port. -1 to disable, Default disabled\n" +
     private void createControlPort(Builder serverBuilder) {
-        // TODO Auto-generated method stub
+        if(options.controlPort == null || options.controlPort == -1)
+            return;
+        //TODO
 
     }
 
