@@ -105,7 +105,8 @@ public class UndertowInitiator {
     // "                              (the one that starts with '-----BEGIN RSA PRIVATE KEY-----')\n" +
     // "   --httpsKeyManagerType    = the SSL KeyManagerFactory type (eg SunX509, IbmX509). Default is SunX509\n" +
     private void setHttpsListener(Builder serverBuilder) {
-        // TODO Auto-generated method stub
+        if(options.httpsPort == -1)
+            return;
 
     }
 
@@ -115,7 +116,7 @@ public class UndertowInitiator {
      * @param serverBuilder Prepared Undertow instance to which listener will be added
      */
     private void setAjpListener(Builder serverBuilder) {
-        if(options.ajp13Port == null || options.ajp13Port == -1) 
+        if(options.ajp13Port == -1) 
             return;
         
         if(options.ajp13Port < -1) {
@@ -135,7 +136,7 @@ public class UndertowInitiator {
 
     // "   --controlPort            = set the shutdown/control port. -1 to disable, Default disabled\n" +
     private void createControlPort(Builder serverBuilder) {
-        if(options.controlPort == null || options.controlPort == -1)
+        if(options.controlPort == -1)
             return;
         //TODO
 
