@@ -3,6 +3,7 @@ package undertow4jenkins;
 import static io.undertow.servlet.Servlets.defaultContainer;
 import static io.undertow.servlet.Servlets.deployment;
 import io.undertow.Undertow;
+import io.undertow.Undertow.Builder;
 import io.undertow.server.handlers.resource.FileResourceManager;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
@@ -33,6 +34,11 @@ public class UndertowInitiator {
 
     private String pathToTmpDir;
 
+    /**
+     * IP adress, which should be set to bind listener in Undertow to listen on all interfaces
+     */
+    private final String hostAllInterfacesString = "0.0.0.0";
+
     public UndertowInitiator(ClassLoader classLoader, Options options, String pathToTmpDir) {
         this.classLoader = classLoader;
         this.options = options;
@@ -46,13 +52,76 @@ public class UndertowInitiator {
                 createServletContainerDeployment(webXmlContent));
         manager.deploy();
 
-        Undertow server = Undertow.builder()
-                .addHttpListener(options.httpPort, "localhost")
-                // .addAjpListener(options.ajp13Port, options.ajp13ListenAdress)
+        Undertow.Builder serverBuilder = Undertow.builder()
                 .setHandler(manager.start())
-                .setWorkerThreads(options.handlerCountMax) // TODO
-                .build();
-        return server;
+                .setWorkerThreads(options.handlerCountMax); // TODO
+
+        setHttpListener(serverBuilder);
+        setHttpsListener(serverBuilder);
+        setAjpListener(serverBuilder);
+        createControlPort(serverBuilder);
+
+        return serverBuilder.build();
+    }
+
+    // "   --httpKeepAliveTimeout   = how long idle HTTP keep-alive connections are kept around (in ms; default 5000)?\n" +
+    /**
+     * Creates HTTP listener based on values from options.httpPort, options.httpListenAdress.
+     * 
+     * @param serverBuilder Prepared Undertow instance to which listener will be added
+     */
+    private void setHttpListener(Builder serverBuilder) {
+        if (options.httpPort == -1) {
+            log.info("Http listener is disabled.");
+        }
+        else {
+            if (options.httpPort < -1) {
+                log.warn("Unallowed httpPort value. Http listener is disabled!");
+            }
+            else {
+                log.info("HttpPort: " + options.httpPort + ", HttpListenAdress: "
+                        + options.httpListenAdress);
+
+                if (options.httpListenAdress != null)
+                    serverBuilder.addHttpListener(options.httpPort, options.httpListenAdress);
+                else {
+                    // Listen on all interfaces
+                    serverBuilder.addHttpListener(options.httpPort, hostAllInterfacesString);
+                }
+            }
+        }
+    }
+
+    // "   --httpsPort              = set the https listening port. -1 to disable, Default is disabled\n" +
+    // "                              if neither --httpsCertificate nor --httpsKeyStore are specified,\n" +
+    // "                              https is run with one-time self-signed certificate.\n" +
+    // "   --httpsListenAddress     = set the https listening address. Default is all interfaces\n" +
+    // "   --httpsDoHostnameLookups = enable host name lookups on incoming https connections (true/false). Default is false\n" +
+    // "   --httpsKeepAliveTimeout   = how long idle HTTPS keep-alive connections are kept around (in ms; default 5000)?\n" +
+    // "   --httpsKeyStore          = the location of the SSL KeyStore file.\n" +
+    // "   --httpsKeyStorePassword  = the password for the SSL KeyStore file. Default is null\n" +
+    // "   --httpsCertificate       = the location of the PEM-encoded SSL certificate file.\n" +
+    // "                              (the one that starts with '-----BEGIN CERTIFICATE-----')\n" +
+    // "                              must be used with --httpsPrivateKey.\n" +
+    // "   --httpsPrivateKey        = the location of the PEM-encoded SSL private key.\n" +
+    // "                              (the one that starts with '-----BEGIN RSA PRIVATE KEY-----')\n" +
+    // "   --httpsKeyManagerType    = the SSL KeyManagerFactory type (eg SunX509, IbmX509). Default is SunX509\n" +
+    private void setHttpsListener(Builder serverBuilder) {
+        // TODO Auto-generated method stub
+
+    }
+
+    // "   --ajp13Port              = set the ajp13 listening port. -1 to disable, Default is disabled\n" +
+    // "   --ajp13ListenAddress     = set the ajp13 listening address. Default is all interfaces\n" +
+    private void setAjpListener(Builder serverBuilder) {
+        // TODO Auto-generated method stub
+
+    }
+
+    // "   --controlPort            = set the shutdown/control port. -1 to disable, Default disabled\n" +
+    private void createControlPort(Builder serverBuilder) {
+        // TODO Auto-generated method stub
+
     }
 
     private DeploymentInfo createServletContainerDeployment(WebXmlContent webXmlContent)
@@ -81,8 +150,8 @@ public class UndertowInitiator {
         servletContainerBuilder.setResourceManager(
                 new FileResourceManager(new File(pathToTmpDir), 0L));
 
-        //TODO solve env-entry
-        
+        // TODO solve env-entry
+
         return servletContainerBuilder;
     }
 

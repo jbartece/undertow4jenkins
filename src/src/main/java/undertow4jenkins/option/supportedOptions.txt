@@ -6,16 +6,13 @@ This options have to be supported
 --webroot                = set document root folder.
 --warfile                = set location of warfile to extract from.
 
+##############################################################################################################################
 This options have to be supported
-"   --httpPort               = set the http listening port. -1 to disable, Default is 8080\n" +
-"   --httpListenAddress      = set the http listening address. Default is all interfaces\n" +
-"   --httpDoHostnameLookups  = enable host name lookups on incoming http connections (true/false). Default is false\n" +
 "   --httpKeepAliveTimeout   = how long idle HTTP keep-alive connections are kept around (in ms; default 5000)?\n" +
 "   --httpsPort              = set the https listening port. -1 to disable, Default is disabled\n" +
 "                              if neither --httpsCertificate nor --httpsKeyStore are specified,\n" +
 "                              https is run with one-time self-signed certificate.\n" +
 "   --httpsListenAddress     = set the https listening address. Default is all interfaces\n" +
-"   --httpsDoHostnameLookups = enable host name lookups on incoming https connections (true/false). Default is false\n" +
 "   --httpsKeepAliveTimeout   = how long idle HTTPS keep-alive connections are kept around (in ms; default 5000)?\n" +
 "   --httpsKeyStore          = the location of the SSL KeyStore file.\n" +
 "   --httpsKeyStorePassword  = the password for the SSL KeyStore file. Default is null\n" +
@@ -53,9 +50,18 @@ This options have to be supported
 
 
 
-
+##############################################################################################################################
 Solved options: 
 "   --usage / --help         = show this message\n" +
 "   --version                = show the version and quit\n" +   // solved in Extras and also in Launcher
 "   --mimeTypes=ARG          = define additional MIME type mappings. ARG would be EXT=MIMETYPE:EXT=MIMETYPE:...\n" +
 "                              (e.g., xls=application/vnd.ms-excel:wmf=application/x-msmetafile)\n" +
+
+"   --httpPort               = set the http listening port. -1 to disable, Default is 8080\n" +
+"   --httpListenAddress      = set the http listening address. Default is all interfaces\n" +
+
+##############################################################################################################################
+Options not used in Winstone 2.0:
+"   --httpsDoHostnameLookups = enable host name lookups on incoming https connections (true/false). Default is false\n" +
+"   --httpDoHostnameLookups  = enable host name lookups on incoming http connections (true/false). Default is false\n" +
+
