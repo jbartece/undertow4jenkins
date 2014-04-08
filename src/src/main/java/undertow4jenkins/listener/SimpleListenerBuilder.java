@@ -6,25 +6,23 @@ import org.slf4j.LoggerFactory;
 import undertow4jenkins.option.Options;
 import io.undertow.Undertow.Builder;
 
-
 public class SimpleListenerBuilder {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
-    
+
     private Options options;
-    
+
     /**
      * IP address, which should be set to bind listener in Undertow to listen on all interfaces
      */
     private static final String hostAllInterfacesString = "0.0.0.0";
-    
+
     private static final int MAX_PORT = 65535;
 
-    
     public SimpleListenerBuilder(Options options) {
         this.options = options;
     }
-    
+
     // "   --httpKeepAliveTimeout   = how long idle HTTP keep-alive connections are kept around (in ms; default 5000)?\n" +
     /**
      * Creates HTTP listener based on values from options.httpPort, options.httpListenAdress.
@@ -34,23 +32,23 @@ public class SimpleListenerBuilder {
     public void setHttpListener(Builder serverBuilder) {
         if (options.httpPort == -1) {
             log.info("Http listener is disabled.");
+            return;
         }
+        if (options.httpPort < -1 || options.httpPort > MAX_PORT) {
+            log.warn("Unallowed httpPort value. HTTP listener is disabled!");
+            return;
+        }
+
+        if (options.httpListenAdress != null)
+            serverBuilder.addHttpListener(options.httpPort, options.httpListenAdress);
         else {
-            if (options.httpPort < -1 || options.httpPort > MAX_PORT) {
-                log.warn("Unallowed httpPort value. HTTP listener is disabled!");
-            }
-            else {
-                if (options.httpListenAdress != null)
-                    serverBuilder.addHttpListener(options.httpPort, options.httpListenAdress);
-                else {
-                    // Listen on all interfaces
-                    serverBuilder.addHttpListener(options.httpPort, hostAllInterfacesString);
-                }
-                log.debug("Created HTTP listener");
-            }
+            // Listen on all interfaces
+            serverBuilder.addHttpListener(options.httpPort, hostAllInterfacesString);
         }
+
+        log.debug("Created HTTP listener");
     }
-    
+
     /**
      * Creates AJP listener based on values from options.ajpPort, options.ajpListenAdress.
      * 
@@ -59,20 +57,19 @@ public class SimpleListenerBuilder {
     public void setAjpListener(Builder serverBuilder) {
         if (options.ajp13Port == -1)
             return;
-
         if (options.ajp13Port < -1 || options.ajp13Port > MAX_PORT) {
             log.warn("Unallowed ajp13Port value. AJP13 listener is disabled!");
+            return;
         }
-        else {
-            if (options.ajp13ListenAdress != null)
-                serverBuilder.addAjpListener(options.ajp13Port, options.ajp13ListenAdress);
-            else {
-                // Listen on all interfaces
-                serverBuilder.addAjpListener(options.ajp13Port, hostAllInterfacesString);
-            }
 
-            log.debug("Created AJP listener");
+        if (options.ajp13ListenAdress != null)
+            serverBuilder.addAjpListener(options.ajp13Port, options.ajp13ListenAdress);
+        else {
+            // Listen on all interfaces
+            serverBuilder.addAjpListener(options.ajp13Port, hostAllInterfacesString);
         }
+
+        log.debug("Created AJP listener");
     }
-    
+
 }

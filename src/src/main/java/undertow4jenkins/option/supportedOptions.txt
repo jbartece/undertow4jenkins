@@ -4,24 +4,9 @@ This options don't have to be supported
 
 This options have to be supported
 --webroot                = set document root folder.
---warfile                = set location of warfile to extract from.
 
 ##############################################################################################################################
 This options have to be supported
-"   --httpKeepAliveTimeout   = how long idle HTTP keep-alive connections are kept around (in ms; default 5000)?\n" +
-"   --httpsPort              = set the https listening port. -1 to disable, Default is disabled\n" +
-"                              if neither --httpsCertificate nor --httpsKeyStore are specified,\n" +
-"                              https is run with one-time self-signed certificate.\n" +
-"   --httpsListenAddress     = set the https listening address. Default is all interfaces\n" +
-"   --httpsKeepAliveTimeout   = how long idle HTTPS keep-alive connections are kept around (in ms; default 5000)?\n" +
-"   --httpsKeyStore          = the location of the SSL KeyStore file.\n" +
-"   --httpsKeyStorePassword  = the password for the SSL KeyStore file. Default is null\n" +
-"   --httpsCertificate       = the location of the PEM-encoded SSL certificate file.\n" +
-"                              (the one that starts with '-----BEGIN CERTIFICATE-----')\n" +
-"                              must be used with --httpsPrivateKey.\n" +
-"   --httpsPrivateKey        = the location of the PEM-encoded SSL private key.\n" +
-"                              (the one that starts with '-----BEGIN RSA PRIVATE KEY-----')\n" +
-"   --httpsKeyManagerType    = the SSL KeyManagerFactory type (eg SunX509, IbmX509). Default is SunX509\n" +
 "   --spdy                   = Enable SPDY. See http://wiki.eclipse.org/Jetty/Feature/NPN\n" +
 "   --controlPort            = set the shutdown/control port. -1 to disable, Default disabled\n" +
 "   \n" +
@@ -49,17 +34,38 @@ This options have to be supported
 
 
 ##############################################################################################################################
-Solved options: 
+#### Solved options: 
+#Main:
+"   --warfile                = set location of warfile to extract from.
+
+#General:
 "   --usage / --help         = show this message\n" +
 "   --version                = show the version and quit\n" +   // solved in Extras and also in Launcher
 "   --mimeTypes=ARG          = define additional MIME type mappings. ARG would be EXT=MIMETYPE:EXT=MIMETYPE:...\n" +
 "                              (e.g., xls=application/vnd.ms-excel:wmf=application/x-msmetafile)\n" +
 
+#HTTP
 "   --httpPort               = set the http listening port. -1 to disable, Default is 8080\n" +
 "   --httpListenAddress      = set the http listening address. Default is all interfaces\n" +
 
+#AJP
 "   --ajp13Port              = set the ajp13 listening port. -1 to disable, Default is disabled\n" +
 "   --ajp13ListenAddress     = set the ajp13 listening address. Default is all interfaces\n" +
+
+#HTTPS
+"   --httpsPort              = set the https listening port. -1 to disable, Default is disabled\n" +
+"                              if neither --httpsCertificate nor --httpsKeyStore are specified,\n" +
+"                              https is run with one-time self-signed certificate.\n" +
+"   --httpsListenAddress     = set the https listening address. Default is all interfaces\n" +
+"   --httpsKeepAliveTimeout   = how long idle HTTPS keep-alive connections are kept around (in ms; default 5000)?\n" +
+"   --httpsKeyStore          = the location of the SSL KeyStore file.\n" +
+"   --httpsKeyStorePassword  = the password for the SSL KeyStore file. Default is null\n" +
+"   --httpsCertificate       = the location of the PEM-encoded SSL certificate file.\n" +
+"                              (the one that starts with '-----BEGIN CERTIFICATE-----')\n" +
+"                              must be used with --httpsPrivateKey.\n" +
+"   --httpsPrivateKey        = the location of the PEM-encoded SSL private key.\n" +
+"                              (the one that starts with '-----BEGIN RSA PRIVATE KEY-----')\n" +
+"   --httpsKeyManagerType    = the SSL KeyManagerFactory type (eg SunX509, IbmX509). Default is SunX509\n" +
 
 
 ##############################################################################################################################
