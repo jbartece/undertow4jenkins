@@ -3,7 +3,6 @@ package undertow4jenkins;
 import static io.undertow.servlet.Servlets.defaultContainer;
 import static io.undertow.servlet.Servlets.deployment;
 import io.undertow.Undertow;
-import io.undertow.Undertow.Builder;
 import io.undertow.server.handlers.resource.FileResourceManager;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
@@ -63,20 +62,14 @@ public class UndertowInitiator {
         SimpleListenerBuilder simpleListenerBuilder = new SimpleListenerBuilder(options);
         simpleListenerBuilder.setHttpListener(serverBuilder);
         simpleListenerBuilder.setAjpListener(serverBuilder);
+//        simpleListenerBuilder.createControlPort(serverBuilder);
+        
         new HttpsListenerBuilder(options).setHttpsListener(serverBuilder);
         
-        createControlPort(serverBuilder);
         
         return serverBuilder;
     }
 
-    // "   --controlPort            = set the shutdown/control port. -1 to disable, Default disabled\n" +
-    private void createControlPort(Builder serverBuilder) {
-        if (options.controlPort == -1)
-            return;
-        // TODO
-
-    }
 
     private DeploymentInfo createServletContainerDeployment(WebXmlContent webXmlContent)
             throws ClassNotFoundException {

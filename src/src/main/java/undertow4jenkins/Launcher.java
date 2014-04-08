@@ -3,6 +3,9 @@ package undertow4jenkins;
 import io.undertow.Undertow;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
 
 import javax.servlet.ServletException;
 import javax.xml.stream.XMLStreamException;
@@ -13,11 +16,11 @@ import org.slf4j.LoggerFactory;
 import undertow4jenkins.option.OptionParser;
 import undertow4jenkins.option.Options;
 import undertow4jenkins.parser.WebXmlContent;
+import undertow4jenkins.parser.WebXmlContent.MimeMapping;
 import undertow4jenkins.parser.WebXmlFormatException;
 import undertow4jenkins.parser.WebXmlParser;
 import undertow4jenkins.util.Configuration;
 import undertow4jenkins.util.WarWorker;
-import undertow4jenkins.parser.WebXmlContent.MimeMapping;
 
 /**
  * @author Jakub Bartecek <jbartece@redhat.com>
@@ -32,6 +35,8 @@ public class Launcher {
     private ClassLoader jenkinsWarClassLoader;
 
     private final String pathToTmpDir = "/tmp/undertow4jenkins/extractedWar/";
+
+    private Undertow undertowInstance;
 
     /**
      * Field for usage, which can be overridden outside this class
@@ -59,14 +64,15 @@ public class Launcher {
             WebXmlContent webXmlContent = parser.parse(pathToTmpDir + "WEB-INF/web.xml");
 
             editXmlContentWithOptions(webXmlContent);
-            
+
             // if (log.isDebugEnabled())
             // log.debug("Loaded content of web.xml:\n" + webXmlContent.toString());
 
             UndertowInitiator undertowInitiator = new UndertowInitiator(jenkinsWarClassLoader,
                     options, pathToTmpDir);
-            Undertow undertowInstance = undertowInitiator.initUndertow(webXmlContent);
+            undertowInstance = undertowInitiator.initUndertow(webXmlContent);
             undertowInstance.start();
+
         } catch (ServletException e) {
             log.error("Start of embedded Undertow server failed!", e);
         } catch (IOException e) {
@@ -78,34 +84,126 @@ public class Launcher {
         } catch (WebXmlFormatException e) {
             log.error("Parsing web.xml failed!", e);
         }
+
         // ClassCastException and RuntimeException also should be catched
+
+        listenOnControlPort(options.controlPort);
     }
 
+    // private static int controlSocketTimeout = 2000;
+
+    // "   --controlPort            = set the shutdown/control port. -1 to disable, Default disabled\n" +
+    private void listenOnControlPort(int port) {
+        if (port == -1)
+            return;
+
+        if (port < -1 || port > 65535) {
+            log.warn("Unallowed controlPort value. Control port is disabled!");
+            return;
+        }
+
+        boolean interrupted = false;
+        ServerSocket controlSocket = null;
+        try {
+            controlSocket = new ServerSocket(port);
+            // TODO check if timeout is needed
+            // controlSocket.setSoTimeout(controlSocketTimeout);
+            log.info("Control port initializated. Port: " + port);
+
+        } catch (IOException e) {
+            // TODO
+            e.printStackTrace();
+            return;
+        }
+
+        Socket acceptedSocket = null;
+        while (!interrupted) {
+
+            try {
+                acceptedSocket = controlSocket.accept();
+                if (handleControlRequest(acceptedSocket)) {
+                    undertowInstance.stop();
+                    System.exit(0);
+                }
+            } catch (IOException e) {
+                // TODO
+                e.printStackTrace();
+            }
+        }
+
+        try {
+            if (controlSocket != null)
+                controlSocket.close();
+        } catch (IOException e) {
+        }
+
+    }
+
+    private static final byte SHUTDOWN_REQUEST_TYPE = (byte) '0';
+
+    private static final byte RELOAD_REQUEST_TYPE = (byte) '4';
+
+    /**
+     * @return true if shutdown request was accepted, otherwise false
+     */
+    private boolean handleControlRequest(Socket acceptedSocket) throws IOException {
+        boolean returnValue = false;
+        InputStream inputStream = null;
+
+        try {
+            inputStream = acceptedSocket.getInputStream();
+            int requestType = inputStream.read();
+            log.debug("Accepted control request with type: " + requestType + " [byte value]");
+
+            switch ((byte) requestType) {
+                case SHUTDOWN_REQUEST_TYPE:
+                    System.err.println("Accepted shutdown request");
+                    returnValue = true;
+                    break;
+
+                case RELOAD_REQUEST_TYPE:
+                    System.err.println("Accepted reload request");
+                    break;
+
+                default:
+                    System.err.println("Accepted unknown request");
+                    break;
+            }
+        } finally {
+            acceptedSocket.close();
+
+            if (inputStream != null)
+                inputStream.close();
+        }
+
+        return returnValue;
+    }
 
     private void editXmlContentWithOptions(WebXmlContent webXmlContent) {
-        if(options.mimeTypes != null) {
+        if (options.mimeTypes != null) {
             String[] mimePairs = options.mimeTypes.split(":");
-            for(String singleMimeStr : mimePairs) {
+            for (String singleMimeStr : mimePairs) {
                 String[] singleMime = singleMimeStr.split("=");
-                if(singleMime.length == 2) {
+                if (singleMime.length == 2) {
                     MimeMapping newMime = new MimeMapping();
                     newMime.extension = singleMime[0];
                     newMime.mimeType = singleMime[1];
                     webXmlContent.mimeMappings.add(newMime);
                 }
-                else 
-                    log.warn("Wrong additional mime definition. Caused by: " + singleMimeStr );
+                else
+                    log.warn("Wrong additional mime definition. Caused by: " + singleMimeStr);
             }
         }
-        
+
     }
 
     /**
      * Checks one of help/usage/version parameters was set. If so, print proper information.
+     * 
      * @return True if help/usage/version was specified, otherwise false
      */
     private boolean checkHelpParams() {
-        if ( (options.help != null && options.help )|| (options.usage != null && options.usage)) {
+        if ((options.help != null && options.help) || (options.usage != null && options.usage)) {
             System.out.println(Launcher.USAGE);
             return true;
         }
