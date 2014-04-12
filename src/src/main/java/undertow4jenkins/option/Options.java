@@ -15,6 +15,7 @@ public class Options {
     //
     public String webappsDir;
     public String hostsDir;
+    public String prefix;
 
     //
     public Integer httpPort;
@@ -110,9 +111,6 @@ public class Options {
         }
     }
     
-    /**
-     * Prints values of all non null options
-     */
     @Override
     public String toString() {
         return "Options ["
@@ -120,6 +118,7 @@ public class Options {
                 + (warfile != null ? "warfile=" + warfile + ", " : "")
                 + (webappsDir != null ? "webappsDir=" + webappsDir + ", " : "")
                 + (hostsDir != null ? "hostsDir=" + hostsDir + ", " : "")
+                + (prefix != null ? "prefix=" + prefix + ", " : "")
                 + (httpPort != null ? "httpPort=" + httpPort + ", " : "")
                 + (httpListenAdress != null ? "httpListenAdress=" + httpListenAdress + ", " : "")
                 + (httpDoHostnameLookups != null ? "httpDoHostnameLookups=" + httpDoHostnameLookups

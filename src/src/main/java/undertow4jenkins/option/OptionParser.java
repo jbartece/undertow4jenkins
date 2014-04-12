@@ -27,7 +27,7 @@ public class OptionParser {
             parsedOptions = parser.parse(optionsDefinition, args);
 
         } catch (ParseException e) {
-            log.error("Command line options could not be parsed!", e);
+            log.error("Command line options could not be parsed!\n Reason: " , e.getMessage());
             return null;
         }
 

@@ -2,7 +2,9 @@ package undertow4jenkins;
 
 import static io.undertow.servlet.Servlets.defaultContainer;
 import static io.undertow.servlet.Servlets.deployment;
+import io.undertow.Handlers;
 import io.undertow.Undertow;
+import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.resource.FileResourceManager;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
@@ -35,10 +37,14 @@ public class UndertowInitiator {
 
     private String pathToTmpDir;
 
+    //Has to be set in constructor
+    private String applicationContextPath;
+
     public UndertowInitiator(ClassLoader classLoader, Options options, String pathToTmpDir) {
         this.classLoader = classLoader;
         this.options = options;
         this.pathToTmpDir = pathToTmpDir;
+        setContextPath(options.prefix);
     }
 
     public Undertow initUndertow(WebXmlContent webXmlContent) throws ServletException,
@@ -51,18 +57,30 @@ public class UndertowInitiator {
         Undertow.Builder serverBuilder = createUndertowInstance(manager);
         return serverBuilder.build();
     }
+    
+
+    private void setContextPath(String prefix) {
+        if(prefix.isEmpty()) {
+            applicationContextPath = "";
+        }
+        else {
+            applicationContextPath = "/" + prefix;
+        }
+    }
 
     private Undertow.Builder createUndertowInstance(DeploymentManager manager)
             throws ServletException {
+        
+        HttpHandler containerHandler = createPathHandlerForContainer(manager.start());
         Undertow.Builder serverBuilder = Undertow.builder()
-                .setHandler(manager.start())
+                .setHandler(containerHandler)
                 .setWorkerThreads(options.handlerCountMax); // TODO
 
+        
         //Create listeners
         SimpleListenerBuilder simpleListenerBuilder = new SimpleListenerBuilder(options);
         simpleListenerBuilder.setHttpListener(serverBuilder);
         simpleListenerBuilder.setAjpListener(serverBuilder);
-//        simpleListenerBuilder.createControlPort(serverBuilder);
         
         new HttpsListenerBuilder(options).setHttpsListener(serverBuilder);
         
@@ -71,13 +89,22 @@ public class UndertowInitiator {
     }
 
 
+    private HttpHandler createPathHandlerForContainer(HttpHandler containerManagerHandler) {
+        if(applicationContextPath.isEmpty()){
+            return containerManagerHandler;
+        }
+        else {
+            return Handlers.path(Handlers.redirect(applicationContextPath))
+                    .addPrefixPath(applicationContextPath, containerManagerHandler);
+        }
+    }
+
     private DeploymentInfo createServletContainerDeployment(WebXmlContent webXmlContent)
             throws ClassNotFoundException {
         DeploymentInfo servletContainerBuilder = deployment()
                 .setClassLoader(classLoader)
-                .setContextPath("")
-                // TODO add option prefix and it here
                 .setDeploymentName(options.warfile)
+                .setContextPath(applicationContextPath)
                 .addListeners(ListenerLoader.createListener(webXmlContent.listeners, classLoader))
                 .addServlets(
                         ServletLoader.createServlets(webXmlContent.servlets,
@@ -93,7 +120,8 @@ public class UndertowInitiator {
         FilterLoader.addFilterMappings(webXmlContent.filterMappings, servletContainerBuilder);
         setServletAppVersion(webXmlContent.webAppVersion, servletContainerBuilder);
         setDisplayName(webXmlContent.displayName, servletContainerBuilder);
-
+        
+        
         // Load static resources from extracted war archive
         servletContainerBuilder.setResourceManager(
                 new FileResourceManager(new File(pathToTmpDir), 0L));
