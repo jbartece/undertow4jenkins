@@ -92,11 +92,9 @@ public class UndertowInitiator {
     }
 
     private void setCustomOptions(Builder serverBuilder) {
-        serverBuilder.setWorkerThreads(options.handlerCountMax);
-
         setIdleTimeout(serverBuilder);
         serverBuilder.setWorkerThreads(options.handlerCountMax);
-
+        serverBuilder.setServerOption(UndertowOptions.MAX_PARAMETERS, options.maxParamCount);
     }
 
     private void setIdleTimeout(Builder serverBuilder) {
@@ -184,7 +182,7 @@ public class UndertowInitiator {
         servletContainerBuilder.setResourceManager(
                 new FileResourceManager(new File(pathToTmpDir), 0L));
 
-        //Set session timeout for application
+        // Set session timeout for application
         servletContainerBuilder.setSessionManagerFactory(new JenkinsSessionManagerFactory(
                 options.sessionTimeout * 60));
 

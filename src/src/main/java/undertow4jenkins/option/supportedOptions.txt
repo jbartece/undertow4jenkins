@@ -9,9 +9,6 @@ This options have to be supported
 This options have to be supported
 "   --spdy                   = Enable SPDY. See http://wiki.eclipse.org/Jetty/Feature/NPN\n" 
 
-"   \n" +
-"   --maxParamCount=N        = set the max number of parameters allowed in a form submission to protect\n" +
-"                              against hash DoS attack (oCERT #2011-003). Default is 10000.\n" +
 
 "Security options:\n" +
 "   --realmClassName               = Set the realm class to use for user authentication. Defaults to ArgumentsRealm class\n" +
@@ -42,6 +39,8 @@ This options have to be supported
 "                              (e.g., xls=application/vnd.ms-excel:wmf=application/x-msmetafile)\n" +
 "   --handlerCountMax        = set the max no of worker threads to allow. Default is 40\n" +
 "   --sessionTimeout         = set the http session timeout value in minutes. Default to what webapp specifies, and then to 60 minutes\n"+
+"   --maxParamCount=N        = set the max number of parameters allowed in a form submission to protect\n" +
+"                              against hash DoS attack (oCERT #2011-003). Default is 10000.\n" +
 
 #HTTP
 "   --httpPort               = set the http listening port. -1 to disable, Default is 8080\n" +

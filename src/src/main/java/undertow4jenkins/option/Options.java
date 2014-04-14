@@ -47,7 +47,7 @@ public class Options {
     //
     public Integer sessionTimeout;
     public String mimeTypes; 
-    public String maxParamCount;
+    public Integer maxParamCount;
     
     //
     public Boolean usage;
