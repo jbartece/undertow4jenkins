@@ -4,8 +4,8 @@ import static io.undertow.servlet.Servlets.defaultContainer;
 import static io.undertow.servlet.Servlets.deployment;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
-import io.undertow.UndertowOptions;
 import io.undertow.Undertow.Builder;
+import io.undertow.UndertowOptions;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.resource.FileResourceManager;
 import io.undertow.servlet.api.DeploymentInfo;
@@ -17,7 +17,6 @@ import javax.servlet.ServletException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xnio.Option;
 
 import undertow4jenkins.listener.HttpsListenerBuilder;
 import undertow4jenkins.listener.SimpleListenerBuilder;
@@ -172,7 +171,9 @@ public class UndertowInitiator {
                         SecurityLoader.createSecurityConstraints(webXmlContent.securityConstraints))
                 .setLoginConfig(SecurityLoader.createLoginConfig(webXmlContent.loginConfig))
                 .addErrorPages(ErrorPageLoader.createErrorPage(webXmlContent.errorPages))
-                .addMimeMappings(MimeLoader.createMimeMappings(webXmlContent.mimeMappings));
+                .addMimeMappings(
+                        MimeLoader
+                                .createMimeMappings(webXmlContent.mimeMappings, options.mimeTypes));
 
         FilterLoader.addFilterMappings(webXmlContent.filterMappings, servletContainerBuilder);
         setServletAppVersion(webXmlContent.webAppVersion, servletContainerBuilder);

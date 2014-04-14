@@ -36,7 +36,7 @@
 	<properties>
 		<slf4jVersion>1.7.4</slf4jVersion>
 		<javaVersion>1.6</javaVersion>
-		<undertowVersion>1.0.3.Final</undertowVersion>
+		<undertowVersion>1.0.5.Final</undertowVersion>
 	</properties>
 
 	<build>

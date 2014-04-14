@@ -1,5 +1,9 @@
 package undertow4jenkins.util;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 import java.util.ResourceBundle;
 
 import org.slf4j.Logger;
@@ -42,6 +46,29 @@ public class Configuration {
 
     public static boolean isPropertySet(String propertyName) {
         return propertiesResource.containsKey(propertyName);
+    }
+
+    /**
+     * Create Properties from file from the folder of this class
+     * 
+     * @param propertyFileName Name of property file
+     * @return New property entity
+     * @throws IOException Thrown if the file is not found or file is malformed
+     */
+    public static Properties loadPropertiesFromFile(String propertyFileName) throws IOException {
+        InputStream input = null;
+        Properties properties;
+        
+        try {
+            input = new FileInputStream(propertyFileName);
+            properties = new Properties();
+            properties.load(input);
+        } finally {
+            if (input != null)
+                input.close();
+        }
+
+        return properties;
     }
 
 }

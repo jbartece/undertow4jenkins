@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import undertow4jenkins.option.OptionParser;
 import undertow4jenkins.option.Options;
 import undertow4jenkins.parser.WebXmlContent;
-import undertow4jenkins.parser.WebXmlContent.MimeMapping;
 import undertow4jenkins.parser.WebXmlFormatException;
 import undertow4jenkins.parser.WebXmlParser;
 import undertow4jenkins.util.Configuration;
@@ -62,9 +61,7 @@ public class Launcher {
 
             WebXmlParser parser = new WebXmlParser();
             WebXmlContent webXmlContent = parser.parse(pathToTmpDir + "WEB-INF/web.xml");
-
-            editXmlContentWithOptions(webXmlContent);
-
+            
             // if (log.isDebugEnabled())
             // log.debug("Loaded content of web.xml:\n" + webXmlContent.toString());
 
@@ -177,24 +174,6 @@ public class Launcher {
         }
 
         return returnValue;
-    }
-
-    private void editXmlContentWithOptions(WebXmlContent webXmlContent) {
-        if (options.mimeTypes != null) {
-            String[] mimePairs = options.mimeTypes.split(":");
-            for (String singleMimeStr : mimePairs) {
-                String[] singleMime = singleMimeStr.split("=");
-                if (singleMime.length == 2) {
-                    MimeMapping newMime = new MimeMapping();
-                    newMime.extension = singleMime[0];
-                    newMime.mimeType = singleMime[1];
-                    webXmlContent.mimeMappings.add(newMime);
-                }
-                else
-                    log.warn("Wrong additional mime definition. Caused by: " + singleMimeStr);
-            }
-        }
-
     }
 
     /**

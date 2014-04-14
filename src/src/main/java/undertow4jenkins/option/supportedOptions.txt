@@ -9,7 +9,6 @@ This options have to be supported
 This options have to be supported
 "   --spdy                   = Enable SPDY. See http://wiki.eclipse.org/Jetty/Feature/NPN\n" 
 
-
 "Security options:\n" +
 "   --realmClassName               = Set the realm class to use for user authentication. Defaults to ArgumentsRealm class\n" +
 "   \n" +
