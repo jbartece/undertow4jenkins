@@ -29,11 +29,15 @@ public class Launcher {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
+    private static final byte SHUTDOWN_REQUEST_TYPE = (byte) '0';
+
+    private static final byte RELOAD_REQUEST_TYPE = (byte) '4';
+
+    private final String pathToTmpDir = "/tmp/undertow4jenkins/extractedWar/";
+
     private Options options;
 
     private ClassLoader jenkinsWarClassLoader;
-
-    private final String pathToTmpDir = "/tmp/undertow4jenkins/extractedWar/";
 
     private Undertow undertowInstance;
 
@@ -61,7 +65,7 @@ public class Launcher {
 
             WebXmlParser parser = new WebXmlParser();
             WebXmlContent webXmlContent = parser.parse(pathToTmpDir + "WEB-INF/web.xml");
-            
+
             // if (log.isDebugEnabled())
             // log.debug("Loaded content of web.xml:\n" + webXmlContent.toString());
 
@@ -89,7 +93,6 @@ public class Launcher {
 
     // private static int controlSocketTimeout = 2000;
 
-    // "   --controlPort            = set the shutdown/control port. -1 to disable, Default disabled\n" +
     private void listenOnControlPort(int port) {
         if (port == -1)
             return;
@@ -107,44 +110,29 @@ public class Launcher {
             // controlSocket.setSoTimeout(controlSocketTimeout);
             log.info("Control port initializated. Port: " + port);
 
+            while (!interrupted) {
+                Socket acceptedSocket = controlSocket.accept();
+                handleControlRequest(acceptedSocket);
+            }
+
         } catch (IOException e) {
             // TODO
             e.printStackTrace();
             return;
-        }
-
-        Socket acceptedSocket = null;
-        while (!interrupted) {
-
+        } finally {
             try {
-                acceptedSocket = controlSocket.accept();
-                if (handleControlRequest(acceptedSocket)) {
-                    undertowInstance.stop();
-                    System.exit(0);
-                }
+                if (controlSocket != null)
+                    controlSocket.close();
             } catch (IOException e) {
-                // TODO
-                e.printStackTrace();
             }
-        }
-
-        try {
-            if (controlSocket != null)
-                controlSocket.close();
-        } catch (IOException e) {
         }
 
     }
 
-    private static final byte SHUTDOWN_REQUEST_TYPE = (byte) '0';
-
-    private static final byte RELOAD_REQUEST_TYPE = (byte) '4';
-
     /**
      * @return true if shutdown request was accepted, otherwise false
      */
-    private boolean handleControlRequest(Socket acceptedSocket) throws IOException {
-        boolean returnValue = false;
+    private void handleControlRequest(Socket acceptedSocket) throws IOException {
         InputStream inputStream = null;
 
         try {
@@ -154,16 +142,17 @@ public class Launcher {
 
             switch ((byte) requestType) {
                 case SHUTDOWN_REQUEST_TYPE:
-                    System.err.println("Accepted shutdown request");
-                    returnValue = true;
+                    log.info("Accepted shutdown request on control port");
+                    shutdownApplication();
                     break;
 
                 case RELOAD_REQUEST_TYPE:
-                    System.err.println("Accepted reload request");
+                    log.info("Accepted reload request on control port");
+                    reloadApplication();
                     break;
 
                 default:
-                    System.err.println("Accepted unknown request");
+                    log.info("Accepted unknown request on control port");
                     break;
             }
         } finally {
@@ -173,7 +162,16 @@ public class Launcher {
                 inputStream.close();
         }
 
-        return returnValue;
+    }
+
+    private void reloadApplication() {
+        undertowInstance.stop();
+        undertowInstance.start();
+    }
+
+    private void shutdownApplication() {
+        undertowInstance.stop();
+        System.exit(0);
     }
 
     /**
