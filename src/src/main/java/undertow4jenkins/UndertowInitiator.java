@@ -4,6 +4,8 @@ import static io.undertow.servlet.Servlets.defaultContainer;
 import static io.undertow.servlet.Servlets.deployment;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
+import io.undertow.UndertowOptions;
+import io.undertow.Undertow.Builder;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.resource.FileResourceManager;
 import io.undertow.servlet.api.DeploymentInfo;
@@ -15,6 +17,7 @@ import javax.servlet.ServletException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xnio.Option;
 
 import undertow4jenkins.listener.HttpsListenerBuilder;
 import undertow4jenkins.listener.SimpleListenerBuilder;
@@ -26,6 +29,7 @@ import undertow4jenkins.loader.SecurityLoader;
 import undertow4jenkins.loader.ServletLoader;
 import undertow4jenkins.option.Options;
 import undertow4jenkins.parser.WebXmlContent;
+import undertow4jenkins.util.Configuration;
 
 public class UndertowInitiator {
 
@@ -37,7 +41,7 @@ public class UndertowInitiator {
 
     private String pathToTmpDir;
 
-    //Has to be set in constructor
+    // Has to be set in constructor
     private String applicationContextPath;
 
     public UndertowInitiator(ClassLoader classLoader, Options options, String pathToTmpDir) {
@@ -57,10 +61,9 @@ public class UndertowInitiator {
         Undertow.Builder serverBuilder = createUndertowInstance(manager);
         return serverBuilder.build();
     }
-    
 
     private void setContextPath(String prefix) {
-        if(prefix.isEmpty()) {
+        if (prefix.isEmpty()) {
             applicationContextPath = "";
         }
         else {
@@ -70,27 +73,83 @@ public class UndertowInitiator {
 
     private Undertow.Builder createUndertowInstance(DeploymentManager manager)
             throws ServletException {
-        
+
         HttpHandler containerHandler = createPathHandlerForContainer(manager.start());
         Undertow.Builder serverBuilder = Undertow.builder()
-                .setHandler(containerHandler)
-                .setWorkerThreads(options.handlerCountMax); // TODO
+                .setHandler(containerHandler);
 
-        
-        //Create listeners
+        // Create listeners
         SimpleListenerBuilder simpleListenerBuilder = new SimpleListenerBuilder(options);
         simpleListenerBuilder.setHttpListener(serverBuilder);
         simpleListenerBuilder.setAjpListener(serverBuilder);
-        
+
         new HttpsListenerBuilder(options).setHttpsListener(serverBuilder);
-        
-        
+
+        // Set specific options
+        setCustomOptions(serverBuilder);
+
         return serverBuilder;
     }
 
+    private void setCustomOptions(Builder serverBuilder) {
+        serverBuilder.setWorkerThreads(options.handlerCountMax);
+
+        setIdleTimeout(serverBuilder);
+        serverBuilder.setWorkerThreads(options.handlerCountMax);
+
+    }
+
+    private void setIdleTimeout(Builder serverBuilder) {
+        boolean defaultHttpValue = isDefaultHttpTimeout();
+        boolean defaultHttpsValue = isDefaultHttpsTimeout();
+
+        Integer timeoutValue;
+
+        // There are two options, which can have this value, but Undertow supports
+        // only same value for all listeners
+        if (defaultHttpsValue && defaultHttpValue)
+            timeoutValue = options.httpKeepAliveTimeout;
+        else {
+            if (!defaultHttpValue && !defaultHttpsValue) {
+                log.warn("Undertow does not support diferent keep alive timeout "
+                        + "for HTTP and HTTPS. HTTP value used.");
+                timeoutValue = options.httpKeepAliveTimeout;
+            }
+            else {
+                if (defaultHttpValue)
+                    timeoutValue = options.httpKeepAliveTimeout;
+                else {
+                    timeoutValue = options.httpsKeepAliveTimeout;
+                }
+            }
+        }
+
+        serverBuilder.setServerOption(
+                UndertowOptions.IDLE_TIMEOUT,
+                timeoutValue.longValue());
+
+    }
+
+    private boolean isDefaultHttpsTimeout() {
+        if (options.httpsKeepAliveTimeout == Configuration.getIntProperty("httpsKeepAliveTimeout")) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    private boolean isDefaultHttpTimeout() {
+        if (options.httpKeepAliveTimeout == Configuration.getIntProperty("httpKeepAliveTimeout")) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
 
     private HttpHandler createPathHandlerForContainer(HttpHandler containerManagerHandler) {
-        if(applicationContextPath.isEmpty()){
+        if (applicationContextPath.isEmpty()) {
             return containerManagerHandler;
         }
         else {
@@ -120,11 +179,14 @@ public class UndertowInitiator {
         FilterLoader.addFilterMappings(webXmlContent.filterMappings, servletContainerBuilder);
         setServletAppVersion(webXmlContent.webAppVersion, servletContainerBuilder);
         setDisplayName(webXmlContent.displayName, servletContainerBuilder);
-        
-        
+
         // Load static resources from extracted war archive
         servletContainerBuilder.setResourceManager(
                 new FileResourceManager(new File(pathToTmpDir), 0L));
+
+        //Set session timeout for application
+        servletContainerBuilder.setSessionManagerFactory(new JenkinsSessionManagerFactory(
+                options.sessionTimeout * 60));
 
         // TODO solve env-entry
 

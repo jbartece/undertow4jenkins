@@ -21,7 +21,7 @@ public class Options {
     public Integer httpPort;
     public String httpListenAdress;
     public Boolean httpDoHostnameLookups;
-    public Integer httpKeepAliceTimeout;
+    public Integer httpKeepAliveTimeout;
 
     //
     public Integer httpsPort;
@@ -123,7 +123,7 @@ public class Options {
                 + (httpListenAdress != null ? "httpListenAdress=" + httpListenAdress + ", " : "")
                 + (httpDoHostnameLookups != null ? "httpDoHostnameLookups=" + httpDoHostnameLookups
                         + ", " : "")
-                + (httpKeepAliceTimeout != null ? "httpKeepAliceTimeout=" + httpKeepAliceTimeout
+                + (httpKeepAliveTimeout != null ? "httpKeepAliceTimeout=" + httpKeepAliveTimeout
                         + ", " : "")
                 + (httpsPort != null ? "httpsPort=" + httpsPort + ", " : "")
                 + (httpsListenAdress != null ? "httpsListenAdress=" + httpsListenAdress + ", " : "")
