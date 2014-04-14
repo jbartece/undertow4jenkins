@@ -116,9 +116,7 @@ public class Launcher {
             }
 
         } catch (IOException e) {
-            // TODO
-            e.printStackTrace();
-            return;
+            log.error("Error occured on control port. Control port is disabled.");
         } finally {
             try {
                 if (controlSocket != null)
