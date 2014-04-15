@@ -1,6 +1,5 @@
 package undertow4jenkins.util;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -60,7 +59,7 @@ public class Configuration {
         Properties properties;
         
         try {
-            input = new FileInputStream(propertyFileName);
+            input = Configuration.class.getClassLoader().getResourceAsStream(propertyFileName);
             properties = new Properties();
             properties.load(input);
         } finally {

@@ -117,6 +117,8 @@ public class Launcher {
 
         } catch (IOException e) {
             log.error("Error occured on control port. Control port is disabled.");
+        } catch (Throwable e) {
+            //If program is killed with sigterm - OK
         } finally {
             try {
                 if (controlSocket != null)

@@ -17,7 +17,7 @@ public class MimeLoader {
 
     private static final Logger log = LoggerFactory.getLogger("undertow4jenkins.loader.MimeLoader");
 
-    private static final String DEFAULT_MIMES_FILENAME = "mimeMappins.properties";
+    private static final String DEFAULT_MIMES_FILENAME = "undertow4jenkins/util/mimeMappings.properties";
 
     public static List<MimeMapping> createMimeMappings(
             List<undertow4jenkins.parser.WebXmlContent.MimeMapping> mappingsDataCol,

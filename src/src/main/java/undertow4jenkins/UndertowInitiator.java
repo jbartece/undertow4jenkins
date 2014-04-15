@@ -108,8 +108,8 @@ public class UndertowInitiator {
             timeoutValue = options.httpKeepAliveTimeout;
         else {
             if (!defaultHttpValue && !defaultHttpsValue) {
-                log.warn("Undertow does not support diferent keep alive timeout "
-                        + "for HTTP and HTTPS. HTTP value used.");
+                log.warn("Undertow does not support different keepAliveTimeout "
+                        + "for HTTP and HTTPS. httpKeepAliveTimeout value used.");
                 timeoutValue = options.httpKeepAliveTimeout;
             }
             else {
@@ -128,7 +128,7 @@ public class UndertowInitiator {
     }
 
     private boolean isDefaultHttpsTimeout() {
-        if (options.httpsKeepAliveTimeout == Configuration.getIntProperty("httpsKeepAliveTimeout")) {
+        if (options.httpsKeepAliveTimeout.equals(Configuration.getIntProperty("Options.defaultValue.httpsKeepAliveTimeout"))) {
             return true;
         }
         else {
@@ -137,7 +137,7 @@ public class UndertowInitiator {
     }
 
     private boolean isDefaultHttpTimeout() {
-        if (options.httpKeepAliveTimeout == Configuration.getIntProperty("httpKeepAliveTimeout")) {
+        if (options.httpKeepAliveTimeout.equals(Configuration.getIntProperty("Options.defaultValue.httpKeepAliveTimeout"))) {
             return true;
         }
         else {
