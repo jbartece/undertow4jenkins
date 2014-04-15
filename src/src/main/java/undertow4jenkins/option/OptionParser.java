@@ -27,7 +27,7 @@ public class OptionParser {
             parsedOptions = parser.parse(optionsDefinition, args);
 
         } catch (ParseException e) {
-            log.error("Command line options could not be parsed!\n Reason: " , e.getMessage());
+            log.error("Command line options could not be parsed!\nReason: " + e.getMessage());
             return null;
         }
 
@@ -43,7 +43,7 @@ public class OptionParser {
                 options.addOption(new Option(field.getName(), false, ""));
             }
             else {
-                //Other types expects arguments with value (Integer/String)
+                // Other types expects arguments with value (Integer/String)
                 options.addOption(new Option(field.getName(), true, ""));
             }
         }

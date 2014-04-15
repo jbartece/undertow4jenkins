@@ -203,7 +203,9 @@ public class Launcher {
 
         OptionParser optionParser = new OptionParser();
         Options options = optionParser.parse(args);
-
+        if(options == null)
+            return;
+        
         Launcher launcher = new Launcher(options);
         launcher.run();
     }
