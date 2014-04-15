@@ -16,6 +16,13 @@ public class Options {
     public String webappsDir;
     public String hostsDir;
     public String prefix;
+    
+    //TODO
+    public String config;
+    public String commonLibFolder;
+    public Boolean logThrowingLineNo;
+    public Boolean logThrowingThread;
+    public Integer debug;
 
     //
     public Integer httpPort;

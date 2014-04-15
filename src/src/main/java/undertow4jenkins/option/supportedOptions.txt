@@ -7,6 +7,13 @@ This options have to be supported
 
 ##############################################################################################################################
 This options have to be supported
+"   --config                 = load configuration properties from here. Default is ./winstone.properties\n" +
+"   --commonLibFolder        = folder for additional jar files. Default is ./lib\n" +
+
+"   --logThrowingLineNo      = show the line no that logged the message (slow). Default is false\n" +
+"   --logThrowingThread      = show the thread that logged the message. Default is false\n" +
+"   --debug                  = set the level of debug msgs (1-9). Default is 5 (INFO level)\n" +
+                
 "   --spdy                   = Enable SPDY. See http://wiki.eclipse.org/Jetty/Feature/NPN\n" 
 
 "Security options:\n" +
