@@ -10,9 +10,6 @@ This options have to be supported
 "   --config                 = load configuration properties from here. Default is ./winstone.properties\n" +
 "   --commonLibFolder        = folder for additional jar files. Default is ./lib\n" +
 
-"   --logThrowingLineNo      = show the line no that logged the message (slow). Default is false\n" +
-"   --logThrowingThread      = show the thread that logged the message. Default is false\n" +
-"   --debug                  = set the level of debug msgs (1-9). Default is 5 (INFO level)\n" +
                 
 "   --spdy                   = Enable SPDY. See http://wiki.eclipse.org/Jetty/Feature/NPN\n" 
 
@@ -24,12 +21,16 @@ This options have to be supported
 "   \n" +
 "   --fileRealm.configFile         = File containing users/passwds/roles. Only valid for the FileRealm realm class\n" +
 "   \n" +
+
 "Access logging:\n" +
 "   --accessLoggerClassName        = Set the access logger class to use for user authentication. Defaults to disabled\n" +
 "   --simpleAccessLogger.format    = The log format to use. Supports combined/common/resin/custom (SimpleAccessLogger only)\n" +
 "   --simpleAccessLogger.file      = The location pattern for the log file(SimpleAccessLogger only)");
 
 
+"   --logThrowingLineNo      = show the line no that logged the message (slow). Default is false\n" +
+"   --logThrowingThread      = show the thread that logged the message. Default is false\n" +
+"   --debug                  = set the level of debug msgs (1-9). Default is 5 (INFO level)\n" +
 
 ##############################################################################################################################
 #### Solved options: 

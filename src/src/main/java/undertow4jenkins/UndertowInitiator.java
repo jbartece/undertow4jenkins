@@ -7,17 +7,23 @@ import io.undertow.Undertow;
 import io.undertow.Undertow.Builder;
 import io.undertow.UndertowOptions;
 import io.undertow.server.HttpHandler;
+import io.undertow.server.handlers.accesslog.AccessLogHandler;
+import io.undertow.server.handlers.accesslog.DefaultAccessLogReceiver;
 import io.undertow.server.handlers.resource.FileResourceManager;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
 
 import java.io.File;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 import javax.servlet.ServletException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import undertow4jenkins.handlers.AccessLoggerHandler;
+import undertow4jenkins.handlers.SimpleAccessLoggerHandler;
 import undertow4jenkins.listener.HttpsListenerBuilder;
 import undertow4jenkins.listener.SimpleListenerBuilder;
 import undertow4jenkins.loader.ErrorPageLoader;
@@ -72,22 +78,48 @@ public class UndertowInitiator {
 
     private Undertow.Builder createUndertowInstance(DeploymentManager manager)
             throws ServletException {
+        Undertow.Builder serverBuilder = Undertow.builder();
 
-        HttpHandler containerHandler = createPathHandlerForContainer(manager.start());
-        Undertow.Builder serverBuilder = Undertow.builder()
-                .setHandler(containerHandler);
+        createHandlerChain(serverBuilder, manager.start());
+        createListeners(serverBuilder);
+        setCustomOptions(serverBuilder);
 
-        // Create listeners
+        return serverBuilder;
+    }
+
+    private void createHandlerChain(Builder serverBuilder, HttpHandler containerManagerHandler) {
+        HttpHandler next = containerManagerHandler;
+
+        if (options.accessLoggerClassName != null) {
+            try {
+                Class<? extends AccessLoggerHandler> loggerClass = Class.forName(
+                        options.accessLoggerClassName,
+                        true, classLoader).asSubclass(AccessLoggerHandler.class);
+                Constructor<? extends AccessLoggerHandler> loggerConstructor = loggerClass
+                        .getConstructor(HttpHandler.class, String.class, String.class, String.class);
+
+                HttpHandler accessLoggerHandler = loggerConstructor.newInstance(next,
+                        "WEB_APP_NAME", // TODO set App name
+                        options.simpleAccessLoggerFile, options.simpleAccessLoggerFormat);
+
+                next = accessLoggerHandler;
+            } catch (Throwable e) {
+                log.error("Access logger could not be created. "
+                        + "This feature is disabled! Reason: " + e.getMessage());
+            }
+        }
+
+        HttpHandler redirectHandler = createRedirectHandlerForContainer(next);
+
+        serverBuilder.setHandler(redirectHandler);
+    }
+
+    private void createListeners(Undertow.Builder serverBuilder) {
         SimpleListenerBuilder simpleListenerBuilder = new SimpleListenerBuilder(options);
         simpleListenerBuilder.setHttpListener(serverBuilder);
         simpleListenerBuilder.setAjpListener(serverBuilder);
 
         new HttpsListenerBuilder(options).setHttpsListener(serverBuilder);
-
-        // Set specific options
-        setCustomOptions(serverBuilder);
-
-        return serverBuilder;
     }
 
     private void setCustomOptions(Builder serverBuilder) {
@@ -128,7 +160,8 @@ public class UndertowInitiator {
     }
 
     private boolean isDefaultHttpsTimeout() {
-        if (options.httpsKeepAliveTimeout.equals(Configuration.getIntProperty("Options.defaultValue.httpsKeepAliveTimeout"))) {
+        if (options.httpsKeepAliveTimeout.equals(Configuration
+                .getIntProperty("Options.defaultValue.httpsKeepAliveTimeout"))) {
             return true;
         }
         else {
@@ -137,7 +170,8 @@ public class UndertowInitiator {
     }
 
     private boolean isDefaultHttpTimeout() {
-        if (options.httpKeepAliveTimeout.equals(Configuration.getIntProperty("Options.defaultValue.httpKeepAliveTimeout"))) {
+        if (options.httpKeepAliveTimeout.equals(Configuration
+                .getIntProperty("Options.defaultValue.httpKeepAliveTimeout"))) {
             return true;
         }
         else {
@@ -145,7 +179,7 @@ public class UndertowInitiator {
         }
     }
 
-    private HttpHandler createPathHandlerForContainer(HttpHandler containerManagerHandler) {
+    private HttpHandler createRedirectHandlerForContainer(HttpHandler containerManagerHandler) {
         if (applicationContextPath.isEmpty()) {
             return containerManagerHandler;
         }
@@ -189,6 +223,7 @@ public class UndertowInitiator {
 
         // TODO solve env-entry
 
+        // servletContainerBuilder.
         return servletContainerBuilder;
     }
 
