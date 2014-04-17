@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE web-app
+    PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+    "http://java.sun.com/dtd/web-app_2_3.dtd">
+
+<web-app>
+  <display-name>Undertow4JenkinsTestWebapp</display-name>
+  <description>Test application</description>
+
+	<servlet>
+		<servlet-name>CountRequestsServlet</servlet-name>
+		<servlet-class>undertow4jenkins.testApplication.servlets.CountRequestsServlet</servlet-class>    
+		<init-param>
+			<param-name>offset</param-name>
+			<param-value>1000</param-value>
+		</init-param>
+	</servlet>
+	
+	
+	<servlet-mapping>
+		<servlet-name>CountRequestsServlet</servlet-name>
+		<url-pattern>/CountRequestsServlet</url-pattern>
+	</servlet-mapping>
+	
+
+  <security-constraint>
+    <display-name>SecurityConstraint</display-name>
+    <web-resource-collection>
+      <web-resource-name>secured</web-resource-name>
+      <url-pattern>/secure/*</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>loginUser</role-name>
+    </auth-constraint>
+  </security-constraint>
+  <login-config>
+    <auth-method>BASIC</auth-method>
+  </login-config>
+  <security-role>
+    <role-name>loginUser</role-name>
+  </security-role>
+</web-app>
