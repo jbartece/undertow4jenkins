@@ -38,17 +38,22 @@ public class OptionParser {
         org.apache.commons.cli.Options options = new org.apache.commons.cli.Options();
 
         for (Field field : Options.class.getFields()) {
+            String optionName = fieldNameToOptionName(field.getName());
             if (field.getType().equals(Boolean.class)) {
                 // Boolean arguments does not expect additional value
-                options.addOption(new Option(field.getName(), false, ""));
+                options.addOption(new Option(null, optionName, false, "")); //TODO
             }
             else {
                 // Other types expects arguments with value (Integer/String)
-                options.addOption(new Option(field.getName(), true, ""));
+                options.addOption(new Option(null, optionName, true, ""));
             }
         }
 
         return options;
+    }
+
+    private String fieldNameToOptionName(String name) {
+        return name.replaceFirst("_", ".");  //TODO optimize
     }
 
     private Options loadParsedOptions(CommandLine parsedOptions) {
@@ -56,24 +61,25 @@ public class OptionParser {
 
         for (Field field : Options.class.getFields()) {
             Class<?> fieldClass = field.getType();
-            if (parsedOptions.hasOption(field.getName())) {
-                saveOptionValue(parsedOptions, options, field, fieldClass);
+            String optionNameOfField = fieldNameToOptionName(field.getName());
+            
+            if (parsedOptions.hasOption(optionNameOfField)) {
+                saveOptionValue(parsedOptions, options, field, optionNameOfField, fieldClass);
             }
         }
 
         return options;
     }
 
-    private void saveOptionValue(CommandLine parsedOptions, Options options, Field field,
-            Class<?> fieldClass) {
+    private void saveOptionValue(CommandLine parsedOptions, Options options, Field field, 
+            String optionName, Class<?> fieldClass) {
         try {
             if (fieldClass.equals(String.class)) {
-                field.set(options, parsedOptions.getOptionValue(field.getName()));
+                field.set(options, parsedOptions.getOptionValue(optionName));
             }
             else {
                 if (fieldClass.equals(Integer.class)) {
-                    Integer value = Integer.parseInt(parsedOptions.getOptionValue(field
-                            .getName()));
+                    Integer value = Integer.parseInt(parsedOptions.getOptionValue(optionName));
                     field.set(options, value);
                 }
                 else {

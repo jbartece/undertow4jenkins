@@ -69,8 +69,8 @@ public class Options {
     
     //Currently ignored (not properly defined)
     public String accessLoggerClassName;
-    public String simpleAccessLoggerFormat;
-    public String simpleAccessLoggerFile;
+    public String simpleAccessLogger_format; 
+    public String simpleAccessLogger_file; 
     
     public Options() {
         loadOptionsDefaultValues();
@@ -126,11 +126,16 @@ public class Options {
                 + (webappsDir != null ? "webappsDir=" + webappsDir + ", " : "")
                 + (hostsDir != null ? "hostsDir=" + hostsDir + ", " : "")
                 + (prefix != null ? "prefix=" + prefix + ", " : "")
+                + (config != null ? "config=" + config + ", " : "")
+                + (commonLibFolder != null ? "commonLibFolder=" + commonLibFolder + ", " : "")
+                + (logThrowingLineNo != null ? "logThrowingLineNo=" + logThrowingLineNo + ", " : "")
+                + (logThrowingThread != null ? "logThrowingThread=" + logThrowingThread + ", " : "")
+                + (debug != null ? "debug=" + debug + ", " : "")
                 + (httpPort != null ? "httpPort=" + httpPort + ", " : "")
                 + (httpListenAdress != null ? "httpListenAdress=" + httpListenAdress + ", " : "")
                 + (httpDoHostnameLookups != null ? "httpDoHostnameLookups=" + httpDoHostnameLookups
                         + ", " : "")
-                + (httpKeepAliveTimeout != null ? "httpKeepAliceTimeout=" + httpKeepAliveTimeout
+                + (httpKeepAliveTimeout != null ? "httpKeepAliveTimeout=" + httpKeepAliveTimeout
                         + ", " : "")
                 + (httpsPort != null ? "httpsPort=" + httpsPort + ", " : "")
                 + (httpsListenAdress != null ? "httpsListenAdress=" + httpsListenAdress + ", " : "")
@@ -167,10 +172,10 @@ public class Options {
                         : "")
                 + (accessLoggerClassName != null ? "accessLoggerClassName=" + accessLoggerClassName
                         + ", " : "")
-                + (simpleAccessLoggerFormat != null ? "simpleAccessLoggerFormat="
-                        + simpleAccessLoggerFormat + ", " : "")
-                + (simpleAccessLoggerFile != null ? "simpleAccessLoggerFile="
-                        + simpleAccessLoggerFile : "") + "]";
+                + (simpleAccessLogger_format != null ? "simpleAccessLogger_format="
+                        + simpleAccessLogger_format + ", " : "")
+                + (simpleAccessLogger_file != null ? "simpleAccessLogger_file="
+                        + simpleAccessLogger_file : "") + "]";
     }
     
 }
