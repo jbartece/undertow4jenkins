@@ -29,18 +29,16 @@ public class ServletLoader {
     private static ServletInfo createServletInfo(
             Class<? extends javax.servlet.Servlet> servletClass,
             Servlet servletData, List<ServletMapping> mappingData) {
-        String mapping = null;
-
+        ServletInfo servlet = servlet(servletData.servletName, servletClass);
+        
         for (ServletMapping servletMapping : mappingData) {
             if (servletData.servletName.equals(servletMapping.servletName))
-                mapping = servletMapping.urlPattern;
+                servlet.addMapping(servletMapping.urlPattern);
         }
 
-        if (mapping == null)
-            throw new RuntimeException("Servlet has to have specified servlet-mapping entry!");
+//        if (mapping == null)
+//            throw new RuntimeException("Servlet has to have specified servlet-mapping entry!");
 
-        ServletInfo servlet = servlet(servletData.servletName, servletClass)
-                .addMapping(mapping);
 
         for(InitParam param : servletData.initParams) 
             servlet.addInitParam(param.paramName, param.paramValue); 
