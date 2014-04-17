@@ -61,7 +61,7 @@ public class Launcher {
             // Create class loader to load classed from jenkins.war archive.
             // It is needed to load servlet classes such as Stapler.
             this.jenkinsWarClassLoader = WarWorker.createJarsClassloader(options.warfile,
-                    pathToTmpDir);
+                    pathToTmpDir, getClass().getClassLoader());
 
             WebXmlParser parser = new WebXmlParser();
             WebXmlContent webXmlContent = parser.parse(pathToTmpDir + "WEB-INF/web.xml");
@@ -169,9 +169,9 @@ public class Launcher {
         undertowInstance.start();
     }
 
-    private void shutdownApplication() {
+    public void shutdownApplication() {
         undertowInstance.stop();
-        System.exit(0);
+//        System.exit(0);
     }
 
     /**
@@ -200,7 +200,7 @@ public class Launcher {
     public static void main(String[] args) {
         Logger log = LoggerFactory.getLogger("Main");
         log.info("Undertow4Jenkins is starting...");
-
+        
         OptionParser optionParser = new OptionParser();
         Options options = optionParser.parse(args);
         if(options == null)

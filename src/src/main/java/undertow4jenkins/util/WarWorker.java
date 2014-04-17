@@ -14,28 +14,33 @@ import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import undertow4jenkins.Launcher;
-
 public class WarWorker {
 
     // private static final Logger log = LoggerFactory
     // .getLogger("undertow4jenkins.util.WarClassLoader");
 
-    public static ClassLoader createJarsClassloader(String warfile, String warDir)
+    public static ClassLoader createJarsClassloader(String warfile, String warDir,
+            ClassLoader parentClassLoader)
             throws IOException {
+        List<URL> jarUrls = new ArrayList<URL>();
         final String relativeLibPath = "WEB-INF/lib/";
         File libDir = new File(warDir + relativeLibPath);
 
-        List<URL> jarUrls = new ArrayList<URL>();
-        for (File file : libDir.listFiles()) {
-            if (file.getName().endsWith(".jar")) {
-                jarUrls.add(file.toURI().toURL());
+        if (libDir.exists()) {
+            for (File file : libDir.listFiles()) {
+                if (file.getName().endsWith(".jar")) {
+                    jarUrls.add(file.toURI().toURL());
+                }
             }
+        }
+        
+        File classesDir = new File(warDir + "WEB-INF/classes");
+        if(classesDir.exists()) {
+            jarUrls.add(classesDir.toURI().toURL());
         }
 
         return new URLClassLoader(
-                jarUrls.toArray(new URL[jarUrls.size()]),
-                Launcher.class.getClassLoader());
+                jarUrls.toArray(new URL[jarUrls.size()]), parentClassLoader);
     }
 
     public static void extractFilesFromWar(String warfilePath, String pathToTmpDir)
