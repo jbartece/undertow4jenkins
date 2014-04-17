@@ -28,8 +28,7 @@ public class SimpleAccessLoggerHandlerTest extends AbstractTest {
         containerInstance = new Launcher(options);
         containerInstance.run();
         
-        Thread.sleep(500);
-        makeRequest("http://localhost:5555/prefix/CountRequestsServlet");
+        makeRequest("http://127.0.0.1:5555/prefix/CountRequestsServlet");
 
         // Check content of log file
         String text = FileUtils.readFileToString(logFile);

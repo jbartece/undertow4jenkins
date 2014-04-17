@@ -106,22 +106,22 @@ public class SimpleAccessLogger implements AccessLoggerHandler {
         synchronized (DF) {
             date = DF.format(new Date());
         }
-        String logLine = pattern;
-//        String logLine = patternReplace(pattern,
-//                new String[][] {
-//                        { "###ip###", exchange.getHostName() },
-//                        { "###user###",
-//                                toString(exchange.getSecurityContext()
-//                                        .getAuthenticatedAccount()) }, // TODO
-//                        { "###time###", "[" + date + "]" },
-//                        { "###uriLine###", uriLine },
-//                        { "###status###", "" + status },
-//                        { "###size###", "" + size },
-//                        { "###referer###",
-//                                hyphenIfNull(exchange.getRequestHeaders().getFirst("Referer")) },
-//                        { "###userAgent###",
-//                                hyphenIfNull(exchange.getRequestHeaders().getFirst("User-Agent")) }
-//                });
+
+        String logLine = patternReplace(pattern,
+                new String[][] {
+                        { "###ip###", exchange.getHostName() }, // TODO translate to IP?
+                        { "###user###", "-" },
+                        // toString(exchange.getSecurityContext()
+                        // .getAuthenticatedAccount()) }, // TODO
+                        { "###time###", "[" + date + "]" },
+                        { "###uriLine###", uriLine },
+                        { "###status###", "" + status },
+                        { "###size###", "" + size },
+                        { "###referer###",
+                                hyphenIfNull(exchange.getRequestHeaders().getFirst("Referer")) },
+                        { "###userAgent###",
+                                hyphenIfNull(exchange.getRequestHeaders().getFirst("User-Agent")) }
+                });
 
         outputWriter.println(logLine);
 
