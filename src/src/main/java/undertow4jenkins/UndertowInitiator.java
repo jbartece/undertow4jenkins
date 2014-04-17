@@ -7,8 +7,6 @@ import io.undertow.Undertow;
 import io.undertow.Undertow.Builder;
 import io.undertow.UndertowOptions;
 import io.undertow.server.HttpHandler;
-import io.undertow.server.handlers.accesslog.AccessLogHandler;
-import io.undertow.server.handlers.accesslog.DefaultAccessLogReceiver;
 import io.undertow.server.handlers.resource.FileResourceManager;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
@@ -23,7 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import undertow4jenkins.handlers.AccessLoggerHandler;
-import undertow4jenkins.handlers.SimpleAccessLoggerHandler;
 import undertow4jenkins.listener.HttpsListenerBuilder;
 import undertow4jenkins.listener.SimpleListenerBuilder;
 import undertow4jenkins.loader.ErrorPageLoader;
@@ -94,27 +91,39 @@ public class UndertowInitiator {
         HttpHandler next = containerManagerHandler;
 
         if (options.accessLoggerClassName != null) {
-            try {
-                Class<? extends AccessLoggerHandler> loggerClass = Class.forName(
-                        options.accessLoggerClassName,
-                        true, classLoader).asSubclass(AccessLoggerHandler.class);
-                Constructor<? extends AccessLoggerHandler> loggerConstructor = loggerClass
-                        .getConstructor(HttpHandler.class, String.class, String.class, String.class);
-
-                HttpHandler accessLoggerHandler = loggerConstructor.newInstance(next,
-                        "WEB_APP_NAME", // TODO set App name
-                        options.simpleAccessLoggerFile, options.simpleAccessLoggerFormat);
-
-                next = accessLoggerHandler;
-            } catch (Throwable e) {
-                log.error("Access logger could not be created. "
-                        + "This feature is disabled! Reason: " + e.getMessage());
-            }
+            next = createAccessLogger(next);
         }
 
         HttpHandler redirectHandler = createRedirectHandlerForContainer(next);
 
         serverBuilder.setHandler(redirectHandler);
+    }
+
+    private HttpHandler createAccessLogger(HttpHandler next) {
+        try {
+            Class<? extends AccessLoggerHandler> loggerClass = Class.forName(
+                    options.accessLoggerClassName,
+                    true, classLoader).asSubclass(AccessLoggerHandler.class);
+
+            Constructor<? extends AccessLoggerHandler> loggerConstructor = loggerClass
+                    .getConstructor(HttpHandler.class, String.class, String.class,
+                            String.class);
+
+            HttpHandler accessLoggerHandler = loggerConstructor.newInstance(next,
+                    "WEB_APP_NAME", // TODO set App name
+                    options.simpleAccessLogger_file, options.simpleAccessLogger_format);
+
+            next = accessLoggerHandler;
+        } catch (InvocationTargetException e) {
+            log.error("Access logger could not be created. "
+                    // + "This feature is disabled! Reason: " + e.getCause().getMessage()); TODO
+                    + "This feature is disabled! Reason: ", e);
+        } catch (Throwable e) {
+            log.error("Access logger could not be created. "
+                    + "This feature is disabled! Reason: " + e.getMessage());
+        }
+
+        return next;
     }
 
     private void createListeners(Undertow.Builder serverBuilder) {
