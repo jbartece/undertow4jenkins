@@ -68,11 +68,14 @@ public class UndertowInitiator {
     }
 
     private void setContextPath(String prefix) {
-        if (prefix.isEmpty()) {
+        if (prefix.isEmpty() || (prefix.startsWith("/") && prefix.length() == 1)) {
             applicationContextPath = "";
         }
         else {
-            applicationContextPath = "/" + prefix;
+            if (prefix.startsWith("/"))
+                applicationContextPath = prefix;
+            else
+                applicationContextPath = "/" + prefix;
         }
     }
 
