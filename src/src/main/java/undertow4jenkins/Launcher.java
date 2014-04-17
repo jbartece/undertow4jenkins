@@ -2,10 +2,13 @@ package undertow4jenkins;
 
 import io.undertow.Undertow;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.xml.stream.XMLStreamException;
@@ -41,6 +44,8 @@ public class Launcher {
 
     private Undertow undertowInstance;
 
+    private List<Closeable> objectsToClose = new ArrayList<Closeable>();
+
     /**
      * Field for usage, which can be overridden outside this class
      */
@@ -71,7 +76,7 @@ public class Launcher {
 
             UndertowInitiator undertowInitiator = new UndertowInitiator(jenkinsWarClassLoader,
                     options, pathToTmpDir);
-            undertowInstance = undertowInitiator.initUndertow(webXmlContent);
+            undertowInstance = undertowInitiator.initUndertow(webXmlContent, objectsToClose);
             undertowInstance.start();
 
         } catch (ServletException e) {
@@ -118,7 +123,7 @@ public class Launcher {
         } catch (IOException e) {
             log.error("Error occured on control port. Control port is disabled.");
         } catch (Throwable e) {
-            //If program is killed with sigterm - OK
+            // If program is killed with sigterm - OK
         } finally {
             try {
                 if (controlSocket != null)
@@ -171,7 +176,13 @@ public class Launcher {
 
     public void shutdownApplication() {
         undertowInstance.stop();
-//        System.exit(0);
+
+        try {
+            for (Closeable o : objectsToClose)
+                o.close();
+        } catch (IOException e) {
+        }
+        // System.exit(0);
     }
 
     /**
@@ -200,12 +211,12 @@ public class Launcher {
     public static void main(String[] args) {
         Logger log = LoggerFactory.getLogger("Main");
         log.info("Undertow4Jenkins is starting...");
-        
+
         OptionParser optionParser = new OptionParser();
         Options options = optionParser.parse(args);
-        if(options == null)
+        if (options == null)
             return;
-        
+
         Launcher launcher = new Launcher(options);
         launcher.run();
     }

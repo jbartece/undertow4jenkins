@@ -11,9 +11,11 @@ import io.undertow.server.handlers.resource.FileResourceManager;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
 
+import java.io.Closeable;
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
 import javax.servlet.ServletException;
 
@@ -45,6 +47,8 @@ public class UndertowInitiator {
 
     // Has to be set in constructor
     private String applicationContextPath;
+    
+    List<Closeable> objToClose;
 
     public UndertowInitiator(ClassLoader classLoader, Options options, String pathToTmpDir) {
         this.classLoader = classLoader;
@@ -53,9 +57,10 @@ public class UndertowInitiator {
         setContextPath(options.prefix);
     }
 
-    public Undertow initUndertow(WebXmlContent webXmlContent) throws ServletException,
+    public Undertow initUndertow(WebXmlContent webXmlContent, List<Closeable> objToClose) throws ServletException,
             ClassNotFoundException {
-
+        this.objToClose = objToClose;
+        
         DeploymentManager manager = defaultContainer().addDeployment(
                 createServletContainerDeployment(webXmlContent));
         manager.deploy();
@@ -108,16 +113,16 @@ public class UndertowInitiator {
             Constructor<? extends AccessLoggerHandler> loggerConstructor = loggerClass
                     .getConstructor(HttpHandler.class, String.class, String.class,
                             String.class);
-
-            HttpHandler accessLoggerHandler = loggerConstructor.newInstance(next,
-                    "WEB_APP_NAME", // TODO set App name
+            
+            AccessLoggerHandler accessLoggerHandler = loggerConstructor.newInstance(next,
+                    "webapp", // same value of app name as in winstone
                     options.simpleAccessLogger_file, options.simpleAccessLogger_format);
-
+            objToClose.add(accessLoggerHandler);
+            
             next = accessLoggerHandler;
         } catch (InvocationTargetException e) {
             log.error("Access logger could not be created. "
-                    // + "This feature is disabled! Reason: " + e.getCause().getMessage()); TODO
-                    + "This feature is disabled! Reason: ", e);
+                     + "This feature is disabled! Reason: " + e.getCause().getMessage()); 
         } catch (Throwable e) {
             log.error("Access logger could not be created. "
                     + "This feature is disabled! Reason: " + e.getMessage());

@@ -91,7 +91,7 @@ public class SimpleAccessLogger implements AccessLoggerHandler {
 
     @Override
     public void handleRequest(HttpServerExchange exchange) throws Exception {
-        log(exchange);
+        log(exchange);  //TODO check and compare with access logger in Undertow
         next.handleRequest(exchange);
     }
 
@@ -135,7 +135,7 @@ public class SimpleAccessLogger implements AccessLoggerHandler {
         return acc != null ? acc.getPrincipal().getName() : "-";
     }
 
-    // TODO add Closeable interface and close it when app ends
+    @Override
     public void close() throws IOException {
         if (outputWriter != null) {
             outputWriter.flush();
