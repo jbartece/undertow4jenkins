@@ -1,4 +1,4 @@
-package undertow4jenkins;
+package undertow4jenkins.listener;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
@@ -6,6 +6,8 @@ import java.net.UnknownHostException;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
+import undertow4jenkins.AbstractTest;
+import undertow4jenkins.Launcher;
 import undertow4jenkins.option.Options;
 
 public class HttpConnectionTest extends AbstractTest {
