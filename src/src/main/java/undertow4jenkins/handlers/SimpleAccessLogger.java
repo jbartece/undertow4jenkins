@@ -1,5 +1,6 @@
 package undertow4jenkins.handlers;
 
+import io.undertow.security.api.SecurityContext;
 import io.undertow.security.idm.Account;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
@@ -110,9 +111,7 @@ public class SimpleAccessLogger implements AccessLoggerHandler {
         String logLine = patternReplace(pattern,
                 new String[][] {
                         { "###ip###", exchange.getHostName() }, // TODO translate to IP?
-                        { "###user###", "-" },
-                        // toString(exchange.getSecurityContext()
-                        // .getAuthenticatedAccount()) }, // TODO
+                        { "###user###", getUserName(exchange.getSecurityContext()) }, //TODO check
                         { "###time###", "[" + date + "]" },
                         { "###uriLine###", uriLine },
                         { "###status###", "" + status },
@@ -125,6 +124,13 @@ public class SimpleAccessLogger implements AccessLoggerHandler {
 
         outputWriter.println(logLine);
 
+    }
+
+    private String getUserName(SecurityContext securityContext) {
+        if(securityContext != null)
+            return toString(securityContext.getAuthenticatedAccount());
+        else
+            return "-";
     }
 
     private String hyphenIfNull(String str) {
