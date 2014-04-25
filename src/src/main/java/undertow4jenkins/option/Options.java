@@ -1,6 +1,8 @@
 package undertow4jenkins.option;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,13 +63,13 @@ public class Options {
     public Boolean help;
     public Boolean version;
     
-    //Currently ignored (not properly defined)
+    //
     public String realmClassName;
-    public String argumentsRealmPasswd;     //TODO - temporary implementation (has to be checked later)
-    public String argumentsRealmRoles;      //TODO - temporary implementation (has to be checked later)
-    public String fileRealConfigFile;       //TODO - temporary implementation (has to be checked later)
+    public Map<String, String> argumentsRealmPasswd = new HashMap<String, String>();     
+    public Map<String, String[]> argumentsRealmRoles = new HashMap<String, String[]>();      
+    public String fileRealm_configFile;       
     
-    //Currently ignored (not properly defined)
+    //
     public String accessLoggerClassName;
     public String simpleAccessLogger_format; 
     public String simpleAccessLogger_file; 
@@ -168,8 +170,8 @@ public class Options {
                         + ", " : "")
                 + (argumentsRealmRoles != null ? "argumentsRealmRoles=" + argumentsRealmRoles
                         + ", " : "")
-                + (fileRealConfigFile != null ? "fileRealConfigFile=" + fileRealConfigFile + ", "
-                        : "")
+                + (fileRealm_configFile != null ? "fileRealm_configFile=" + fileRealm_configFile
+                        + ", " : "")
                 + (accessLoggerClassName != null ? "accessLoggerClassName=" + accessLoggerClassName
                         + ", " : "")
                 + (simpleAccessLogger_format != null ? "simpleAccessLogger_format="
