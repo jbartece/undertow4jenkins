@@ -24,7 +24,7 @@ public class ArgumentsRealmTest extends AbstractTest {
         opts.argumentsRealmPasswd = passwdMap;
         
         Map<String, String[]> rolesMap = new HashMap<String, String[]>();
-        rolesMap.put("joe", new String[]{"user"});
+        rolesMap.put("joe", new String[]{"loginUser"});
         opts.argumentsRealmRoles = rolesMap;
 
         containerInstance = new Launcher(opts);
