@@ -3,6 +3,7 @@ package undertow4jenkins;
 import io.undertow.Undertow;
 
 import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
@@ -56,12 +57,28 @@ public class Launcher {
         log.debug(options.toString());
     }
 
+    public static boolean deleteDirectory(File directory) {
+        if(directory.exists()){
+            for(File f : directory.listFiles()) {
+                if(f.isDirectory()) {
+                    deleteDirectory(f);
+                }
+                else
+                    f.delete();
+            }
+        }
+        return(directory.delete());
+    }
+    
     public void run() {
 
         if (checkHelpParams())
             return;
 
         try {
+            //TODO temporary 
+            deleteDirectory(new File(pathToTmpDir));
+            
             WarWorker.extractFilesFromWar(options.warfile, pathToTmpDir);
             // Create class loader to load classed from jenkins.war archive.
             // It is needed to load servlet classes such as Stapler.
