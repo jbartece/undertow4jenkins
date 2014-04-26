@@ -32,7 +32,7 @@ public class ArgumentsRealmTest extends AbstractTest {
 
         try {
             makeRequest("http://localhost:13000/secure/secret.txt");
-            fail("Autentication should be required!");
+            fail("Authentication should be required!");
         } catch (AuthorizationRequiredException e) {
             // OK
         }
