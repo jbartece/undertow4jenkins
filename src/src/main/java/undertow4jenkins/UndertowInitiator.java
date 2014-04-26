@@ -223,7 +223,7 @@ public class UndertowInitiator {
                 .addSecurityConstraints(
                         SecurityLoader.createSecurityConstraints(webXmlContent.securityConstraints))
                 .setLoginConfig(
-                        SecurityLoader.createLoginConfig(webXmlContent.loginConfig, "JenkinsRealm"))
+                        SecurityLoader.createLoginConfig(webXmlContent.loginConfig, "Jenkins"))
                 .addErrorPages(ErrorPageLoader.createErrorPage(webXmlContent.errorPages))
                 .addMimeMappings(
                         MimeLoader
