@@ -33,6 +33,7 @@ import undertow4jenkins.loader.SecurityLoader;
 import undertow4jenkins.loader.ServletLoader;
 import undertow4jenkins.option.Options;
 import undertow4jenkins.parser.WebXmlContent;
+import undertow4jenkins.security.ArgumentsIdentityManager;
 import undertow4jenkins.util.Configuration;
 
 public class UndertowInitiator {
@@ -47,7 +48,7 @@ public class UndertowInitiator {
 
     // Has to be set in constructor
     private String applicationContextPath;
-    
+
     List<Closeable> objToClose;
 
     public UndertowInitiator(ClassLoader classLoader, Options options, String pathToTmpDir) {
@@ -57,10 +58,11 @@ public class UndertowInitiator {
         setContextPath(options.prefix);
     }
 
-    public Undertow initUndertow(WebXmlContent webXmlContent, List<Closeable> objToClose) throws ServletException,
+    public Undertow initUndertow(WebXmlContent webXmlContent, List<Closeable> objToClose)
+            throws ServletException,
             ClassNotFoundException {
         this.objToClose = objToClose;
-        
+
         DeploymentManager manager = defaultContainer().addDeployment(
                 createServletContainerDeployment(webXmlContent));
         manager.deploy();
@@ -113,16 +115,16 @@ public class UndertowInitiator {
             Constructor<? extends AccessLoggerHandler> loggerConstructor = loggerClass
                     .getConstructor(HttpHandler.class, String.class, String.class,
                             String.class);
-            
+
             AccessLoggerHandler accessLoggerHandler = loggerConstructor.newInstance(next,
                     "webapp", // same value of app name as in winstone
                     options.simpleAccessLogger_file, options.simpleAccessLogger_format);
             objToClose.add(accessLoggerHandler);
-            
+
             next = accessLoggerHandler;
         } catch (InvocationTargetException e) {
             log.error("Access logger could not be created. "
-                     + "This feature is disabled! Reason: " + e.getCause().getMessage()); 
+                    + "This feature is disabled! Reason: " + e.getCause().getMessage());
         } catch (Throwable e) {
             log.error("Access logger could not be created. "
                     + "This feature is disabled! Reason: " + e.getMessage());
@@ -220,11 +222,14 @@ public class UndertowInitiator {
                 .addSecurityRoles(SecurityLoader.createSecurityRoles(webXmlContent.securityRoles))
                 .addSecurityConstraints(
                         SecurityLoader.createSecurityConstraints(webXmlContent.securityConstraints))
-                .setLoginConfig(SecurityLoader.createLoginConfig(webXmlContent.loginConfig))
+                .setLoginConfig(
+                        SecurityLoader.createLoginConfig(webXmlContent.loginConfig, "JenkinsRealm"))
                 .addErrorPages(ErrorPageLoader.createErrorPage(webXmlContent.errorPages))
                 .addMimeMappings(
                         MimeLoader
                                 .createMimeMappings(webXmlContent.mimeMappings, options.mimeTypes));
+
+        setSecurityActions(servletContainerBuilder);
 
         FilterLoader.addFilterMappings(webXmlContent.filterMappings, servletContainerBuilder);
         setServletAppVersion(webXmlContent.webAppVersion, servletContainerBuilder);
@@ -242,6 +247,18 @@ public class UndertowInitiator {
 
         // servletContainerBuilder.
         return servletContainerBuilder;
+    }
+
+    private void setSecurityActions(DeploymentInfo servletContainerBuilder) {
+        ArgumentsIdentityManager idManager = new ArgumentsIdentityManager(
+                options.argumentsRealmPasswd, options.argumentsRealmRoles);
+        servletContainerBuilder.setIdentityManager(idManager);
+
+        
+        // servletContainerBuilder.addFirstAuthenticationMechanism(name, mechanism)
+        // servletContainerBuilder.setSecurityContextFactory(securityContextFactory);
+        // servletContainerBuilder.setAuthorizationManager(authorizationManager)
+
     }
 
     private void setDisplayName(String displayName, DeploymentInfo servletContainerBuilder) {

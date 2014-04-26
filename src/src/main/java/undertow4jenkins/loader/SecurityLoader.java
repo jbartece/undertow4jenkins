@@ -32,12 +32,12 @@ public class SecurityLoader {
     }
 
     public static LoginConfig createLoginConfig(
-            undertow4jenkins.parser.WebXmlContent.LoginConfig configData){
+            undertow4jenkins.parser.WebXmlContent.LoginConfig configData, String realmName){
         if(configData.authMethod != null && configData.formErrorPage != null && configData.formLoginPage != null)
-            return new LoginConfig(configData.authMethod, "", configData.formLoginPage, configData.formErrorPage);
+            return new LoginConfig(configData.authMethod, realmName, configData.formLoginPage, configData.formErrorPage);
 
         if(configData.authMethod != null )
-            return new LoginConfig(configData.authMethod, "");
+            return new LoginConfig(configData.authMethod, realmName);
         
          throw new RuntimeException("Not properly set login-config in web.xml!");    
     }
