@@ -34,6 +34,7 @@ public class SecurityLoader {
             }
             
             constraint.addWebResourceCollection(webResourceCollection);
+            securityConstraints.add(constraint);
         }
 
         return securityConstraints;
