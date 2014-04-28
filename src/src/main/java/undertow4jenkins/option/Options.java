@@ -19,7 +19,6 @@ public class Options {
     public String warfile;
 
     //TODO
-    public String config;
     public String commonLibFolder;
 
     //
@@ -144,7 +143,6 @@ public class Options {
                 + (webappsDir != null ? "webappsDir=" + webappsDir + ", " : "")
                 + (hostsDir != null ? "hostsDir=" + hostsDir + ", " : "")
                 + (prefix != null ? "prefix=" + prefix + ", " : "")
-                + (config != null ? "config=" + config + ", " : "")
                 + (commonLibFolder != null ? "commonLibFolder=" + commonLibFolder + ", " : "")
                 + (logThrowingLineNo != null ? "logThrowingLineNo=" + logThrowingLineNo + ", " : "")
                 + (logThrowingThread != null ? "logThrowingThread=" + logThrowingThread + ", " : "")

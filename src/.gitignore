@@ -1,2 +1,5 @@
 /bin
 /target
+configFile.properties
+undertow4jenkins.properties
+winstone.properties
