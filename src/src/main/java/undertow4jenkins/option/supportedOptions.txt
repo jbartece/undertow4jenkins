@@ -1,16 +1,10 @@
-This options don't have to be supported
---webappsDir             = set directory for multiple webapps to be deployed from
---hostsDir               = set directory for name-based virtual hosts to be deployed from
-
-This options have to be supported
---webroot                = set document root folder.
-
 ##############################################################################################################################
 This options have to be supported
 "   --config                 = load configuration properties from here. Default is ./winstone.properties\n" +
 "   --commonLibFolder        = folder for additional jar files. Default is ./lib\n" +
 
                 
+"   --webroot                = set document root folder.
 "   --spdy                   = Enable SPDY. See http://wiki.eclipse.org/Jetty/Feature/NPN\n" 
 
 "Security options:\n" +
@@ -22,9 +16,6 @@ This options have to be supported
 "   --fileRealm.configFile         = File containing users/passwds/roles. Only valid for the FileRealm realm class\n" +
 "   \n" +
 
-"   --logThrowingLineNo      = show the line no that logged the message (slow). Default is false\n" +
-"   --logThrowingThread      = show the thread that logged the message. Default is false\n" +
-"   --debug                  = set the level of debug msgs (1-9). Default is 5 (INFO level)\n" +
 
 ##############################################################################################################################
 #### Solved options: 
@@ -75,12 +66,19 @@ This options have to be supported
 "   --httpKeepAliveTimeout   = how long idle HTTP keep-alive connections are kept around (in ms; default 5000)?\n" +
 "   --httpsKeepAliveTimeout   = how long idle HTTPS keep-alive connections are kept around (in ms; default 5000)?\n" +
    
-#Not supported by Undertow and not needed
+#Not supported by Undertow4Jenkins and not essential
 "   --handlerCountMaxIdle    = set the max no of idle worker threads to allow. Default is 5\n" +            
+"   --logThrowingThread      = show the thread that logged the message. Default is false\n" +
+
+"   --debug                  = set the level of debug msgs (1-9). Default is 5 (INFO level)\n" +
+
+"   --webappsDir             = set directory for multiple webapps to be deployed from
+"   --hostsDir               = set directory for name-based virtual hosts to be deployed from
                 
 ##############################################################################################################################
 Options not used in Winstone 2.0:
 "   --httpsDoHostnameLookups = enable host name lookups on incoming https connections (true/false). Default is false\n" +
 "   --httpDoHostnameLookups  = enable host name lookups on incoming http connections (true/false). Default is false\n" +
 "   --handlerCountStartup    = set the no of worker threads to spawn at startup. Default is 5\n" +
+"   --logThrowingLineNo      = show the line no that logged the message (slow). Default is false\n" +
 

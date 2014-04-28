@@ -3,6 +3,7 @@ package undertow4jenkins.option;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -49,18 +50,18 @@ public class OptionParser {
             for (String arg : args) {
                 if (arg.startsWith("--argumentsRealm.passwd.")) {
                     String[] data = arg.substring(24).split("=");
-                    if(data.length != 2)
+                    if (data.length != 2)
                         throw new Exception();
-                    
+
                     options.argumentsRealmPasswd.put(data[0], data[1]);
                     continue;
                 }
 
                 if (arg.startsWith("--argumentsRealm.roles.")) {
                     String[] data = arg.substring(23).split("=");
-                    if(data.length != 2)
+                    if (data.length != 2)
                         throw new Exception();
-                    
+
                     options.argumentsRealmRoles.put(data[0], data[1].split(","));
                     continue;
                 }
@@ -107,6 +108,8 @@ public class OptionParser {
     }
 
     private Options loadParsedOptions(CommandLine parsedOptions, Options options) {
+        Set<String> unsupportedOptions = Options.getUnsupportedOptions();
+
         for (Field field : Options.class.getFields()) {
             if (skipOption(field.getName()))
                 continue;
@@ -115,7 +118,14 @@ public class OptionParser {
             String optionNameOfField = fieldNameToOptionName(field.getName());
 
             if (parsedOptions.hasOption(optionNameOfField)) {
-                saveOptionValue(parsedOptions, options, field, optionNameOfField, fieldClass);
+                if (unsupportedOptions.contains(field.getName())) {
+                    log.warn("Option " + field.getName() 
+                            + " is not supported in this version of container. "
+                            + "Its usage is not essential for this container.");
+                }
+                else {
+                    saveOptionValue(parsedOptions, options, field, optionNameOfField, fieldClass);
+                }
             }
         }
 

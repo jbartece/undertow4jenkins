@@ -2,7 +2,9 @@ package undertow4jenkins.option;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,26 +12,19 @@ import org.slf4j.LoggerFactory;
 import undertow4jenkins.util.Configuration;
 
 public class Options {
-    
+
+    //
+    public String prefix;
     public String webroot;
     public String warfile;
 
-    //
-    public String webappsDir;
-    public String hostsDir;
-    public String prefix;
-    
     //TODO
     public String config;
     public String commonLibFolder;
-    public Boolean logThrowingLineNo;
-    public Boolean logThrowingThread;
-    public Integer debug;
 
     //
     public Integer httpPort;
     public String httpListenAdress;
-    public Boolean httpDoHostnameLookups;
     public Integer httpKeepAliveTimeout;
 
     //
@@ -49,11 +44,7 @@ public class Options {
     public Integer controlPort;
 
     //
-    public Integer handlerCountStartup;
     public Integer handlerCountMax;
-    public Integer handlerCountMaxIdle;
-    
-    //
     public Integer sessionTimeout;
     public String mimeTypes; 
     public Integer maxParamCount;
@@ -73,6 +64,31 @@ public class Options {
     public String accessLoggerClassName;
     public String simpleAccessLogger_format; 
     public String simpleAccessLogger_file; 
+    
+    //Not supported options - only for compatibility with old versions of Winstone   
+    public String webappsDir;
+    public String hostsDir;
+    public Integer handlerCountStartup;
+    public Integer handlerCountMaxIdle;
+    public Boolean httpDoHostnameLookups;
+    public Boolean httpsDoHostnameLookups;
+    public Boolean logThrowingLineNo;
+    public Boolean logThrowingThread;
+    public Integer debug;
+    
+
+    public static Set<String> getUnsupportedOptions() {
+        Set<String> set =  new HashSet<String>();
+        set.add("webappsDir");
+        set.add("hostsDir");
+        set.add("handlerCountStartup");
+        set.add("handlerCountMaxIdle");
+        set.add("httpDoHostnameLookups");
+        set.add("logThrowingLineNo");
+        set.add("logThrowingThread");
+        set.add("debug");
+        return set;
+    }
     
     public Options() {
         loadOptionsDefaultValues();
@@ -179,5 +195,8 @@ public class Options {
                 + (simpleAccessLogger_file != null ? "simpleAccessLogger_file="
                         + simpleAccessLogger_file : "") + "]";
     }
+
+    
+
     
 }
