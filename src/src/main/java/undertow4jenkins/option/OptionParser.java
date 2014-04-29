@@ -135,7 +135,11 @@ public class OptionParser {
         if (data.length != 2)
             throw new Exception();
 
-        options.argumentsRealmRoles.put(data[0], data[1].split(","));
+        List<String> rolesList = new ArrayList<String>(3);
+        for(String role : data[1].split(",")) 
+            rolesList.add(role.trim());
+        
+        options.argumentsRealmRoles.put(data[0], rolesList.toArray(new String[0]));
     }
 
     private void parseArgumentsRealmPasswd(Options options, String arg) throws Exception {
