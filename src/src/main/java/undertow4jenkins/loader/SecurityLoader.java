@@ -26,11 +26,11 @@ public class SecurityLoader {
             SecurityConstraint constraint = new SecurityConstraint();
             WebResourceCollection webResourceCollection = new WebResourceCollection();
 
-            log.debug("UrlPattern: " + constraintData.webResourceCollection.urlPattern);
+            log.trace("UrlPattern: " + constraintData.webResourceCollection.urlPattern);
             webResourceCollection.addUrlPattern(constraintData.webResourceCollection.urlPattern);
             if (constraintData.rolesAllowed != null) {
                 constraint.addRolesAllowed(constraintData.rolesAllowed);
-                log.debug("Allowed roles: " + constraintData.rolesAllowed);
+                log.trace("Allowed roles: " + constraintData.rolesAllowed);
             }
             
             constraint.addWebResourceCollection(webResourceCollection);
@@ -43,7 +43,7 @@ public class SecurityLoader {
     public static LoginConfig createLoginConfig(
             undertow4jenkins.parser.WebXmlContent.LoginConfig configData, String realmName){
         if(configData.authMethod != null && configData.formErrorPage != null && configData.formLoginPage != null){
-            log.debug("LoginConfig: Method: " + configData.authMethod + ", realm: " + realmName + ", errorPage: " + configData.formErrorPage
+            log.trace("LoginConfig: Method: " + configData.authMethod + ", realm: " + realmName + ", errorPage: " + configData.formErrorPage
                     +  ", loginPage: " + configData.formLoginPage);
             return new LoginConfig(configData.authMethod, realmName, configData.formLoginPage, configData.formErrorPage);
         }
