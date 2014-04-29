@@ -1,7 +1,5 @@
 ##############################################################################################################################
 This options have to be supported
-"   --commonLibFolder        = folder for additional jar files. Default is ./lib\n" +
-
 "   --webroot                = set document root folder.
 "   --spdy                   = Enable SPDY. See http://wiki.eclipse.org/Jetty/Feature/NPN\n" 
 
@@ -23,7 +21,7 @@ This options have to be supported
 "   --maxParamCount=N        = set the max number of parameters allowed in a form submission to protect\n" +
 "                              against hash DoS attack (oCERT #2011-003). Default is 10000.\n" +
 "   --config                 = load configuration properties from here. Default is ./winstone.properties\n" +
-
+"   --commonLibFolder        = folder for additional jar files. Default is ./lib\n" +
 
 #HTTP
 "   --httpPort               = set the http listening port. -1 to disable, Default is 8080\n" +

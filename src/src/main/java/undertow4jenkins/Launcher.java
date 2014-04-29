@@ -79,11 +79,13 @@ public class Launcher {
             //TODO temporary 
             deleteDirectory(new File(pathToTmpDir));
             
+            //TODO check if warfile or webroot is specified
             WarWorker.extractFilesFromWar(options.warfile, pathToTmpDir);
+            
             // Create class loader to load classed from jenkins.war archive.
             // It is needed to load servlet classes such as Stapler.
-            this.jenkinsWarClassLoader = WarWorker.createJarsClassloader(options.warfile,
-                    pathToTmpDir, getClass().getClassLoader());
+            this.jenkinsWarClassLoader = WarWorker.createJarsClassloader(options.warfile, 
+                    options.commonLibFolder, pathToTmpDir, getClass().getClassLoader());
 
             WebXmlParser parser = new WebXmlParser();
             WebXmlContent webXmlContent = parser.parse(pathToTmpDir + "WEB-INF/web.xml");
@@ -108,7 +110,7 @@ public class Launcher {
             log.error("Parsing web.xml failed!", e);
         }
 
-        // ClassCastException and RuntimeException also should be catched
+        // ClassCastException and RuntimeException also should be caught
 
         listenOnControlPort(options.controlPort);
     }

@@ -16,16 +16,14 @@ import java.util.jar.JarFile;
 
 public class WarWorker {
 
-    // private static final Logger log = LoggerFactory
-    // .getLogger("undertow4jenkins.util.WarClassLoader");
-
-    public static ClassLoader createJarsClassloader(String warfile, String warDir,
-            ClassLoader parentClassLoader)
+    public static ClassLoader createJarsClassloader(String warfile,
+            String commonLib, String warDir, ClassLoader parentClassLoader)
             throws IOException {
         List<URL> jarUrls = new ArrayList<URL>();
+        
+        //Add lib dir to ClassLoader
         final String relativeLibPath = "WEB-INF/lib/";
         File libDir = new File(warDir + relativeLibPath);
-
         if (libDir.exists()) {
             for (File file : libDir.listFiles()) {
                 if (file.getName().endsWith(".jar")) {
@@ -34,9 +32,21 @@ public class WarWorker {
             }
         }
         
+        //Add classes to ClassLoader
         File classesDir = new File(warDir + "WEB-INF/classes");
         if(classesDir.exists()) {
             jarUrls.add(classesDir.toURI().toURL());
+        }
+        
+        //Add common lib to ClassLoader
+        File commonLibDir = new File(commonLib);
+        if(commonLibDir.exists() && commonLibDir.isDirectory()) {
+            for (File file : commonLibDir.listFiles()) {
+                if (file.getName().endsWith(".jar") ||
+                        file.getName().endsWith(".zip")) {
+                    jarUrls.add(file.toURI().toURL());
+                }
+            }
         }
 
         return new URLClassLoader(
