@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import undertow4jenkins.handlers.AccessLoggerHandler;
+import undertow4jenkins.handlers.SimpleAccessLogger;
 import undertow4jenkins.listener.HttpsListenerBuilder;
 import undertow4jenkins.listener.SimpleListenerBuilder;
 import undertow4jenkins.loader.ErrorPageLoader;
@@ -34,6 +35,8 @@ import undertow4jenkins.loader.SecurityLoader;
 import undertow4jenkins.loader.ServletLoader;
 import undertow4jenkins.option.Options;
 import undertow4jenkins.parser.WebXmlContent;
+import undertow4jenkins.security.ArgumentsIdentityManager;
+import undertow4jenkins.security.FileIdentityManager;
 import undertow4jenkins.util.Configuration;
 
 public class UndertowInitiator {
@@ -62,7 +65,6 @@ public class UndertowInitiator {
             throws ServletException,
             ClassNotFoundException {
         this.objToClose = objToClose;
-
         DeploymentManager manager = defaultContainer().addDeployment(
                 createServletContainerDeployment(webXmlContent));
         manager.deploy();
@@ -108,7 +110,10 @@ public class UndertowInitiator {
 
     private HttpHandler createAccessLogger(HttpHandler next) {
         try {
-            // TODO Map name to old winstone class name
+            // Compatibility with old winstone class name
+            if("winstone.accesslog.SimpleAccessLogger".equals(options.accessLoggerClassName)) 
+                options.accessLoggerClassName = SimpleAccessLogger.class.getName();
+            
             Class<? extends AccessLoggerHandler> loggerClass = Class.forName(
                     options.accessLoggerClassName,
                     true, classLoader).asSubclass(AccessLoggerHandler.class);
@@ -224,7 +229,7 @@ public class UndertowInitiator {
                 .addSecurityConstraints(
                         SecurityLoader.createSecurityConstraints(webXmlContent.securityConstraints))
                 .setLoginConfig(
-                        SecurityLoader.createLoginConfig(webXmlContent.loginConfig, "Jenkins"))
+                        SecurityLoader.createLoginConfig(webXmlContent.loginConfig, "Jenkins Realm"))
                 .addErrorPages(ErrorPageLoader.createErrorPage(webXmlContent.errorPages))
                 .addMimeMappings(
                         MimeLoader
@@ -243,10 +248,7 @@ public class UndertowInitiator {
         // Set session timeout for application
         servletContainerBuilder.setSessionManagerFactory(new JenkinsSessionManagerFactory(
                 options.sessionTimeout * 60));
-
-        // TODO solve env-entry
-
-        // servletContainerBuilder.
+        
         return servletContainerBuilder;
     }
 
@@ -278,11 +280,11 @@ public class UndertowInitiator {
 
     private void mapWinstoneRealmNamesToIdentityManager(Options options2) {
         if ("winstone.realm.ArgumentsRealm".equals(options.realmClassName)) {
-            options.realmClassName = "undertow4jenkins.security.ArgumentsIdentityManager";
+            options.realmClassName = ArgumentsIdentityManager.class.getName();
         }
         else {
             if ("winstone.realm.FileRealm".equals(options.realmClassName)) {
-                options.realmClassName = "undertow4jenkins.security.FileIdentityManager";
+                options.realmClassName = FileIdentityManager.class.getName();
             }
         }
     }

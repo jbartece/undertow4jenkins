@@ -5,9 +5,6 @@ This options have to be supported
 "   --webroot                = set document root folder.
 "   --spdy                   = Enable SPDY. See http://wiki.eclipse.org/Jetty/Feature/NPN\n" 
 
-"   --fileRealm.configFile         = File containing users/passwds/roles. Only valid for the FileRealm realm class\n" +
-"   \n" +
-
 
 ##############################################################################################################################
 #### Solved options: 
@@ -61,6 +58,8 @@ This options have to be supported
 "   \n" +
 "   --argumentsRealm.passwd.<user> = Password for user <user>. Only valid for the ArgumentsRealm realm class\n" +
 "   --argumentsRealm.roles.<user>  = Roles for user <user> (comma separated). Only valid for the ArgumentsRealm realm class\n" +
+"   \n" +
+"   --fileRealm.configFile         = File containing users/passwds/roles. Only valid for the FileRealm realm class\n" +
 "   \n" +
 
 #####################################
