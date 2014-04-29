@@ -54,7 +54,7 @@ public class OptionParser {
         return loadParsedOptions(parsedOptions, options);
     }
 
-    private String[] preprocessOptions(String[] args, Options options) throws Exception {
+    private String[] preprocessOptions(String[] args, Options options) throws ParseException {
         List<String> editedArgs = new ArrayList<String>();
 
         try {
