@@ -4,7 +4,14 @@ import io.undertow.security.idm.IdentityManager;
 
 import java.util.Map;
 
+import undertow4jenkins.CustomFatalException;
+import undertow4jenkins.option.Options;
+
 public class ArgumentsIdentityManager extends GenericIdentityManager implements IdentityManager {
+
+    public ArgumentsIdentityManager(Options options) {
+        this(options.argumentsRealmPasswd, options.argumentsRealmRoles);
+    }
 
     /**
      * Initializes identity manager and set users

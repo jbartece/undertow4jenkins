@@ -6,6 +6,7 @@ import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.Undertow.Builder;
 import io.undertow.UndertowOptions;
+import io.undertow.security.idm.IdentityManager;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.resource.FileResourceManager;
 import io.undertow.servlet.api.DeploymentInfo;
@@ -33,7 +34,6 @@ import undertow4jenkins.loader.SecurityLoader;
 import undertow4jenkins.loader.ServletLoader;
 import undertow4jenkins.option.Options;
 import undertow4jenkins.parser.WebXmlContent;
-import undertow4jenkins.security.ArgumentsIdentityManager;
 import undertow4jenkins.util.Configuration;
 
 public class UndertowInitiator {
@@ -46,7 +46,7 @@ public class UndertowInitiator {
 
     private String pathToTmpDir;
 
-    // Has to be set in constructor
+    /** Has to be set in constructor */
     private String applicationContextPath;
 
     List<Closeable> objToClose;
@@ -98,7 +98,7 @@ public class UndertowInitiator {
         HttpHandler next = containerManagerHandler;
 
         if (options.accessLoggerClassName != null) {
-            next = createAccessLogger(next);
+            next = createAccessLogger(next); // TODO move to container handlers
         }
 
         HttpHandler redirectHandler = createRedirectHandlerForContainer(next);
@@ -108,6 +108,7 @@ public class UndertowInitiator {
 
     private HttpHandler createAccessLogger(HttpHandler next) {
         try {
+            // TODO Map name to old winstone class name
             Class<? extends AccessLoggerHandler> loggerClass = Class.forName(
                     options.accessLoggerClassName,
                     true, classLoader).asSubclass(AccessLoggerHandler.class);
@@ -250,15 +251,40 @@ public class UndertowInitiator {
     }
 
     private void setSecurityActions(DeploymentInfo servletContainerBuilder) {
-        ArgumentsIdentityManager idManager = new ArgumentsIdentityManager(
-                options.argumentsRealmPasswd, options.argumentsRealmRoles);
-        servletContainerBuilder.setIdentityManager(idManager);
+        if (!options.argumentsRealmPasswd.isEmpty() || options.fileRealm_configFile != null) {
+            // Initialization of Arguments Identity Manager
+            mapWinstoneRealmNamesToIdentityManager(options); // Compatibility with old winstone class names
 
-        
-        // servletContainerBuilder.addFirstAuthenticationMechanism(name, mechanism)
-        // servletContainerBuilder.setSecurityContextFactory(securityContextFactory);
-        // servletContainerBuilder.setAuthorizationManager(authorizationManager)
+            try {
+                // Locate identity manager class
+                Class<? extends IdentityManager> managerClass =
+                        Class.forName(options.realmClassName, true, classLoader)
+                                .asSubclass(IdentityManager.class);
+                Constructor<? extends IdentityManager> managerConstructor = managerClass
+                        .getConstructor(Options.class);
 
+                // Create and add classloader to deployment
+                IdentityManager idManager = managerConstructor.newInstance(options);
+                servletContainerBuilder.setIdentityManager(idManager);
+            } catch (InvocationTargetException e) {
+                log.error("Security support could not be created. "
+                        + "This feature is disabled! Reason: " + e.getCause().getMessage());
+            } catch (Throwable e) {
+                log.error("Security support could not be created. "
+                        + "This feature is disabled! Reason: " + e.getMessage());
+            }
+        }
+    }
+
+    private void mapWinstoneRealmNamesToIdentityManager(Options options2) {
+        if ("winstone.realm.ArgumentsRealm".equals(options.realmClassName)) {
+            options.realmClassName = "undertow4jenkins.security.ArgumentsIdentityManager";
+        }
+        else {
+            if ("winstone.realm.FileRealm".equals(options.realmClassName)) {
+                options.realmClassName = "undertow4jenkins.security.FileIdentityManager";
+            }
+        }
     }
 
     private void setDisplayName(String displayName, DeploymentInfo servletContainerBuilder) {

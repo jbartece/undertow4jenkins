@@ -1,18 +1,10 @@
 ##############################################################################################################################
 This options have to be supported
-"   --config                 = load configuration properties from here. Default is ./winstone.properties\n" +
 "   --commonLibFolder        = folder for additional jar files. Default is ./lib\n" +
 
-                
 "   --webroot                = set document root folder.
 "   --spdy                   = Enable SPDY. See http://wiki.eclipse.org/Jetty/Feature/NPN\n" 
 
-"Security options:\n" +
-"   --realmClassName               = Set the realm class to use for user authentication. Defaults to ArgumentsRealm class\n" +
-"   \n" +
-"   --argumentsRealm.passwd.<user> = Password for user <user>. Only valid for the ArgumentsRealm realm class\n" +
-"   --argumentsRealm.roles.<user>  = Roles for user <user> (comma separated). Only valid for the ArgumentsRealm realm class\n" +
-"   \n" +
 "   --fileRealm.configFile         = File containing users/passwds/roles. Only valid for the FileRealm realm class\n" +
 "   \n" +
 
@@ -33,6 +25,8 @@ This options have to be supported
 "   --sessionTimeout         = set the http session timeout value in minutes. Default to what webapp specifies, and then to 60 minutes\n"+
 "   --maxParamCount=N        = set the max number of parameters allowed in a form submission to protect\n" +
 "                              against hash DoS attack (oCERT #2011-003). Default is 10000.\n" +
+"   --config                 = load configuration properties from here. Default is ./winstone.properties\n" +
+
 
 #HTTP
 "   --httpPort               = set the http listening port. -1 to disable, Default is 8080\n" +
@@ -62,10 +56,19 @@ This options have to be supported
 "   --simpleAccessLogger.file      = The location pattern for the log file(SimpleAccessLogger only)");
 
 
+"Security options:\n" +
+"   --realmClassName               = Set the realm class to use for user authentication. Defaults to ArgumentsRealm class\n" +
+"   \n" +
+"   --argumentsRealm.passwd.<user> = Password for user <user>. Only valid for the ArgumentsRealm realm class\n" +
+"   --argumentsRealm.roles.<user>  = Roles for user <user> (comma separated). Only valid for the ArgumentsRealm realm class\n" +
+"   \n" +
+
+#####################################
 #Partialy supported
 "   --httpKeepAliveTimeout   = how long idle HTTP keep-alive connections are kept around (in ms; default 5000)?\n" +
 "   --httpsKeepAliveTimeout   = how long idle HTTPS keep-alive connections are kept around (in ms; default 5000)?\n" +
-   
+
+#####################################   
 #Not supported by Undertow4Jenkins and not essential
 "   --handlerCountMaxIdle    = set the max no of idle worker threads to allow. Default is 5\n" +            
 "   --logThrowingThread      = show the thread that logged the message. Default is false\n" +
