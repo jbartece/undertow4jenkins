@@ -5,6 +5,7 @@ import java.net.URL;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.X509TrustManager;
 
@@ -50,6 +51,26 @@ public class HttpsConnetionTest extends AbstractTest {
         ssl.init(null, new X509TrustManager[] { trustManager }, null);
         connection.setSSLSocketFactory(ssl.getSocketFactory());
         IOUtils.toString(connection.getInputStream());
+    }
+    
+    @Test
+    public void testSelfSignedCert() throws Exception {
+        Options opts = new Options();
+        opts.warfile = "target/test-classes/test.war";
+        opts.httpPort = -1;
+        opts.httpsPort = 12000;
+
+        containerInstance = new Launcher(opts);
+        containerInstance.run();
+        
+        try {
+            request(new TrustManagerImpl());
+            fail("Unique key should be generated!");
+        } catch (SSLHandshakeException e) {
+            //OK
+        }
+        
+        request(new TrustEveryoneManager());
     }
 
 }

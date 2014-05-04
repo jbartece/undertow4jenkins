@@ -18,6 +18,7 @@ import java.security.PrivateKey;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPrivateKeySpec;
 
@@ -30,28 +31,29 @@ import org.slf4j.LoggerFactory;
 import sun.misc.BASE64Decoder;
 import sun.security.util.DerInputStream;
 import sun.security.util.DerValue;
+import sun.security.x509.CertAndKeyGen;
+import sun.security.x509.X500Name;
 import undertow4jenkins.option.Options;
 
-
+@SuppressWarnings("restriction")
 public class HttpsListenerBuilder {
 
     /**
      * IP address, which should be set to bind listener in Undertow to listen on all interfaces
      */
     private static final String hostAllInterfacesString = "0.0.0.0";
-    
+
     private static final int MAX_PORT = 65535;
-    
+
     private final Logger log = LoggerFactory.getLogger(getClass());
-    
+
     private Options options;
 
-    
     public HttpsListenerBuilder(Options options) {
         this.options = options;
     }
 
- // "   --httpsKeepAliveTimeout   = how long idle HTTPS keep-alive connections are kept around (in ms; default 5000)?\n" +
+    // "   --httpsKeepAliveTimeout   = how long idle HTTPS keep-alive connections are kept around (in ms; default 5000)?\n" +
 
     // "   --httpsPort              = set the https listening port. -1 to disable, Default is disabled\n" +
     // "                              if neither --httpsCertificate nor --httpsKeyStore are specified,\n" +
@@ -81,14 +83,35 @@ public class HttpsListenerBuilder {
                 createHttpsListenerWithCert(serverBuilder, host, options.httpsPort);
             else
                 createHttpsListenerWithSelfSignedCert(serverBuilder, host, options.httpsPort);
+
         }
 
     }
 
     private void createHttpsListenerWithSelfSignedCert(Builder serverBuilder, String host,
             Integer httpsPort) {
-        // TODO Auto-generated method stub
+        log.info("Using one-time self-signed certificate");
+        try {
+            char[] keyStorePassword = "changeit".toCharArray();
 
+            CertAndKeyGen certKeyGen = new CertAndKeyGen("RSA", "SHA1WithRSA", null);
+            certKeyGen.generate(1024);
+            PrivateKey privateKey = certKeyGen.getPrivateKey();
+
+            X500Name xName = new X500Name("Test site", "Unknown", "Unknown", "Unknown");
+            X509Certificate certificate = certKeyGen
+                    .getSelfCertificate(xName, 3650L * 24 * 60 * 60);
+
+            KeyStore keyStoreInstance = KeyStore.getInstance("JKS");
+            keyStoreInstance.load(null);
+            keyStoreInstance.setKeyEntry("hudson", privateKey, keyStorePassword,
+                    new Certificate[] { certificate });
+            
+            SSLContext sslContext = createSSLContext(keyStorePassword, keyStoreInstance);
+            serverBuilder.addHttpsListener(options.httpsPort, host, sslContext);
+        } catch (Exception e) {
+            log.warn("Failed to init SSL context. Check HTTPS options. HTTPS listener disabled!", e);
+        }
     }
 
     // B:
@@ -129,7 +152,6 @@ public class HttpsListenerBuilder {
 
     }
 
-    @SuppressWarnings("restriction")
     private PrivateKey createRSAPrivateKeyFromCert(FileReader fileReader) throws IOException,
             NoSuchAlgorithmException, InvalidKeySpecException {
         ByteArrayOutputStream outStream = new ByteArrayOutputStream();
