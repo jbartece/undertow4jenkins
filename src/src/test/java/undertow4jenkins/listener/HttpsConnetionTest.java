@@ -17,7 +17,7 @@ import undertow4jenkins.option.Options;
 
 public class HttpsConnetionTest extends AbstractTest {
 
-//    @Test
+    @Test
     public void basicListenerTest() throws Exception {
         Options opts = new Options();
         opts.warfile = "target/test-classes/test.war";
@@ -25,12 +25,12 @@ public class HttpsConnetionTest extends AbstractTest {
         opts.httpsPort = 12000;
         opts.httpsPrivateKey = "src/ssl/server.key";
         opts.httpsCertificate = "src/ssl/server.crt";
+        opts.httpsListenAdress = "localhost";
 
         containerInstance = new Launcher(opts);
         containerInstance.run();
         
-        // TODO
-        // assertConnectionRefused("127.0.0.1", 12000);
+        assertConnectionRefused("127.0.0.2", 12000);
 
         request(new TrustManagerImpl());
     }
@@ -48,6 +48,7 @@ public class HttpsConnetionTest extends AbstractTest {
 
         SSLContext ssl = SSLContext.getInstance("SSL");
         ssl.init(null, new X509TrustManager[] { trustManager }, null);
+        connection.setSSLSocketFactory(ssl.getSocketFactory());
         IOUtils.toString(connection.getInputStream());
     }
 
