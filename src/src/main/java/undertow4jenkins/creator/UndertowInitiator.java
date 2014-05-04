@@ -1,4 +1,4 @@
-package undertow4jenkins;
+package undertow4jenkins.creator;
 
 import static io.undertow.servlet.Servlets.defaultContainer;
 import static io.undertow.servlet.Servlets.deployment;
@@ -24,6 +24,7 @@ import javax.servlet.ServletException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import undertow4jenkins.CustomException;
 import undertow4jenkins.handlers.AccessLoggerHandler;
 import undertow4jenkins.handlers.SimpleAccessLogger;
 import undertow4jenkins.listener.HttpsListenerBuilder;

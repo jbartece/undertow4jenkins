@@ -1,4 +1,4 @@
-package undertow4jenkins;
+package undertow4jenkins.creator;
 
 import io.undertow.server.session.InMemorySessionManager;
 import io.undertow.server.session.SessionManager;

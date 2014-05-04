@@ -17,6 +17,7 @@ import javax.xml.stream.XMLStreamException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import undertow4jenkins.creator.UndertowInitiator;
 import undertow4jenkins.option.OptionParser;
 import undertow4jenkins.option.Options;
 import undertow4jenkins.parser.WebXmlContent;
