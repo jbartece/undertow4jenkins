@@ -4,7 +4,6 @@ import io.undertow.security.idm.IdentityManager;
 
 import java.util.Map;
 
-import undertow4jenkins.CustomFatalException;
 import undertow4jenkins.option.Options;
 
 public class ArgumentsIdentityManager extends GenericIdentityManager implements IdentityManager {

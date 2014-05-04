@@ -7,6 +7,7 @@ import io.undertow.Undertow;
 import io.undertow.Undertow.Builder;
 import io.undertow.UndertowOptions;
 import io.undertow.security.idm.IdentityManager;
+import io.undertow.server.HandlerWrapper;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.resource.FileResourceManager;
 import io.undertow.servlet.api.DeploymentInfo;
@@ -97,46 +98,9 @@ public class UndertowInitiator {
     }
 
     private void createHandlerChain(Builder serverBuilder, HttpHandler containerManagerHandler) {
-        HttpHandler next = containerManagerHandler;
-
-        if (options.accessLoggerClassName != null) {
-            next = createAccessLogger(next); // TODO move to container handlers
-        }
-
-        HttpHandler redirectHandler = createRedirectHandlerForContainer(next);
+        HttpHandler redirectHandler = createRedirectHandlerForContainer(containerManagerHandler);
 
         serverBuilder.setHandler(redirectHandler);
-    }
-
-    private HttpHandler createAccessLogger(HttpHandler next) {
-        try {
-            // Compatibility with old winstone class name
-            if("winstone.accesslog.SimpleAccessLogger".equals(options.accessLoggerClassName)) 
-                options.accessLoggerClassName = SimpleAccessLogger.class.getName();
-            
-            Class<? extends AccessLoggerHandler> loggerClass = Class.forName(
-                    options.accessLoggerClassName,
-                    true, classLoader).asSubclass(AccessLoggerHandler.class);
-
-            Constructor<? extends AccessLoggerHandler> loggerConstructor = loggerClass
-                    .getConstructor(HttpHandler.class, String.class, String.class,
-                            String.class);
-
-            AccessLoggerHandler accessLoggerHandler = loggerConstructor.newInstance(next,
-                    "webapp", // same value of app name as in winstone
-                    options.simpleAccessLogger_file, options.simpleAccessLogger_format);
-            objToClose.add(accessLoggerHandler);
-
-            next = accessLoggerHandler;
-        } catch (InvocationTargetException e) {
-            log.error("Access logger could not be created. "
-                    + "This feature is disabled! Reason: " + e.getCause().getMessage());
-        } catch (Throwable e) {
-            log.error("Access logger could not be created. "
-                    + "This feature is disabled! Reason: " + e.getMessage());
-        }
-
-        return next;
     }
 
     private void createListeners(Undertow.Builder serverBuilder) {
@@ -217,6 +181,7 @@ public class UndertowInitiator {
     private DeploymentInfo createServletContainerDeployment(WebXmlContent webXmlContent)
             throws ClassNotFoundException {
         DeploymentInfo servletContainerBuilder = deployment()
+                // .setIgnoreFlush(true) TODO test performance of this option
                 .setClassLoader(classLoader)
                 .setDeploymentName(options.warfile)
                 .setContextPath(applicationContextPath)
@@ -229,7 +194,8 @@ public class UndertowInitiator {
                 .addSecurityConstraints(
                         SecurityLoader.createSecurityConstraints(webXmlContent.securityConstraints))
                 .setLoginConfig(
-                        SecurityLoader.createLoginConfig(webXmlContent.loginConfig, "Jenkins Realm"))
+                        SecurityLoader
+                                .createLoginConfig(webXmlContent.loginConfig, "Jenkins Realm"))
                 .addErrorPages(ErrorPageLoader.createErrorPage(webXmlContent.errorPages))
                 .addMimeMappings(
                         MimeLoader
@@ -248,8 +214,61 @@ public class UndertowInitiator {
         // Set session timeout for application
         servletContainerBuilder.setSessionManagerFactory(new JenkinsSessionManagerFactory(
                 options.sessionTimeout * 60));
-        
+
+        setAccessLogger(servletContainerBuilder);
+
         return servletContainerBuilder;
+    }
+
+    private void setAccessLogger(DeploymentInfo servletContainerBuilder) {
+        if (options.accessLoggerClassName != null) {
+            HandlerWrapper accessLoggerWrapper = createAccessLogger();
+            if (accessLoggerWrapper != null)
+                servletContainerBuilder.addInnerHandlerChainWrapper(accessLoggerWrapper);
+        }
+    }
+
+    private HandlerWrapper createAccessLogger() {
+        return new HandlerWrapper() {
+
+            @Override
+            public HttpHandler wrap(final HttpHandler handler) {
+                try {
+                    return createAccessLoggerHandler(handler);
+                } catch (CustomException e) {
+                    log.warn("Access logger could not be created. "
+                            + "This feature is disabled! Reason: " + e.getMessage());
+                    return handler;
+                }
+            }
+        };
+    }
+
+    private HttpHandler createAccessLoggerHandler(final HttpHandler handler) throws CustomException {
+        try {
+            // Compatibility with old winstone class name
+            if ("winstone.accesslog.SimpleAccessLogger".equals(options.accessLoggerClassName))
+                options.accessLoggerClassName = SimpleAccessLogger.class.getName();
+
+            Class<? extends AccessLoggerHandler> loggerClass = Class.forName(
+                    options.accessLoggerClassName,
+                    true, classLoader).asSubclass(AccessLoggerHandler.class);
+
+            Constructor<? extends AccessLoggerHandler> loggerConstructor = loggerClass
+                    .getConstructor(HttpHandler.class, String.class, String.class,
+                            String.class);
+
+            AccessLoggerHandler accessLoggerHandler = loggerConstructor.newInstance(handler,
+                    "webapp", // same value of app name as in winstone
+                    options.simpleAccessLogger_file, options.simpleAccessLogger_format);
+            objToClose.add(accessLoggerHandler);
+
+            return accessLoggerHandler;
+        } catch (InvocationTargetException e) { 
+            throw new CustomException(e.getCause().getMessage());
+        } catch (Throwable e) {
+            throw new CustomException(e.getMessage());
+        }
     }
 
     private void setSecurityActions(DeploymentInfo servletContainerBuilder) {

@@ -15,7 +15,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
-import undertow4jenkins.CustomFatalException;
+import undertow4jenkins.CustomException;
 import undertow4jenkins.option.Options;
 
 public class FileIdentityManager extends GenericIdentityManager implements IdentityManager {
@@ -32,7 +32,7 @@ public class FileIdentityManager extends GenericIdentityManager implements Ident
 
     private final String EL_USER = "user";
 
-    public FileIdentityManager(Options options) throws CustomFatalException {
+    public FileIdentityManager(Options options) throws CustomException {
         File configFile;
         if (options.fileRealm_configFile == null)
             configFile = new File(options.fileRealm_configFile);
@@ -40,12 +40,12 @@ public class FileIdentityManager extends GenericIdentityManager implements Ident
             configFile = new File(DEFAULT_FILE_NAME);
 
         if (!configFile.exists())
-            throw new CustomFatalException(MSG_FATAL);
+            throw new CustomException(MSG_FATAL);
 
         try {
             loadUsersFromFile(configFile);
         } catch (Throwable e) {
-            throw new CustomFatalException(MSG_FATAL + " Reason: " + e.getMessage());
+            throw new CustomException(MSG_FATAL + " Reason: " + e.getMessage());
         }
     }
 
