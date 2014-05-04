@@ -17,7 +17,7 @@ import javax.xml.stream.XMLStreamException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import undertow4jenkins.creator.UndertowInitiator;
+import undertow4jenkins.creator.UndertowCreator;
 import undertow4jenkins.option.OptionParser;
 import undertow4jenkins.option.Options;
 import undertow4jenkins.parser.WebXmlContent;
@@ -94,7 +94,7 @@ public class Launcher {
             // if (log.isDebugEnabled())
             // log.debug("Loaded content of web.xml:\n" + webXmlContent.toString());
 
-            UndertowInitiator undertowInitiator = new UndertowInitiator(jenkinsWarClassLoader,
+            UndertowCreator undertowInitiator = new UndertowCreator(jenkinsWarClassLoader,
                     options, pathToTmpDir);
             undertowInstance = undertowInitiator.initUndertow(webXmlContent, objectsToClose);
             undertowInstance.start();
