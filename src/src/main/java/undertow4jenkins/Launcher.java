@@ -10,9 +10,6 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.ServletException;
-import javax.xml.stream.XMLStreamException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +17,6 @@ import undertow4jenkins.creator.UndertowCreator;
 import undertow4jenkins.option.OptionParser;
 import undertow4jenkins.option.Options;
 import undertow4jenkins.parser.WebXmlContent;
-import undertow4jenkins.parser.WebXmlFormatException;
 import undertow4jenkins.parser.WebXmlParser;
 import undertow4jenkins.util.Configuration;
 import undertow4jenkins.util.WarWorker;
@@ -77,19 +73,9 @@ public class Launcher {
             undertowInstance = undertowInitiator.initUndertow(webXmlContent, objectsToClose);
             undertowInstance.start();
 
-        } catch (ServletException e) {
-            log.error("Start of embedded Undertow server failed!", e);
-        } catch (IOException e) {
-            log.error("War archive extraction failed!", e);
-        } catch (ClassNotFoundException e) {
-            log.error("Initiating servlet container failed!", e);
-        } catch (XMLStreamException e) {
-            log.error("Parsing web.xml failed!", e);
-        } catch (WebXmlFormatException e) {
-            log.error("Parsing web.xml failed!", e);
-        }
-
-        // ClassCastException and RuntimeException also should be caught
+        } catch (Throwable e) {
+            log.error("Initialization of servlet container failed! Reason: " + e.getMessage());
+        } 
 
         listenOnControlPort(options.controlPort);
     }

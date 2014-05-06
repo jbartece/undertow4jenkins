@@ -10,6 +10,7 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
+import undertow4jenkins.CustomException;
 import undertow4jenkins.parser.WebXmlContent.EnvEntry;
 import undertow4jenkins.parser.WebXmlContent.ErrorPage;
 import undertow4jenkins.parser.WebXmlContent.Filter;
@@ -25,8 +26,8 @@ import undertow4jenkins.parser.WebXmlContent.WebResourceCollection;
 
 public class WebXmlParser {
 
-    public WebXmlContent parse(String pathToFile) throws FileNotFoundException, XMLStreamException,
-            WebXmlFormatException {
+    public WebXmlContent parse(String pathToFile) throws CustomException{
+        try {
         WebXmlContent result = new WebXmlContent();
 
         XMLInputFactory xmlInFactory = XMLInputFactory.newFactory();
@@ -105,6 +106,13 @@ public class WebXmlParser {
         xmlReader.close();
 
         return result;
+        } catch(FileNotFoundException e) {
+            throw new CustomException("Web.xml file was not found. Reason" + e.getMessage());
+        }
+         catch (Exception e) {
+             throw new CustomException("Parsing of web.xml file failed! Reason" + e.getMessage());
+             
+         }
     }
 
     // <error-page>
