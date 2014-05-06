@@ -92,7 +92,7 @@ public class SimpleAccessLogger implements AccessLoggerHandler {
 
     @Override
     public void handleRequest(HttpServerExchange exchange) throws Exception {
-        log(exchange);  //TODO check and compare with access logger in Undertow
+        log(exchange);  
         next.handleRequest(exchange);
     }
 
@@ -110,8 +110,8 @@ public class SimpleAccessLogger implements AccessLoggerHandler {
 
         String logLine = patternReplace(pattern,
                 new String[][] {
-                        { "###ip###", exchange.getHostName() }, // TODO translate to IP?
-                        { "###user###", getUserName(exchange.getSecurityContext()) }, //TODO check
+                        { "###ip###", exchange.getHostName() }, 
+                        { "###user###", getUserName(exchange.getSecurityContext()) }, 
                         { "###time###", "[" + date + "]" },
                         { "###uriLine###", uriLine },
                         { "###status###", "" + status },
