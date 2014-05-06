@@ -208,13 +208,13 @@ public class Launcher {
     /**
      * Checks app options
      * 
-     * @return True if webroot or warfile option is specified, otherwise false
+     * @return False if webroot or warfile option is specified, otherwise true
      */
     private boolean checkAppConfig() {
         if (options.warfile != null || options.webroot != null)
-            return true;
-        else
             return false;
+        else
+            return true;
     }
 
     /**
