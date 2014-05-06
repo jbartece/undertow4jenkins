@@ -125,12 +125,8 @@ public class Options {
                     }
                 }
             }
-
-            // TODO set properly error messages
-        } catch (IllegalArgumentException e) {
-            log.error(e.getMessage(), e);
-        } catch (IllegalAccessException e) {
-            log.error(e.getMessage(), e);
+        } catch (Exception e) {
+            log.error("Loading of default options failed!");
         }
     }
     

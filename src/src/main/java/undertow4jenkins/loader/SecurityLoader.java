@@ -12,8 +12,9 @@ import org.slf4j.LoggerFactory;
 
 public class SecurityLoader {
 
-    private static final Logger log = LoggerFactory.getLogger("undertow4jenkins.loader.SecurityLoader");
-    
+    private static final Logger log = LoggerFactory
+            .getLogger("undertow4jenkins.loader.SecurityLoader");
+
     public static List<String> createSecurityRoles(List<String> securityRoles) {
         return securityRoles;
     }
@@ -23,35 +24,39 @@ public class SecurityLoader {
         List<SecurityConstraint> securityConstraints = new ArrayList<SecurityConstraint>(3);
 
         for (undertow4jenkins.parser.WebXmlContent.SecurityConstraint constraintData : constraintsDataCol) {
-            SecurityConstraint constraint = new SecurityConstraint();
-            WebResourceCollection webResourceCollection = new WebResourceCollection();
+            for (undertow4jenkins.parser.WebXmlContent.WebResourceCollection webResourceCol : constraintData.webResourceCollections) {
+                SecurityConstraint constraint = new SecurityConstraint();
+                WebResourceCollection webResourceCollection = new WebResourceCollection();
 
-            log.trace("UrlPattern: " + constraintData.webResourceCollection.urlPattern);
-            webResourceCollection.addUrlPattern(constraintData.webResourceCollection.urlPattern);
-            if (constraintData.rolesAllowed != null) {
-                constraint.addRolesAllowed(constraintData.rolesAllowed);
-                log.trace("Allowed roles: " + constraintData.rolesAllowed);
+                for (String urlPattern : webResourceCol.urlPatterns)
+                    webResourceCollection.addUrlPattern(urlPattern);
+
+                if (constraintData.rolesAllowed != null)
+                    constraint.addRolesAllowed(constraintData.rolesAllowed);
+
+                constraint.addWebResourceCollection(webResourceCollection);
+                securityConstraints.add(constraint);
             }
-            
-            constraint.addWebResourceCollection(webResourceCollection);
-            securityConstraints.add(constraint);
         }
 
         return securityConstraints;
     }
 
     public static LoginConfig createLoginConfig(
-            undertow4jenkins.parser.WebXmlContent.LoginConfig configData, String realmName){
-        if(configData.authMethod != null && configData.formErrorPage != null && configData.formLoginPage != null){
-            log.trace("LoginConfig: Method: " + configData.authMethod + ", realm: " + realmName + ", errorPage: " + configData.formErrorPage
-                    +  ", loginPage: " + configData.formLoginPage);
-            return new LoginConfig(configData.authMethod, realmName, configData.formLoginPage, configData.formErrorPage);
+            undertow4jenkins.parser.WebXmlContent.LoginConfig configData, String realmName) {
+        if (configData.authMethod != null && configData.formErrorPage != null
+                && configData.formLoginPage != null) {
+            log.trace("LoginConfig: Method: " + configData.authMethod + ", realm: " + realmName
+                    + ", errorPage: " + configData.formErrorPage
+                    + ", loginPage: " + configData.formLoginPage);
+            return new LoginConfig(configData.authMethod, realmName, configData.formLoginPage,
+                    configData.formErrorPage);
         }
 
-        if(configData.authMethod != null )
+        if (configData.authMethod != null)
             return new LoginConfig(configData.authMethod, realmName);
-        
-         throw new RuntimeException("Not properly set login-config in web.xml!");    
+
+        throw new RuntimeException("Not properly set login-config in web.xml!");
     }
 
 }

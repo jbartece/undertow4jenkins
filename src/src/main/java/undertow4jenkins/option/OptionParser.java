@@ -19,6 +19,8 @@ import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import undertow4jenkins.CustomException;
+
 public class OptionParser {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
@@ -50,12 +52,12 @@ public class OptionParser {
             else
                 parsedOptions = parser.parse(optionsDefinition, args, configFileProperties);
 
-        } catch (ParseException e) {
+            return loadParsedOptions(parsedOptions, options);
+        } catch (Exception e) {
             log.error("Command line options could not be parsed!\nReason: " + e.toString());
             return null;
         }
 
-        return loadParsedOptions(parsedOptions, options);
     }
 
     private String[] preprocessOptions(String[] args, Options options) throws ParseException {
@@ -191,7 +193,7 @@ public class OptionParser {
             return name;
     }
 
-    private Options loadParsedOptions(CommandLine parsedOptions, Options options) {
+    private Options loadParsedOptions(CommandLine parsedOptions, Options options) throws CustomException {
         Set<String> unsupportedOptions = Options.getUnsupportedOptions();
 
         for (Field field : Options.class.getFields()) {
@@ -217,7 +219,7 @@ public class OptionParser {
     }
 
     private void saveOptionValue(CommandLine parsedOptions, Options options, Field field,
-            String optionName, Class<?> fieldClass) {
+            String optionName, Class<?> fieldClass) throws CustomException {
         try {
             if (fieldClass.equals(String.class)) {
                 field.set(options, parsedOptions.getOptionValue(optionName));
@@ -237,14 +239,8 @@ public class OptionParser {
                     }
                 }
             }
-
-            // TODO set properly error messages
-        } catch (NumberFormatException e) {
-            log.error(e.getMessage(), e);
-        } catch (IllegalArgumentException e) {
-            log.error(e.getMessage(), e);
-        } catch (IllegalAccessException e) {
-            log.error(e.getMessage(), e);
+        } catch (Exception e) {
+            throw new CustomException("Wrong value of option" + optionName);
         }
     }
 }

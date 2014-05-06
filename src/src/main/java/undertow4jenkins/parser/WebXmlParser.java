@@ -145,8 +145,6 @@ public class WebXmlParser {
                             return errorPage;
                     }
 
-                    // TODO throw exception because of unsupported parametr in web.xml
-
                 default:
                     break;
             }
@@ -328,16 +326,15 @@ public class WebXmlParser {
         String tagContent = null;
         String tagName;
 
-        // TODO change WebResourceCollection to collection
         SecurityConstraint securityConstraint = new SecurityConstraint();
-        WebResourceCollection webResourceCollection = null;
+        WebResourceCollection currentWebResourceCollection = null;
         List<String> authConstraint = null;
 
         while (xmlReader.hasNext()) {
             switch (xmlReader.next()) {
                 case XMLStreamConstants.START_ELEMENT:
                     if (xmlReader.getLocalName().equals("web-resource-collection"))
-                        webResourceCollection = new WebResourceCollection();
+                        currentWebResourceCollection = new WebResourceCollection();
 
                     if (xmlReader.getLocalName().equals("auth-constraint"))
                         authConstraint = new ArrayList<String>(3);
@@ -351,27 +348,27 @@ public class WebXmlParser {
                     tagName = xmlReader.getLocalName();
 
                     if (tagName.equals("web-resource-name")) {
-                        if (webResourceCollection != null)
-                            webResourceCollection.webResourceName = tagContent;
+                        if (currentWebResourceCollection != null)
+                            currentWebResourceCollection.webResourceName = tagContent;
                         else
                             throwMalformedWebXml("security-constraint");
                         continue;
                     }
 
                     if (tagName.equals("url-pattern")) {
-                        if (webResourceCollection != null)
-                            webResourceCollection.urlPattern = tagContent;
+                        if (currentWebResourceCollection != null)
+                            currentWebResourceCollection.urlPatterns.add(tagContent);
                         else
                             throwMalformedWebXml("security-constraint");
                         continue;
                     }
 
                     if (tagName.equals("web-resource-collection")) {
-                        if (webResourceCollection == null
-                                || webResourceCollection.webResourceName == null)
+                        if (currentWebResourceCollection == null
+                                || currentWebResourceCollection.webResourceName == null)
                             throwMalformedWebXml("security-constraint");
                         else
-                            securityConstraint.webResourceCollection = webResourceCollection;
+                            securityConstraint.webResourceCollections.add(currentWebResourceCollection);
                         continue;
                     }
 
@@ -391,7 +388,7 @@ public class WebXmlParser {
 
                     if (tagName.equals("security-constraint")) {
                         if (securityConstraint == null
-                                || securityConstraint.webResourceCollection == null)
+                                || securityConstraint.webResourceCollections == null)
                             throwMalformedWebXml("security-constraint");
                         else
                             return securityConstraint;

@@ -39,7 +39,7 @@ public class WebXmlContent {
 
         public String servletClass;
 
-        public List<InitParam> initParams = new ArrayList<InitParam>();
+        public List<InitParam> initParams = new ArrayList<InitParam>(3);
 
         @Override
         public String toString() {
@@ -109,8 +109,8 @@ public class WebXmlContent {
 
     public static class SecurityConstraint {
 
-        // TODO should be list
-        public WebResourceCollection webResourceCollection;
+        public List<WebResourceCollection> webResourceCollections =
+                new ArrayList<WebResourceCollection>(3);
 
         public List<String> rolesAllowed;
 
@@ -120,12 +120,12 @@ public class WebXmlContent {
 
         public String webResourceName;
 
-        public String urlPattern;
+        public List<String> urlPatterns = new ArrayList<String>(3);
 
         @Override
         public String toString() {
             return "WebResourceCollection [webResourceName=" + webResourceName + ", urlPattern="
-                    + urlPattern + "]";
+                    + urlPatterns + "]";
         }
     }
 
