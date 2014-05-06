@@ -1,7 +1,6 @@
 ##############################################################################################################################
 This options have to be supported
 "   --webroot                = set document root folder.
-"   --spdy                   = Enable SPDY. See http://wiki.eclipse.org/Jetty/Feature/NPN\n" 
 
 
 ##############################################################################################################################
@@ -67,11 +66,13 @@ This options have to be supported
 
 #####################################   
 #Not supported by Undertow4Jenkins and not essential
+"   --spdy                   = Enable SPDY. See http://wiki.eclipse.org/Jetty/Feature/NPN\n" 
 "   --handlerCountMaxIdle    = set the max no of idle worker threads to allow. Default is 5\n" +            
 "   --logThrowingThread      = show the thread that logged the message. Default is false\n" +
 
 "   --debug                  = set the level of debug msgs (1-9). Default is 5 (INFO level)\n" +
 
+#Not supported by Undertow4Jenkins and have no sense for it
 "   --webappsDir             = set directory for multiple webapps to be deployed from
 "   --hostsDir               = set directory for name-based virtual hosts to be deployed from
                 

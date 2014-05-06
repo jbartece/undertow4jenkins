@@ -15,11 +15,8 @@ public class Options {
 
     //
     public String prefix;
-    public String webroot;
+    public String webroot;  //TODO
     public String warfile;
-
-    //TODO
-    public String commonLibFolder;
 
     //
     public Integer httpPort;
@@ -37,10 +34,10 @@ public class Options {
     public String httpsKeyManagerType;
 
     //
-    public Boolean spdy;
     public Integer ajp13Port;
     public String ajp13ListenAdress;
     public Integer controlPort;
+    public String commonLibFolder;
 
     //
     public Integer handlerCountMax;
@@ -65,6 +62,7 @@ public class Options {
     public String simpleAccessLogger_file; 
     
     //Not supported options - only for compatibility with old versions of Winstone   
+    public Boolean spdy;
     public String webappsDir;
     public String hostsDir;
     public Integer handlerCountStartup;
@@ -86,6 +84,7 @@ public class Options {
         set.add("logThrowingLineNo");
         set.add("logThrowingThread");
         set.add("debug");
+        set.add("spdy");
         return set;
     }
     
