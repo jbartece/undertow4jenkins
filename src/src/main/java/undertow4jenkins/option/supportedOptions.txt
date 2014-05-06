@@ -1,7 +1,5 @@
 ##############################################################################################################################
 This options have to be supported
-"   --webroot                = set document root folder.
-
 
 ##############################################################################################################################
 #### Solved options: 
@@ -9,6 +7,7 @@ This options have to be supported
 "   --warfile                = set location of warfile to extract from.
 "   --controlPort            = set the shutdown/control port. -1 to disable, Default disabled\n" +
 "   --prefix                 = add this prefix to all URLs (eg http://localhost:8080/prefix/resource). Default is none\n" +
+"   --webroot                = set document root folder.
 
 #General:
 "   --usage / --help         = show this message\n" +

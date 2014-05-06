@@ -20,8 +20,8 @@ public class WarWorker {
             String commonLib, String warDir, ClassLoader parentClassLoader)
             throws IOException {
         List<URL> jarUrls = new ArrayList<URL>();
-        
-        //Add lib dir to ClassLoader
+
+        // Add lib dir to ClassLoader
         final String relativeLibPath = "WEB-INF/lib/";
         File libDir = new File(warDir + relativeLibPath);
         if (libDir.exists()) {
@@ -31,16 +31,16 @@ public class WarWorker {
                 }
             }
         }
-        
-        //Add classes to ClassLoader
+
+        // Add classes to ClassLoader
         File classesDir = new File(warDir + "WEB-INF/classes");
-        if(classesDir.exists()) {
+        if (classesDir.exists()) {
             jarUrls.add(classesDir.toURI().toURL());
         }
-        
-        //Add common lib to ClassLoader
+
+        // Add common lib to ClassLoader
         File commonLibDir = new File(commonLib);
-        if(commonLibDir.exists() && commonLibDir.isDirectory()) {
+        if (commonLibDir.exists() && commonLibDir.isDirectory()) {
             for (File file : commonLibDir.listFiles()) {
                 if (file.getName().endsWith(".jar") ||
                         file.getName().endsWith(".zip")) {
@@ -65,7 +65,6 @@ public class WarWorker {
 
             File outFile = new File(pathToTmpDir + element.getName());
 
-            // TODO check if the file in WAR is not new version of file (check timestamp)
             if (!outFile.exists()) {
                 copyFile(buffer, warArchive, element, outFile);
             }
@@ -86,5 +85,51 @@ public class WarWorker {
         }
         inContent.close();
         outStream.close();
+    }
+
+    public static String createWebApplicationRoot(String warfile, String webroot) 
+            throws IOException {
+        if (warfile != null) {
+            File warfileFile = new File(warfile);
+            if(! warfileFile.isFile() )
+                throw new IOException("Specified warfile does not exists!");
+            
+            String targetWebrootDir = webroot;
+            if(webroot == null)
+                targetWebrootDir = createAbstractTempDir(warfileFile.getName());
+            else   
+                deleteDirectory(new File(targetWebrootDir));
+            
+            extractFilesFromWar(warfile, targetWebrootDir);
+            
+            return targetWebrootDir;
+        }
+        else {
+            if(!new File(webroot).exists())
+                throw new IOException("Webroot directory does not exists!");
+            else
+                return webroot;
+        }
+    }
+
+    private static String createAbstractTempDir(String warfileName) throws IOException {
+        File tmpFile = File.createTempFile("tmp", "tmp");
+        File tmp = new File(tmpFile.getParent(), "undertow4jenkins_temp_" + warfileName);
+        tmpFile.delete();
+        
+        return tmp.getAbsolutePath() + "/";
+    }
+
+    private static void deleteDirectory(File directory) {
+        if (directory.exists()) {
+            for (File f : directory.listFiles()) {
+                if (f.isDirectory()) {
+                    deleteDirectory(f);
+                }
+                else
+                    f.delete();
+            }
+            directory.delete();
+        }
     }
 }

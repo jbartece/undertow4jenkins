@@ -3,7 +3,6 @@ package undertow4jenkins;
 import io.undertow.Undertow;
 
 import java.io.Closeable;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
@@ -38,8 +37,6 @@ public class Launcher {
 
     private static final byte RELOAD_REQUEST_TYPE = (byte) '4';
 
-    private final String pathToTmpDir = "/tmp/undertow4jenkins/extractedWar/";
-
     private Options options;
 
     private ClassLoader jenkinsWarClassLoader;
@@ -58,44 +55,25 @@ public class Launcher {
         log.debug(options.toString());
     }
 
-    public static boolean deleteDirectory(File directory) {
-        if (directory.exists()) {
-            for (File f : directory.listFiles()) {
-                if (f.isDirectory()) {
-                    deleteDirectory(f);
-                }
-                else
-                    f.delete();
-            }
-        }
-        return (directory.delete());
-    }
-
     public void run() {
 
         if (checkHelpParams() || checkAppConfig())
             return;
 
         try {
-            // TODO temporary
-            deleteDirectory(new File(pathToTmpDir));
-
-            // TODO check if warfile or webroot is specified
-            WarWorker.extractFilesFromWar(options.warfile, pathToTmpDir);
+            String webRootPath = WarWorker.createWebApplicationRoot(options.warfile, 
+                    options.webroot);
 
             // Create class loader to load classed from jenkins.war archive.
             // It is needed to load servlet classes such as Stapler.
             this.jenkinsWarClassLoader = WarWorker.createJarsClassloader(options.warfile,
-                    options.commonLibFolder, pathToTmpDir, getClass().getClassLoader());
+                    options.commonLibFolder, webRootPath, getClass().getClassLoader());
 
             WebXmlParser parser = new WebXmlParser();
-            WebXmlContent webXmlContent = parser.parse(pathToTmpDir + "WEB-INF/web.xml");
-
-            // if (log.isDebugEnabled())
-            // log.debug("Loaded content of web.xml:\n" + webXmlContent.toString());
+            WebXmlContent webXmlContent = parser.parse(webRootPath + "WEB-INF/web.xml");
 
             UndertowCreator undertowInitiator = new UndertowCreator(jenkinsWarClassLoader,
-                    options, pathToTmpDir);
+                    options, webRootPath);
             undertowInstance = undertowInitiator.initUndertow(webXmlContent, objectsToClose);
             undertowInstance.start();
 
@@ -115,8 +93,9 @@ public class Launcher {
 
         listenOnControlPort(options.controlPort);
     }
-
+    
     // private static int controlSocketTimeout = 2000;
+
 
     private void listenOnControlPort(int port) {
         if (port == -1)

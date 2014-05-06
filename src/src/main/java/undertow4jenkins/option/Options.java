@@ -15,7 +15,7 @@ public class Options {
 
     //
     public String prefix;
-    public String webroot;  //TODO
+    public String webroot;
     public String warfile;
 
     //
