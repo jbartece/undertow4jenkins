@@ -3,3 +3,4 @@
 configFile.properties
 undertow4jenkins.properties
 winstone.properties
+/tools

@@ -59,33 +59,33 @@ public class Launcher {
     }
 
     public static boolean deleteDirectory(File directory) {
-        if(directory.exists()){
-            for(File f : directory.listFiles()) {
-                if(f.isDirectory()) {
+        if (directory.exists()) {
+            for (File f : directory.listFiles()) {
+                if (f.isDirectory()) {
                     deleteDirectory(f);
                 }
                 else
                     f.delete();
             }
         }
-        return(directory.delete());
+        return (directory.delete());
     }
-    
+
     public void run() {
 
-        if (checkHelpParams())
+        if (checkHelpParams() || checkAppConfig())
             return;
 
         try {
-            //TODO temporary 
+            // TODO temporary
             deleteDirectory(new File(pathToTmpDir));
-            
-            //TODO check if warfile or webroot is specified
+
+            // TODO check if warfile or webroot is specified
             WarWorker.extractFilesFromWar(options.warfile, pathToTmpDir);
-            
+
             // Create class loader to load classed from jenkins.war archive.
             // It is needed to load servlet classes such as Stapler.
-            this.jenkinsWarClassLoader = WarWorker.createJarsClassloader(options.warfile, 
+            this.jenkinsWarClassLoader = WarWorker.createJarsClassloader(options.warfile,
                     options.commonLibFolder, pathToTmpDir, getClass().getClassLoader());
 
             WebXmlParser parser = new WebXmlParser();
@@ -203,6 +203,18 @@ public class Launcher {
         } catch (IOException e) {
         }
         // System.exit(0);
+    }
+
+    /**
+     * Checks app options
+     * 
+     * @return True if webroot or warfile option is specified, otherwise false
+     */
+    private boolean checkAppConfig() {
+        if (options.warfile != null || options.webroot != null)
+            return true;
+        else
+            return false;
     }
 
     /**
