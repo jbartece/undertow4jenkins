@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.GnuParser;
@@ -29,8 +30,11 @@ public class OptionParser {
 
     private Properties configFileProperties;
 
+    private Pattern dotReplacePattern;
+    
     public OptionParser() {
         optionsDefinition = createOptionsDefinition();
+        this.dotReplacePattern = Pattern.compile("_");
     }
 
     public Options parse(String[] args) {
@@ -92,7 +96,7 @@ public class OptionParser {
                     }
                 }
             }
-            
+
         } catch (IOException e) {
             throw new ParseException("Not properly set config file!");
         } catch (Throwable e) {
@@ -136,9 +140,9 @@ public class OptionParser {
             throw new Exception();
 
         List<String> rolesList = new ArrayList<String>(3);
-        for(String role : data[1].split(",")) 
+        for (String role : data[1].split(","))
             rolesList.add(role.trim());
-        
+
         options.argumentsRealmRoles.put(data[0], rolesList.toArray(new String[0]));
     }
 
@@ -178,8 +182,13 @@ public class OptionParser {
             return false;
     }
 
+    
     private String fieldNameToOptionName(String name) {
-        return name.replaceFirst("_", "."); // TODO optimize
+        if (name.indexOf("_") != -1) {
+            return dotReplacePattern.matcher(name).replaceFirst(".");
+        }
+        else
+            return name;
     }
 
     private Options loadParsedOptions(CommandLine parsedOptions, Options options) {

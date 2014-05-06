@@ -37,7 +37,7 @@ public class FilterLoader {
     public static void addFilterMappings(List<FilterMapping> mappingsDataCol, DeploymentInfo servletBuilder) {
         for (FilterMapping mappingData : mappingsDataCol) {
             servletBuilder.addFilterUrlMapping(mappingData.filterName, mappingData.urlPattern,
-                    DispatcherType.REQUEST); // TODO check the default dispatcher type
+                    DispatcherType.REQUEST);
         }
     }
 
