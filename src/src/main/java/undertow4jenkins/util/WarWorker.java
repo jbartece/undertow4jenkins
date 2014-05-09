@@ -94,11 +94,13 @@ public class WarWorker {
             if(! warfileFile.isFile() )
                 throw new IOException("Specified warfile does not exists!");
             
-            String targetWebrootDir = webroot;
+            String targetWebrootDir;
             if(webroot == null)
                 targetWebrootDir = createAbstractTempDir(warfileFile.getName());
-            else   
+            else   {
+                targetWebrootDir = unifyWebroot(webroot);
                 deleteDirectory(new File(targetWebrootDir));
+            }
             
             extractFilesFromWar(warfile, targetWebrootDir);
             
@@ -109,12 +111,16 @@ public class WarWorker {
                 throw new IOException("Webroot directory does not exists!");
             else {
                 //Application expects directory ending with /
-                if(webroot.endsWith("/"))
-                    return webroot;
-                else
-                    return webroot + "/";
+                return unifyWebroot(webroot);
             }
         }
+    }
+    
+    private static String unifyWebroot(String webroot) {
+        if(webroot.endsWith("/"))
+            return webroot;
+        else
+            return webroot + "/";
     }
 
     private static String createAbstractTempDir(String warfileName) throws IOException {
