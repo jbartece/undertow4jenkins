@@ -35,8 +35,8 @@ public class OptionParser {
     private Pattern dotReplacePattern;
     
     public OptionParser() {
-        optionsDefinition = createOptionsDefinition();
         this.dotReplacePattern = Pattern.compile("_");
+        optionsDefinition = createOptionsDefinition();
     }
 
     public Options parse(String[] args) {
