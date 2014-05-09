@@ -46,7 +46,7 @@ public class SimpleListenerBuilder {
             serverBuilder.addHttpListener(options.httpPort, hostAllInterfacesString);
         }
 
-        log.debug("Created HTTP listener");
+        log.info("HTTP listener created");
     }
 
     /**
@@ -69,7 +69,7 @@ public class SimpleListenerBuilder {
             serverBuilder.addAjpListener(options.ajp13Port, hostAllInterfacesString);
         }
 
-        log.debug("Created AJP listener");
+        log.info("AJP listener created");
     }
 
 }

@@ -68,6 +68,7 @@ public class Launcher {
             WebXmlParser parser = new WebXmlParser();
             WebXmlContent webXmlContent = parser.parse(webRootPath + "WEB-INF/web.xml");
 
+            log.info("Webroot directory: " + webRootPath);
             UndertowCreator undertowInitiator = new UndertowCreator(jenkinsWarClassLoader,
                     options, webRootPath);
             undertowInstance = undertowInitiator.initUndertow(webXmlContent, objectsToClose);
@@ -102,7 +103,7 @@ public class Launcher {
 
             while (!interrupted) {
                 Socket acceptedSocket = controlSocket.accept();
-                handleControlRequest(acceptedSocket);
+                handleControlRequest(acceptedSocket);   //TODO solve interruption
             }
 
         } catch (IOException e) {

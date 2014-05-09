@@ -85,6 +85,8 @@ public class HttpsListenerBuilder {
                 createHttpsListenerWithSelfSignedCert(serverBuilder, host, options.httpsPort);
 
         }
+        
+        log.info("HTTPS listener created.");
 
     }
 
