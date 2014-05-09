@@ -107,8 +107,13 @@ public class WarWorker {
         else {
             if(!new File(webroot).exists())
                 throw new IOException("Webroot directory does not exists!");
-            else
-                return webroot;
+            else {
+                //Application expects directory ending with /
+                if(webroot.endsWith("/"))
+                    return webroot;
+                else
+                    return webroot + "/";
+            }
         }
     }
 
