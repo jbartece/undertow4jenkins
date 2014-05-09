@@ -39,8 +39,8 @@ public class SimpleListenerBuilder {
             return;
         }
 
-        if (options.httpListenAdress != null)
-            serverBuilder.addHttpListener(options.httpPort, options.httpListenAdress);
+        if (options.httpListenAddress != null)
+            serverBuilder.addHttpListener(options.httpPort, options.httpListenAddress);
         else {
             // Listen on all interfaces
             serverBuilder.addHttpListener(options.httpPort, hostAllInterfacesString);
@@ -62,8 +62,8 @@ public class SimpleListenerBuilder {
             return;
         }
 
-        if (options.ajp13ListenAdress != null)
-            serverBuilder.addAjpListener(options.ajp13Port, options.ajp13ListenAdress);
+        if (options.ajp13ListenAddress != null)
+            serverBuilder.addAjpListener(options.ajp13Port, options.ajp13ListenAddress);
         else {
             // Listen on all interfaces
             serverBuilder.addAjpListener(options.ajp13Port, hostAllInterfacesString);

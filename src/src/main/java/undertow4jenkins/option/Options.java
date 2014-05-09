@@ -20,12 +20,12 @@ public class Options {
 
     //
     public Integer httpPort;
-    public String httpListenAdress;
+    public String httpListenAddress;
     public Integer httpKeepAliveTimeout;
 
     //
     public Integer httpsPort;
-    public String httpsListenAdress;
+    public String httpsListenAddress;
     public Integer httpsKeepAliveTimeout;
     public String httpsKeyStore;
     public String httpsKeyStorePassword;
@@ -35,7 +35,7 @@ public class Options {
 
     //
     public Integer ajp13Port;
-    public String ajp13ListenAdress;
+    public String ajp13ListenAddress;
     public Integer controlPort;
     public String commonLibFolder;
 
@@ -143,13 +143,13 @@ public class Options {
                 + (logThrowingThread != null ? "logThrowingThread=" + logThrowingThread + ", " : "")
                 + (debug != null ? "debug=" + debug + ", " : "")
                 + (httpPort != null ? "httpPort=" + httpPort + ", " : "")
-                + (httpListenAdress != null ? "httpListenAdress=" + httpListenAdress + ", " : "")
+                + (httpListenAddress != null ? "httpListenAdress=" + httpListenAddress + ", " : "")
                 + (httpDoHostnameLookups != null ? "httpDoHostnameLookups=" + httpDoHostnameLookups
                         + ", " : "")
                 + (httpKeepAliveTimeout != null ? "httpKeepAliveTimeout=" + httpKeepAliveTimeout
                         + ", " : "")
                 + (httpsPort != null ? "httpsPort=" + httpsPort + ", " : "")
-                + (httpsListenAdress != null ? "httpsListenAdress=" + httpsListenAdress + ", " : "")
+                + (httpsListenAddress != null ? "httpsListenAdress=" + httpsListenAddress + ", " : "")
                 + (httpsKeepAliveTimeout != null ? "httpsKeepAliveTimeout=" + httpsKeepAliveTimeout
                         + ", " : "")
                 + (httpsKeyStore != null ? "httpsKeyStore=" + httpsKeyStore + ", " : "")
@@ -161,7 +161,7 @@ public class Options {
                         + ", " : "")
                 + (spdy != null ? "spdy=" + spdy + ", " : "")
                 + (ajp13Port != null ? "ajp13Port=" + ajp13Port + ", " : "")
-                + (ajp13ListenAdress != null ? "ajp13ListenAdress=" + ajp13ListenAdress + ", " : "")
+                + (ajp13ListenAddress != null ? "ajp13ListenAdress=" + ajp13ListenAddress + ", " : "")
                 + (controlPort != null ? "controlPort=" + controlPort + ", " : "")
                 + (handlerCountStartup != null ? "handlerCountStartup=" + handlerCountStartup
                         + ", " : "")

@@ -18,7 +18,7 @@ public class HttpConnectionTest extends AbstractTest {
         Options opts = new Options();
         opts.warfile = "target/test-classes/test.war";
         opts.httpPort = 11005;
-        opts.httpListenAdress = "127.0.0.2";
+        opts.httpListenAddress = "127.0.0.2";
 
         containerInstance = new Launcher(opts);
         containerInstance.run();

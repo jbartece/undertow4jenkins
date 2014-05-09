@@ -70,10 +70,10 @@ public class HttpsListenerBuilder {
         }
 
         String host;
-        if (options.httpsListenAdress == null)
+        if (options.httpsListenAddress == null)
             host = hostAllInterfacesString; // Listen on all interfaces
         else
-            host = options.httpsListenAdress;
+            host = options.httpsListenAddress;
 
         if (options.httpsKeyStore != null) {
             createHttpsListenerWithKeyStore(serverBuilder, host, options.httpsPort);

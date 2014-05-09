@@ -26,7 +26,7 @@ public class HttpsConnetionTest extends AbstractTest {
         opts.httpsPort = 12000;
         opts.httpsPrivateKey = "src/ssl/server.key";
         opts.httpsCertificate = "src/ssl/server.crt";
-        opts.httpsListenAdress = "localhost";
+        opts.httpsListenAddress = "localhost";
 
         containerInstance = new Launcher(opts);
         containerInstance.run();
