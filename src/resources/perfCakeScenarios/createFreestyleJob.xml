@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<scenario xmlns="urn:perfcake:scenario:2.0">
+
+  <properties>
+    <property name="server.url" value="${server.url}"/>
+    <property name="server.port" value="${server.port}"/>
+  </properties>
+
+  <generator class="DefaultMessageGenerator" threads="${perfcake.performance.thread.count:1}">
+    <run type="time" value="${perfcake.performance.duration:60000}"/>
+    <!-- run type="iteration" value="10"/ -->                                                                                              
+    <property name="threadQueueSize" value="50000"/>                                                                                                                                                                                          
+  </generator>
+              
+  <sender class="org.perfcake.plugins.jenkins_tools.RandomTargetSender">
+    <property name="target" value="http://${server.url}:${server.port:8080}/createItem?name=$RANDOM"/>
+    <property name="method" value="POST"/>
+  </sender>
+
+  <reporting>
+    <reporter class="ResponseTimeReporter">
+      <destination class="CSVDestination">
+        <period type="time" value="1000"/>
+        <property name="path" value="perf-logs/createFreestylJob/response-time.csv"/>
+      </destination>
+    </reporter>
+    
+    <reporter class="AverageThroughputReporter">
+      <destination class="CSVDestination">
+        <period type="time" value="500"/>
+        <property name="path" value="perf-logs/createFreestylJob/throughput-iter.csv"/>
+      </destination>
+    </reporter>
+  </reporting>
+  
+  <messages>
+    <message uri="testFreestyle.xml"/>
+  </messages>
+
+</scenario>
