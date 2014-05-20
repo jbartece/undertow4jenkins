@@ -30,7 +30,6 @@ import undertow4jenkins.parser.WebXmlContent;
 import undertow4jenkins.security.ArgumentsIdentityManager;
 import undertow4jenkins.security.FileIdentityManager;
 
-
 public class DeploymentCreator {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
@@ -45,8 +44,7 @@ public class DeploymentCreator {
 
     private List<Closeable> objToClose;
 
-    
-    public DeploymentCreator(ClassLoader classLoader, Options options, String pathToTmpDir, 
+    public DeploymentCreator(ClassLoader classLoader, Options options, String pathToTmpDir,
             List<Closeable> objToClose, String applicationContextPath) {
         this.classLoader = classLoader;
         this.options = options;
@@ -141,7 +139,7 @@ public class DeploymentCreator {
             objToClose.add(accessLoggerHandler);
 
             return accessLoggerHandler;
-        } catch (InvocationTargetException e) { 
+        } catch (InvocationTargetException e) {
             throw new CustomException(e.getCause().getMessage());
         } catch (Throwable e) {
             throw new CustomException(e.getMessage());
@@ -149,7 +147,8 @@ public class DeploymentCreator {
     }
 
     private void setSecurityActions(DeploymentInfo servletContainerBuilder) {
-        if (!options.argumentsRealmPasswd.isEmpty() || options.fileRealm_configFile != null) {
+        if (!options.argumentsRealmPasswd.isEmpty() || 
+                !options.realmClassName.equals("undertow4jenkins.security.ArgumentsIdentityManager")) {
             // Initialization of Arguments Identity Manager
             mapWinstoneRealmNamesToIdentityManager(options); // Compatibility with old winstone class names
 

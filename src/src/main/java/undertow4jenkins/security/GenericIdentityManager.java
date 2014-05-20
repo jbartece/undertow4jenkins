@@ -22,7 +22,6 @@ public abstract class GenericIdentityManager implements IdentityManager {
 
     @Override
     public Account verify(Account account) {
-        log.debug("Verify: Account: " + account.toString());
         if (account instanceof UserAccount) {
             return verifyCredential(account, ((UserAccount) account).getCredential());
         }
@@ -34,7 +33,6 @@ public abstract class GenericIdentityManager implements IdentityManager {
 
     @Override
     public Account verify(String id, Credential credential) {
-        log.debug("Verify: Id " + id + ", " + credential.toString());
         UserAccount account = users.get(id);
         if (account != null) {
             return verifyCredential(new UserAccount(account.getPrincipal(), account.getRoles(),

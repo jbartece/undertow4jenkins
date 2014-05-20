@@ -31,7 +31,7 @@ public class SimpleListenerBuilder {
      */
     public void setHttpListener(Builder serverBuilder) {
         if (options.httpPort == -1) {
-            log.info("Http listener is disabled.");
+            log.info("HTTP listener is disabled.");
             return;
         }
         if (options.httpPort < -1 || options.httpPort > MAX_PORT) {
@@ -58,7 +58,7 @@ public class SimpleListenerBuilder {
         if (options.ajp13Port == -1)
             return;
         if (options.ajp13Port < -1 || options.ajp13Port > MAX_PORT) {
-            log.warn("Unallowed ajp13Port value. AJP13 listener is disabled!");
+            log.warn("Unallowed ajp13Port value. AJP listener is disabled!");
             return;
         }
 

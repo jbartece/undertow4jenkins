@@ -34,7 +34,7 @@ public class FileIdentityManager extends GenericIdentityManager implements Ident
 
     public FileIdentityManager(Options options) throws CustomException {
         File configFile;
-        if (options.fileRealm_configFile == null)
+        if (options.fileRealm_configFile != null)
             configFile = new File(options.fileRealm_configFile);
         else
             configFile = new File(DEFAULT_FILE_NAME);
@@ -68,9 +68,14 @@ public class FileIdentityManager extends GenericIdentityManager implements Ident
                     log.debug("Incomplete data! Skipping user " + data.username);
                 }
                 else {
+                    if(log.isDebugEnabled())
+                        log.debug("Created user with username: " + data.username 
+                            + ", password: " + data.password + ", roles: " + data.roles);
+                    
                     this.users.put(data.username,
                             new UserAccount(data.username, data.roles.toArray(new String[0])));
                     this.passwords.put(data.username, data.password.toCharArray());
+                    
                 }
             }
         }
