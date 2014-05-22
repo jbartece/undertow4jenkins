@@ -59,7 +59,7 @@ public class DeploymentCreator {
     public DeploymentInfo createServletContainerDeployment(WebXmlContent webXmlContent)
             throws ClassNotFoundException {
         DeploymentInfo servletContainerBuilder = deployment()
-                // .setIgnoreFlush(true) TODO test performance of this option
+                .setIgnoreFlush(true)
                 .setClassLoader(classLoader)
                 .setDeploymentName(options.warfile)
                 .setContextPath(applicationContextPath)
