@@ -4,7 +4,10 @@ import static io.undertow.servlet.Servlets.deployment;
 import io.undertow.security.idm.IdentityManager;
 import io.undertow.server.HandlerWrapper;
 import io.undertow.server.HttpHandler;
+import io.undertow.server.handlers.cache.DirectBufferCache;
+import io.undertow.server.handlers.resource.CachingResourceManager;
 import io.undertow.server.handlers.resource.FileResourceManager;
+import io.undertow.server.handlers.resource.ResourceManager;
 import io.undertow.servlet.api.DeploymentInfo;
 
 import java.io.Closeable;
@@ -38,7 +41,7 @@ public class DeploymentCreator {
 
     private Options options;
 
-    private String pathToTmpDir;
+    private String webrootDir;
 
     private String applicationContextPath;
 
@@ -48,7 +51,7 @@ public class DeploymentCreator {
             List<Closeable> objToClose, String applicationContextPath) {
         this.classLoader = classLoader;
         this.options = options;
-        this.pathToTmpDir = pathToTmpDir;
+        this.webrootDir = pathToTmpDir;
         this.objToClose = objToClose;
         this.applicationContextPath = applicationContextPath;
     }
@@ -83,9 +86,8 @@ public class DeploymentCreator {
         setDisplayName(webXmlContent.displayName, servletContainerBuilder);
 
         // Load static resources from extracted war archive
-        servletContainerBuilder.setResourceManager(
-                new FileResourceManager(new File(pathToTmpDir), 0L));
-
+        servletContainerBuilder.setResourceManager(createResourceManager());
+        
         // Set session timeout for application
         servletContainerBuilder.setSessionManagerFactory(new JenkinsSessionManagerFactory(
                 options.sessionTimeout * 60));
@@ -93,6 +95,17 @@ public class DeploymentCreator {
         setAccessLogger(servletContainerBuilder);
 
         return servletContainerBuilder;
+    }
+
+    /**
+     * Creates caching resource manager to serve static resource from webroot directory
+     * @return Created resource manager
+     */
+    private ResourceManager createResourceManager() {
+        //Used values, which are used in some parts of Undertow 
+        DirectBufferCache bufferCache = new DirectBufferCache(1024, 10, 10480);
+        ResourceManager resourceManager = new FileResourceManager(new File(webrootDir), 10485760L);
+        return new CachingResourceManager(100, 10000, bufferCache, resourceManager, -1);
     }
 
     private void setAccessLogger(DeploymentInfo servletContainerBuilder) {
