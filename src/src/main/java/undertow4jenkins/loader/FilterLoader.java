@@ -59,7 +59,7 @@ public class FilterLoader {
     /**
      * Add filter mappings to servlet container configuration in DeploymentInfo
      * 
-     * @param filtersDataCol Data from web.xml
+     * @param mappingsDataCol Data from web.xml
      * @param servletBuilder Builder instance of servlet container
      */
     public static void addFilterMappings(List<FilterMapping> mappingsDataCol, DeploymentInfo servletBuilder) {

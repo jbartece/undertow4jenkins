@@ -191,8 +191,6 @@ public class Launcher implements Runnable {
     
     /**
      * Process received request on control port
-     * 
-     * @return true if shutdown request was accepted, otherwise false
      */
     private void handleControlRequest(Socket acceptedSocket) throws IOException {
         InputStream inputStream = null;
