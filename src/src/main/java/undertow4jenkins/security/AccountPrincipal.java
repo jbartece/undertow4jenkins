@@ -3,6 +3,13 @@ package undertow4jenkins.security;
 import java.io.Serializable;
 import java.security.Principal;
 
+/**
+ * This class represents principal of account used in IdentityManager instances
+ * Principal contains only account name.
+ * 
+ * @author Jakub Bartecek <jbartece@redhat.com>
+ *
+ */
 public class AccountPrincipal implements Principal, Serializable {
 
     private static final long serialVersionUID = 1L;

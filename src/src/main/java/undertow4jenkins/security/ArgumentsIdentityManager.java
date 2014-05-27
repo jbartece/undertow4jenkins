@@ -6,8 +6,20 @@ import java.util.Map;
 
 import undertow4jenkins.option.Options;
 
+/**
+ * Identity manager, which loads users, passwords and roles from
+ * command line options.
+ * 
+ * @author Jakub Bartecek <jbartece@redhat.com>
+ *
+ */
 public class ArgumentsIdentityManager extends GenericIdentityManager implements IdentityManager {
 
+    /**
+     * Initializes identity manager and set users
+     * 
+     * @param options Undertow4Jenkins options
+     */
     public ArgumentsIdentityManager(Options options) {
         this(options.argumentsRealmPasswd, options.argumentsRealmRoles);
     }

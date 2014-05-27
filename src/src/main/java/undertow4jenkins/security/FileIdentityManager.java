@@ -18,6 +18,14 @@ import org.xml.sax.SAXException;
 import undertow4jenkins.CustomException;
 import undertow4jenkins.option.Options;
 
+/**
+ * 
+ * Identity manager, which loads users, passwords and roles from
+ * XML file.
+ * 
+ * @author Jakub Bartecek <jbartece@redhat.com>
+ * 
+ */
 public class FileIdentityManager extends GenericIdentityManager implements IdentityManager {
 
     private final String MSG_FATAL = "No valid file with users for FileIdentityManager! Feature disabled!";
@@ -32,6 +40,12 @@ public class FileIdentityManager extends GenericIdentityManager implements Ident
 
     private final String EL_USER = "user";
 
+    /**
+     * Initializes identity manager and set users
+     * 
+     * @param options Undertow4Jenkins options
+     * @throws CustomException Thrown if file with users is malformed or not found
+     */
     public FileIdentityManager(Options options) throws CustomException {
         File configFile;
         if (options.fileRealm_configFile != null)
@@ -49,8 +63,14 @@ public class FileIdentityManager extends GenericIdentityManager implements Ident
         }
     }
 
-    private void loadUsersFromFile(File configFile) throws SAXException, IOException,
-            ParserConfigurationException {
+    /**
+     * Loads data about users from file
+     * 
+     * @param configFile File with users
+     * 
+     * @throws Exception Thrown if loading of users fails
+     */
+    private void loadUsersFromFile(File configFile) throws Exception {
         Document document = createDOMFromXml(configFile);
 
         UserData data = new UserData();
@@ -68,45 +88,57 @@ public class FileIdentityManager extends GenericIdentityManager implements Ident
                     log.debug("Incomplete data! Skipping user " + data.username);
                 }
                 else {
-                    if(log.isDebugEnabled())
-                        log.debug("Created user with username: " + data.username 
-                            + ", password: " + data.password + ", roles: " + data.roles);
-                    
+                    if (log.isDebugEnabled())
+                        log.debug("Created user with username: " + data.username
+                                + ", password: " + data.password + ", roles: " + data.roles);
+
                     this.users.put(data.username,
                             new UserAccount(data.username, data.roles.toArray(new String[0])));
                     this.passwords.put(data.username, data.password.toCharArray());
-                    
+
                 }
             }
         }
 
     }
 
+    /**
+     * Load data from attributes in XML node
+     * 
+     * @param node Current node in document
+     * @param data Container for loaded data
+     */
     private void getDataFromAttributes(Node node, UserData data) {
         int attLen = node.getAttributes().getLength();
-        for(int i = 0; i < attLen; i++) {
+        for (int i = 0; i < attLen; i++) {
             Node attr = node.getAttributes().item(i);
-            if(attr.getNodeName().equals(ATT_USERNAME)){
+            if (attr.getNodeName().equals(ATT_USERNAME)) {
                 data.username = attr.getNodeValue();
                 continue;
             }
-            
-            if(attr.getNodeName().equals(ATT_PASSWORD)){
+
+            if (attr.getNodeName().equals(ATT_PASSWORD)) {
                 data.password = attr.getNodeValue();
                 continue;
             }
-            
-            if(attr.getNodeName().equals(ATT_ROLES)){
+
+            if (attr.getNodeName().equals(ATT_ROLES)) {
                 String rolesString = attr.getNodeValue();
-                for(String role : rolesString.split(",")) 
+                for (String role : rolesString.split(","))
                     data.roles.add(role.trim());
                 continue;
             }
         }
     }
 
-    private Document createDOMFromXml(File configFile) throws SAXException, IOException,
-            ParserConfigurationException {
+    /**
+     * DOM document creator
+     * 
+     * @param configFile File with users
+     * @return Created DOM document object
+     * @throws Exception Thrown if loading of file fails
+     */
+    private Document createDOMFromXml(File configFile) throws Exception {
         DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
         builderFactory.setValidating(false);
         builderFactory.setNamespaceAware(false);
@@ -117,6 +149,12 @@ public class FileIdentityManager extends GenericIdentityManager implements Ident
         return builderFactory.newDocumentBuilder().parse(configFile);
     }
 
+    /**
+     * Container for user data
+     * 
+     * @author Jakub Bartecek <jbartece@redhat.com>
+     * 
+     */
     private class UserData {
 
         String username = null;

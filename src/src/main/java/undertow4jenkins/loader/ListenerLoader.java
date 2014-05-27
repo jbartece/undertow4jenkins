@@ -9,8 +9,21 @@ import java.util.List;
 
 import undertow4jenkins.parser.WebXmlContent.Listener;
 
+/**
+ * Utility class to create listener entity from web.xml data
+ * @author Jakub Bartecek <jbartece@redhat.com>
+ *
+ */
 public class ListenerLoader {
 
+    /**
+     * Creates listener entity from web.xml data
+     * @param listenersData Data about listeners from web.xml
+     * @param jenkinsWarClassLoader Web archive classloader
+     * @return Created entity
+     * @throws ClassNotFoundException Thrown if some class 
+     *      could not be loaded by current class loader
+     */
     public static List<ListenerInfo> createListener(List<Listener> listenersData,
             ClassLoader jenkinsWarClassLoader) throws ClassNotFoundException {
         List<ListenerInfo> listenerInfos = new ArrayList<ListenerInfo>(3);

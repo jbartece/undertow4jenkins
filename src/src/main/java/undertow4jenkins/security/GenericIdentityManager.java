@@ -12,6 +12,14 @@ import io.undertow.security.idm.Credential;
 import io.undertow.security.idm.IdentityManager;
 import io.undertow.security.idm.PasswordCredential;
 
+/**
+ * Abstract implementation of IdentityManager, which implements authentication
+ * of users with their username and password. Does not load data about users.
+ * This has to arrange child class.
+ * 
+ * @author Jakub Bartecek <jbartece@redhat.com>
+ *
+ */
 public abstract class GenericIdentityManager implements IdentityManager {
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
@@ -48,6 +56,12 @@ public abstract class GenericIdentityManager implements IdentityManager {
         return null;
     }
 
+    /**
+     * Verify if specified credentials fit to the user account
+     * @param account User account
+     * @param credential Provided credentials
+     * @return Account if user was verified, otherwise null.
+     */
     protected Account verifyCredential(Account account, Credential credential) {
         if (credential instanceof PasswordCredential) {
             String username = account.getPrincipal().getName();

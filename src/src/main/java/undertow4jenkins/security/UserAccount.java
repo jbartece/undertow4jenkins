@@ -9,6 +9,12 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+/**
+ * This class represents user account used in IdentityManager instances
+ * 
+ * @author Jakub Bartecek <jbartece@redhat.com>
+ *
+ */
 public class UserAccount implements Account, Serializable {
 
     private static final long serialVersionUID = 1L;
