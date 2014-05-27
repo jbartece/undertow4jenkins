@@ -22,6 +22,9 @@ import undertow4jenkins.util.Configuration;
 import undertow4jenkins.util.WarWorker;
 
 /**
+ * This class is entry point to the servlet container.
+ * Coordinates starting of whole application and run the control port.
+ * 
  * @author Jakub Bartecek <jbartece@redhat.com>
  * 
  */
@@ -29,40 +32,55 @@ public class Launcher {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
+    /** Code for control port message with type shutdown */
     private static final byte SHUTDOWN_REQUEST_TYPE = (byte) '0';
 
+    /** Code for control port message with type request */
     private static final byte RELOAD_REQUEST_TYPE = (byte) '4';
 
+    /** Container options */
     private Options options;
 
+    /** Classloader to load classes from war of Jenkins */
     private ClassLoader jenkinsWarClassLoader;
 
+    /** Created instance of undertow */
     private Undertow undertowInstance;
 
+    /** List of objects to be closed on  application end */
     private List<Closeable> objectsToClose = new ArrayList<Closeable>();
 
     /**
-     * Field for usage, which can be overridden outside this class
+     * Field for usage, which can be overridden outside this class (from extras-executable-war)
      */
     public static String USAGE;
 
+    /**
+     * Creates instance and store options
+     * 
+     * @param options Loaded command-line options for servlet container
+     */
     public Launcher(Options options) {
         this.options = options;
         log.debug(options.toString());
     }
 
+    /**
+     * This method is entry point to initialize server Undertow and run
+     * the Jenkins CI.
+     */
     public void run() {
 
         if (checkHelpParams() || checkAppConfig())
             return;
 
         try {
-            String webRootPath = WarWorker.createWebApplicationRoot(options.warfile, 
+            String webRootPath = WarWorker.createWebApplicationRoot(options.warfile,
                     options.webroot);
 
             // Create class loader to load classed from jenkins.war archive.
             // It is needed to load servlet classes such as Stapler.
-            this.jenkinsWarClassLoader = WarWorker.createJarsClassloader(options.warfile,
+            this.jenkinsWarClassLoader = WarWorker.createJarsClassloader(
                     options.commonLibFolder, webRootPath, getClass().getClassLoader());
 
             WebXmlParser parser = new WebXmlParser();
@@ -76,13 +94,12 @@ public class Launcher {
 
         } catch (Throwable e) {
             log.error("Initialization of servlet container failed! Reason: " + e.getMessage());
-        } 
+        }
 
         listenOnControlPort(options.controlPort);
     }
-    
-    // private static int controlSocketTimeout = 2000;
 
+    // private static int controlSocketTimeout = 2000;
 
     private void listenOnControlPort(int port) {
         if (port == -1)
@@ -103,7 +120,7 @@ public class Launcher {
 
             while (!interrupted) {
                 Socket acceptedSocket = controlSocket.accept();
-                handleControlRequest(acceptedSocket);   //TODO solve interruption
+                handleControlRequest(acceptedSocket); // TODO solve interruption
             }
 
         } catch (IOException e) {
@@ -121,6 +138,8 @@ public class Launcher {
     }
 
     /**
+     * Process received request on control port
+     * 
      * @return true if shutdown request was accepted, otherwise false
      */
     private void handleControlRequest(Socket acceptedSocket) throws IOException {
@@ -155,11 +174,17 @@ public class Launcher {
 
     }
 
+    /**
+     * Reload whole application - stops it and start is again
+     */
     private void reloadApplication() {
         undertowInstance.stop();
         undertowInstance.start();
     }
 
+    /**
+     * Shutdown application and close objects with opened resources 
+     */
     public void shutdownApplication() {
         undertowInstance.stop();
 
@@ -204,7 +229,8 @@ public class Launcher {
     }
 
     /**
-     * @param args
+     * Main method for Undertow4Jenkins 
+     * @param args Command-line arguments
      */
     public static void main(String[] args) {
         Logger log = LoggerFactory.getLogger("Main");

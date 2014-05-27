@@ -33,29 +33,57 @@ import undertow4jenkins.parser.WebXmlContent;
 import undertow4jenkins.security.ArgumentsIdentityManager;
 import undertow4jenkins.security.FileIdentityManager;
 
+/**
+ * This class ensures initialization of Undertow servlet container 
+ * 
+ * @author Jakub Bartecek <jbartece@redhat.com>
+ *
+ */
 public class DeploymentCreator {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
+    /** ClassLoader for web application  */
     private ClassLoader classLoader;
 
     private Options options;
 
+    /** Path to root directory of web application */
     private String webrootDir;
 
+    /** Prefix of application URL */
     private String applicationContextPath;
 
+    /** List of objects to be closed on  application end */
     private List<Closeable> objToClose;
 
-    public DeploymentCreator(ClassLoader classLoader, Options options, String pathToTmpDir,
+    /**
+     * Initializes creator
+     * 
+     * @param classLoader ClassLoder for web application
+     * @param options Options of Undertow4Jenkins
+     * @param webrootDir Path to root directory of web application
+     * @param objToClose List of objects to be closed on application end
+     * @param applicationContextPath Prefix of application URL
+     */
+    public DeploymentCreator(ClassLoader classLoader, Options options, String webrootDir,
             List<Closeable> objToClose, String applicationContextPath) {
         this.classLoader = classLoader;
         this.options = options;
-        this.webrootDir = pathToTmpDir;
+        this.webrootDir = webrootDir;
         this.objToClose = objToClose;
         this.applicationContextPath = applicationContextPath;
     }
 
+    /**
+     * Creates whole configuration of servlet container
+     * Process setting of configuration from web.xml and creating of identity manager 
+     * and access logger (if specified) 
+     * 
+     * @param webXmlContent Content of web.xml
+     * @return Created configuration of servlet container
+     * @throws ClassNotFoundException Thrown if some specified class in web.xml or as parameter is not found
+     */
     public DeploymentInfo createServletContainerDeployment(WebXmlContent webXmlContent)
             throws ClassNotFoundException {
         DeploymentInfo servletContainerBuilder = deployment()
@@ -92,13 +120,14 @@ public class DeploymentCreator {
         servletContainerBuilder.setSessionManagerFactory(new JenkinsSessionManagerFactory(
                 options.sessionTimeout * 60));
 
+        //Creates access logger
         setAccessLogger(servletContainerBuilder);
 
         return servletContainerBuilder;
     }
 
     /**
-     * Creates caching resource manager to serve static resource from webroot directory
+     * Creates caching resource manager to serve static resources from webroot directory
      * @return Created resource manager
      */
     private ResourceManager createResourceManager() {
@@ -108,6 +137,10 @@ public class DeploymentCreator {
         return new CachingResourceManager(100, 10000, bufferCache, resourceManager, -1);
     }
 
+    /**
+     * Add access logger to servlet container
+     * @param servletContainerBuilder Container configuration object
+     */
     private void setAccessLogger(DeploymentInfo servletContainerBuilder) {
         if (options.accessLoggerClassName != null) {
             HandlerWrapper accessLoggerWrapper = createAccessLogger();
@@ -116,6 +149,10 @@ public class DeploymentCreator {
         }
     }
 
+    /**
+     * Creates handler wrapper for access logger
+     * @return Created handler wrapper
+     */
     private HandlerWrapper createAccessLogger() {
         return new HandlerWrapper() {
 
@@ -132,6 +169,12 @@ public class DeploymentCreator {
         };
     }
 
+    /**
+     * Creates handler for access logger
+     * @param handler Next handler of chain
+     * @return Created handler
+     * @throws CustomException Thrown if specified AccessLoggerHandler class could not be loaded and started
+     */
     private HttpHandler createAccessLoggerHandler(final HttpHandler handler) throws CustomException {
         try {
             // Compatibility with old winstone class name
@@ -159,11 +202,15 @@ public class DeploymentCreator {
         }
     }
 
+    /**
+     * Prepares servlet container to support authentication 
+     * @param servletContainerBuilder Container configuration object
+     */
     private void setSecurityActions(DeploymentInfo servletContainerBuilder) {
         if (!options.argumentsRealmPasswd.isEmpty() || 
                 !options.realmClassName.equals("undertow4jenkins.security.ArgumentsIdentityManager")) {
             // Initialization of Arguments Identity Manager
-            mapWinstoneRealmNamesToIdentityManager(options); // Compatibility with old winstone class names
+            mapWinstoneRealmNamesToIdentityManager(); // Compatibility with old winstone class names
 
             try {
                 // Locate identity manager class
@@ -186,7 +233,11 @@ public class DeploymentCreator {
         }
     }
 
-    private void mapWinstoneRealmNamesToIdentityManager(Options options2) {
+    /**
+     * Maps old winstone class names of security realms to identity manager classes 
+     * created in this project (with analogous function)
+     */
+    private void mapWinstoneRealmNamesToIdentityManager() {
         if ("winstone.realm.ArgumentsRealm".equals(options.realmClassName)) {
             options.realmClassName = ArgumentsIdentityManager.class.getName();
         }
@@ -197,11 +248,21 @@ public class DeploymentCreator {
         }
     }
 
+    /**
+     * Sets display name
+     * @param displayName Display name
+     * @param servletContainerBuilder Container configuration object
+     */
     private void setDisplayName(String displayName, DeploymentInfo servletContainerBuilder) {
         if (displayName != null)
             servletContainerBuilder.setDisplayName(displayName);
     }
 
+    /**
+     * Sets version of web application from web.xml
+     * @param version Version string from web.xml
+     * @param servletContainerBuilder Container configuration object
+     */
     private void setServletAppVersion(String version, DeploymentInfo servletContainerBuilder) {
         if (version == null)
             return;

@@ -14,9 +14,26 @@ import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+/**
+ * Utility class to processing war archives, creating classloader, etc.
+ * 
+ * @author Jakub Bartecek <jbartece@redhat.com>
+ *
+ */
 public class WarWorker {
 
-    public static ClassLoader createJarsClassloader(String warfile,
+    /**
+     * Created ClassLoader for all libraries and classes in extracted war archive.
+     * 
+     * Loads also libraries from additional commonLib directory
+     * 
+     * @param commonLib Path to additional directory with libraries
+     * @param warDir Path to directory with extracted war archive
+     * @param parentClassLoader Parent ClassLoader
+     * @return New instance of classloader with loaded all libraries from specified sources
+     * @throws IOException Thrown if some directory does not exists or some other IO violation occurs
+     */
+    public static ClassLoader createJarsClassloader(
             String commonLib, String warDir, ClassLoader parentClassLoader)
             throws IOException {
         List<URL> jarUrls = new ArrayList<URL>();
@@ -53,7 +70,13 @@ public class WarWorker {
                 jarUrls.toArray(new URL[jarUrls.size()]), parentClassLoader);
     }
 
-    public static void extractFilesFromWar(String warfilePath, String pathToTmpDir)
+    /**
+     * Extras all files from war archive to specified directory
+     * @param warfilePath Path to war file
+     * @param targetDir Target directory for extraction of war file
+     * @throws IOException Thrown if some directory or war file does not exists or some other IO violation occurs
+     */
+    public static void extractFilesFromWar(String warfilePath, String targetDir)
             throws IOException {
         byte buffer[] = new byte[8192];
 
@@ -63,7 +86,7 @@ public class WarWorker {
             if (element.isDirectory())
                 continue;
 
-            File outFile = new File(pathToTmpDir + element.getName());
+            File outFile = new File(targetDir + element.getName());
 
             if (!outFile.exists()) {
                 copyFile(buffer, warArchive, element, outFile);
@@ -72,6 +95,15 @@ public class WarWorker {
         warArchive.close();
     }
 
+    /**
+     * Copies file from one destination to other
+     * @param buffer Buffer to store copied bytes of file
+     * @param warArchive War archive instance
+     * @param element Element of war archive
+     * @param outFile Abstract target file
+     * @throws IOException Thrown if some IO violation occurs
+     * @throws FileNotFoundException Thrown if some specified file does not exists
+     */
     private static void copyFile(byte[] buffer, JarFile warArchive, JarEntry element, File outFile)
             throws IOException, FileNotFoundException {
         outFile.getParentFile().mkdirs();
@@ -87,6 +119,16 @@ public class WarWorker {
         outStream.close();
     }
 
+    /**
+     * Prepares root directory for web application
+     * One of parameters has to be specified
+     * 
+     * 
+     * @param warfile Path to warfile if specified. May be null.
+     * @param webroot Path to webroot if specified. May be null.
+     * @return Path to webroot directory
+     * @throws IOException Thrown if some IO violation occurs or specified file does not exists
+     */
     public static String createWebApplicationRoot(String warfile, String webroot) 
             throws IOException {
         if (warfile != null) {
@@ -116,6 +158,11 @@ public class WarWorker {
         }
     }
     
+    /**
+     * Unify webroot path to end with slash
+     * @param webroot Path to webroot
+     * @return Unified webroot path
+     */
     private static String unifyWebroot(String webroot) {
         if(webroot.endsWith("/"))
             return webroot;
@@ -123,6 +170,13 @@ public class WarWorker {
             return webroot + "/";
     }
 
+    /**
+     * Creates temporary directory  
+     * 
+     * @param warfileName Name of war file
+     * @return Path to created directory
+     * @throws IOException Thrown if some IO violation occurs
+     */
     private static String createAbstractTempDir(String warfileName) throws IOException {
         File tmpFile = File.createTempFile("tmp", "tmp");
         File tmp = new File(tmpFile.getParent(), "undertow4jenkins_temp_" + warfileName);
@@ -131,6 +185,11 @@ public class WarWorker {
         return tmp.getAbsolutePath() + "/";
     }
 
+    /**
+     * Deletes whole directory recursively
+     * 
+     * @param directory Path to directory
+     */
     private static void deleteDirectory(File directory) {
         if (directory.exists()) {
             for (File f : directory.listFiles()) {

@@ -23,33 +23,60 @@ import undertow4jenkins.option.Options;
 import undertow4jenkins.parser.WebXmlContent;
 import undertow4jenkins.util.Configuration;
 
+/**
+ * This class ensures initialization of Undertow webserver
+ * and delegates creating of servlet container configuration do DeploymentCreator.
+ * 
+ * 
+ * @author Jakub Bartecek <jbartece@redhat.com>
+ * 
+ */
 public class UndertowCreator {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
+    /** ClassLoader for web application */
     private ClassLoader classLoader;
 
     private Options options;
 
-    private String pathToTmpDir;
+    /** Path to root directory of web application */
+    private String webrootDir;
 
-    /** Has to be set in constructor */
+    /** Context path of application. Has to be set in constructor */
     private String applicationContextPath;
 
-    public UndertowCreator(ClassLoader classLoader, Options options, String pathToTmpDir) {
+    /**
+     * Initializes creator
+     * 
+     * @param classLoader ClassLoader for web application
+     * @param options Options of Undertow4Jenkins
+     * @param webrootDir Path to root directory of web application
+     */
+    public UndertowCreator(ClassLoader classLoader, Options options, String webrootDir) {
         this.classLoader = classLoader;
         this.options = options;
-        this.pathToTmpDir = pathToTmpDir;
+        this.webrootDir = webrootDir;
         setContextPath(options.prefix);
     }
 
+    /**
+     * Process initialization of webserver and servlet container
+     * 
+     * @param webXmlContent Content of web.xml
+     * @param objToClose List of objects to be closed on application end
+     * @return Created server instance
+     * @throws ServletException Thrown if there are problems with servlet
+     * @throws ClassNotFoundException Thrown if some specified class in web.xml or as parameter is not found
+     */
     public Undertow initUndertow(WebXmlContent webXmlContent, List<Closeable> objToClose)
             throws ServletException,
             ClassNotFoundException {
-        DeploymentCreator deploymentCreator = new DeploymentCreator(classLoader, options, 
-                pathToTmpDir, objToClose, applicationContextPath);
-        
-        DeploymentInfo deploymentInfo = deploymentCreator.createServletContainerDeployment(webXmlContent);
+        DeploymentCreator deploymentCreator = new DeploymentCreator(classLoader, options,
+                webrootDir, objToClose, applicationContextPath);
+
+        DeploymentInfo deploymentInfo = deploymentCreator
+                .createServletContainerDeployment(webXmlContent);
         DeploymentManager manager = defaultContainer().addDeployment(deploymentInfo);
         manager.deploy();
 
@@ -57,6 +84,10 @@ public class UndertowCreator {
         return serverBuilder.build();
     }
 
+    /**
+     * Set context path from prefix 
+     * @param prefix Prefix of application URL
+     */
     private void setContextPath(String prefix) {
         if (prefix.isEmpty() || (prefix.startsWith("/") && prefix.length() == 1)) {
             applicationContextPath = "";
@@ -69,6 +100,13 @@ public class UndertowCreator {
         }
     }
 
+    /**
+     * Prepares instance of undertow webserver instance
+     * 
+     * @param manager Prepared servlet container instance
+     * @return Prepared instance of undertow
+     * @throws ServletException Thrown if there are problems with servlet
+     */
     private Undertow.Builder createUndertowInstance(DeploymentManager manager)
             throws ServletException {
         Undertow.Builder serverBuilder = Undertow.builder();
@@ -80,12 +118,25 @@ public class UndertowCreator {
         return serverBuilder;
     }
 
+    /**
+     * Prepares handler chain for Undertow
+     * 
+     * Currently creates only redirect handler
+     * 
+     * @param serverBuilder Builder of Undertow
+     * @param containerManagerHandler First handler of servlet container
+     */
     private void createHandlerChain(Builder serverBuilder, HttpHandler containerManagerHandler) {
         HttpHandler redirectHandler = createRedirectHandlerForContainer(containerManagerHandler);
 
         serverBuilder.setHandler(redirectHandler);
     }
 
+    /**
+     * Creates all listeners for specified protocols 
+     * 
+     * @param serverBuilder Builder of Undertow
+     */
     private void createListeners(Undertow.Builder serverBuilder) {
         SimpleListenerBuilder simpleListenerBuilder = new SimpleListenerBuilder(options);
         simpleListenerBuilder.setHttpListener(serverBuilder);
@@ -94,12 +145,27 @@ public class UndertowCreator {
         new HttpsListenerBuilder(options).setHttpsListener(serverBuilder);
     }
 
+    /**
+     * Edits options of Undertow
+     * @param serverBuilder Builder of Undertow
+     */
     private void setCustomOptions(Builder serverBuilder) {
         setIdleTimeout(serverBuilder);
         serverBuilder.setWorkerThreads(options.handlerCountMax);
         serverBuilder.setServerOption(UndertowOptions.MAX_PARAMETERS, options.maxParamCount);
     }
-
+    
+    /**
+     * Sets option keep-alive timeout to Undertow from parameters httpsKeepAliveTimeout, httpKeepAliveTimeout.
+     * 
+     * 
+     * It is too much complicated to set it separately for HTTP and HTTPS,
+     * so there war chosen compromise to set it together.
+     * If both httpsKeepAliveTimeout and httpKeepAliveTimeout are set,
+     * the HTTP parameter has higher priority.
+     * 
+     * @param serverBuilder Builder of Undertow
+     */
     private void setIdleTimeout(Builder serverBuilder) {
         boolean defaultHttpValue = isDefaultHttpTimeout();
         boolean defaultHttpsValue = isDefaultHttpsTimeout();
@@ -131,6 +197,9 @@ public class UndertowCreator {
 
     }
 
+    /**
+     * @return True if httpsKeepAliveTimeout was not specified, otherwise false.
+     */
     private boolean isDefaultHttpsTimeout() {
         if (options.httpsKeepAliveTimeout.equals(Configuration
                 .getIntProperty("Options.defaultValue.httpsKeepAliveTimeout"))) {
@@ -141,6 +210,9 @@ public class UndertowCreator {
         }
     }
 
+    /**
+     * @return True if httpKeepAliveTimeout was not specified, otherwise false.
+     */
     private boolean isDefaultHttpTimeout() {
         if (options.httpKeepAliveTimeout.equals(Configuration
                 .getIntProperty("Options.defaultValue.httpKeepAliveTimeout"))) {
@@ -151,13 +223,19 @@ public class UndertowCreator {
         }
     }
 
-    private HttpHandler createRedirectHandlerForContainer(HttpHandler containerManagerHandler) {
+    /**
+     * Creates redirect handler
+     * 
+     * @param handler Next handler of chain
+     * @return Created handler
+     */
+    private HttpHandler createRedirectHandlerForContainer(HttpHandler handler) {
         if (applicationContextPath.isEmpty()) {
-            return containerManagerHandler;
+            return handler;
         }
         else {
             return Handlers.path(Handlers.redirect(applicationContextPath))
-                    .addPrefixPath(applicationContextPath, containerManagerHandler);
+                    .addPrefixPath(applicationContextPath, handler);
         }
     }
 
