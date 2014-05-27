@@ -8,9 +8,8 @@
 	<packaging>jar</packaging>
 
 	<name>Undertow4Jenkins</name>
-	<description>Undertow4Jenkins is a web server and servlet container Undertow adapted for Jenkins CI to</description>
+	<description>Undertow4Jenkins is a servlet container based on Undertow adapted for Jenkins CI</description>
 
-	<!-- Temporary license: Without license is Jenkins CI cannot be built -->
 	<licenses>
 		<license>
 			<name>Apache License, version 2.0</name>
@@ -117,42 +116,6 @@
 				</executions>
 			</plugin>
 
-
-			<!-- <plugin> -->
-			<!-- <groupId>org.apache.maven.plugins</groupId> -->
-			<!-- <artifactId>maven-jar-plugin</artifactId> -->
-			<!-- <version>2.4</version> -->
-			<!-- <configuration> -->
-			<!-- <outputDirectory>./</outputDirectory> -->
-			<!-- <finalName>undertow4jenkins</finalName> -->
-			<!-- <archive> -->
-			<!-- <manifest> -->
-			<!-- <addClasspath>true</addClasspath> -->
-			<!-- <mainClass>undertow4jenkins.Launcher</mainClass> -->
-			<!-- <classpathPrefix>dependency-jars/</classpathPrefix> -->
-			<!-- </manifest> -->
-			<!-- </archive> -->
-			<!-- </configuration> -->
-			<!-- </plugin> -->
-
-			<!-- <plugin> -->
-			<!-- <groupId>org.apache.maven.plugins</groupId> -->
-			<!-- <artifactId>maven-dependency-plugin</artifactId> -->
-			<!-- <version>2.5.1</version> -->
-			<!-- <executions> -->
-			<!-- <execution> -->
-			<!-- <id>copy-dependencies</id> -->
-			<!-- <phase>package</phase> -->
-			<!-- <goals> -->
-			<!-- <goal>copy-dependencies</goal> -->
-			<!-- </goals> -->
-			<!-- <configuration> -->
-			<!-- <includeGroupIds>*</includeGroupIds> -->
-			<!-- <outputDirectory>${project.build.directory}/dependency-jars/</outputDirectory> -->
-			<!-- </configuration> -->
-			<!-- </execution> -->
-			<!-- </executions> -->
-			<!-- </plugin> -->
 
 		</plugins>
 	</build>
