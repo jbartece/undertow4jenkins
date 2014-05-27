@@ -155,7 +155,6 @@ public class Launcher implements Runnable {
                         Thread.sleep(CONTROL_TIMEOUT_DURATION);
                 } catch (InterruptedIOException e) {
                 } catch(InterruptedException e) {
-                    // If program is killed with sigterm - OK
                     interrupted = true;
                 } catch(Throwable e) {
                     log.error("Error occured in control thread. Reason: " + e.getMessage());
