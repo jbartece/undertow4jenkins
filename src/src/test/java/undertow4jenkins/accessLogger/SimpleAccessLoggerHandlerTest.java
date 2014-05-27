@@ -26,7 +26,7 @@ public class SimpleAccessLoggerHandlerTest extends AbstractTest {
         options.simpleAccessLogger_file = logFile.getAbsolutePath();
         options.simpleAccessLogger_format = "###ip### - ###user### ###uriLine### ###status###";
         containerInstance = new Launcher(options);
-        containerInstance.run();
+        containerInstance.startApplication();
         
         makeRequest("http://127.0.0.1:5555/prefix/CountRequestsServlet");
 

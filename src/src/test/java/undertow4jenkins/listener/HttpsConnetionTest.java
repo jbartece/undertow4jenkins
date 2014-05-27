@@ -29,7 +29,7 @@ public class HttpsConnetionTest extends AbstractTest {
         opts.httpsListenAddress = "localhost";
 
         containerInstance = new Launcher(opts);
-        containerInstance.run();
+        containerInstance.startApplication();
         
         assertConnectionRefused("127.0.0.2", 12000);
 
@@ -61,7 +61,7 @@ public class HttpsConnetionTest extends AbstractTest {
         opts.httpsPort = 12000;
 
         containerInstance = new Launcher(opts);
-        containerInstance.run();
+        containerInstance.startApplication();
         
         try {
             request(new TrustManagerImpl());

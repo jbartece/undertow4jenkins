@@ -28,7 +28,7 @@ public class ArgumentsRealmTest extends AbstractTest {
         opts.argumentsRealmRoles = rolesMap;
 
         containerInstance = new Launcher(opts);
-        containerInstance.run();
+        containerInstance.startApplication();
 
         try {
             makeRequest("http://localhost:13000/secure/secret.txt");

@@ -21,7 +21,7 @@ public class HttpConnectionTest extends AbstractTest {
         opts.httpListenAddress = "127.0.0.2";
 
         containerInstance = new Launcher(opts);
-        containerInstance.run();
+        containerInstance.startApplication();
 
         assertConnectionRefused("127.0.0.1", 11005);
 
@@ -35,7 +35,7 @@ public class HttpConnectionTest extends AbstractTest {
         opts.httpPort = 11006;
 
         containerInstance = new Launcher(opts);
-        containerInstance.run();
+        containerInstance.startApplication();
 
         makeRequest("http://127.0.0.1:11006/CountRequestsServlet");
         makeRequest("http://127.0.0.2:11006/CountRequestsServlet");

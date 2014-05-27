@@ -5,6 +5,7 @@ import io.undertow.Undertow;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InterruptedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -28,7 +29,7 @@ import undertow4jenkins.util.WarWorker;
  * @author Jakub Bartecek <jbartece@redhat.com>
  * 
  */
-public class Launcher {
+public class Launcher implements Runnable {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -47,8 +48,20 @@ public class Launcher {
     /** Created instance of undertow */
     private Undertow undertowInstance;
 
-    /** List of objects to be closed on  application end */
+    /** List of objects to be closed on application end */
     private List<Closeable> objectsToClose = new ArrayList<Closeable>();
+
+    /** Duration of timeout in control thread. Used for sleep and socket accept  */
+    private static int CONTROL_TIMEOUT_DURATION = 2000;
+
+    /** Control port */
+    private int controlPort;
+
+    /** Thread processing control */
+    private Thread controlThread;
+    
+    /** Max port value */
+    private static final int MAX_PORT = 65535;
 
     /**
      * Field for usage, which can be overridden outside this class (from extras-executable-war)
@@ -69,7 +82,7 @@ public class Launcher {
      * This method is entry point to initialize server Undertow and run
      * the Jenkins CI.
      */
-    public void run() {
+    public void startApplication() {
 
         if (checkHelpParams() || checkAppConfig())
             return;
@@ -96,47 +109,87 @@ public class Launcher {
             log.error("Initialization of servlet container failed! Reason: " + e.getMessage());
         }
 
-        listenOnControlPort(options.controlPort);
+        runControlThread(options.controlPort);
     }
 
-    // private static int controlSocketTimeout = 2000;
+    /**
+     * Runs control thread of this application
+     * @param port control port
+     */
+    private void runControlThread(int port) {
+        this.controlPort = port;
+        this.controlThread =
+                new Thread(this, "Undertow4Jenkins control thread");
+        this.controlThread.setDaemon(false);
+        this.controlThread.start();
+    }
 
-    private void listenOnControlPort(int port) {
-        if (port == -1)
-            return;
-
-        if (port < -1 || port > 65535) {
+    
+    /**
+     * Processing life-cycle of control port thread
+     */
+    @Override
+    public void run() {
+        if (this.controlPort < -1 || this.controlPort > MAX_PORT) 
             log.warn("Unallowed controlPort value. Control port is disabled!");
-            return;
-        }
 
         boolean interrupted = false;
         ServerSocket controlSocket = null;
         try {
-            controlSocket = new ServerSocket(port);
-            // TODO check if timeout is needed
-            // controlSocket.setSoTimeout(controlSocketTimeout);
-            log.info("Control port initializated. Port: " + port);
+            if(this.controlPort > 0 && this.controlPort < MAX_PORT) {
+                controlSocket = new ServerSocket(this.controlPort);
+                controlSocket.setSoTimeout(CONTROL_TIMEOUT_DURATION);
+                log.info("Control port initializated. Port: " + this.controlPort);
+            }
 
             while (!interrupted) {
-                Socket acceptedSocket = controlSocket.accept();
-                handleControlRequest(acceptedSocket); // TODO solve interruption
+                Socket acceptedSocket = null;
+                
+                try {
+                    if(controlSocket != null) {
+                        acceptedSocket = controlSocket.accept();
+                        if (acceptedSocket != null)
+                            handleControlRequest(acceptedSocket);
+                    }
+                    else 
+                        Thread.sleep(CONTROL_TIMEOUT_DURATION);
+                } catch (InterruptedIOException e) {
+                } catch(InterruptedException e) {
+                    // If program is killed with sigterm - OK
+                    interrupted = true;
+                } catch(Throwable e) {
+                    log.error("Error occured in control thread. Reason: " + e.getMessage());
+                } finally {
+                    if(acceptedSocket != null)
+                        closeSource(acceptedSocket);
+                    if(Thread.interrupted())
+                        interrupted = true;
+                }
             }
+            
+            if(controlSocket != null)
+                closeSource(controlSocket);
 
         } catch (IOException e) {
             log.error("Error occured on control port. Control port is disabled.");
         } catch (Throwable e) {
-            // If program is killed with sigterm - OK
-        } finally {
-            try {
-                if (controlSocket != null)
-                    controlSocket.close();
-            } catch (IOException e) {
-            }
+            log.error("Initialization of control thread failed! Reason: " + e.getMessage());
         }
-
+        
+        log.info("Control thread of undertow4jenkins was terminated.");
     }
 
+    /**
+     * Closes source and ignores possible exceptions
+     * @param s Socket to close
+     */
+    private void closeSource(Closeable  s) {
+        try {
+            s.close();
+        } catch (IOException e) {
+        }
+    }
+    
     /**
      * Process received request on control port
      * 
@@ -153,7 +206,7 @@ public class Launcher {
             switch ((byte) requestType) {
                 case SHUTDOWN_REQUEST_TYPE:
                     log.info("Accepted shutdown request on control port");
-                    shutdownApplication();
+                    internalShutdown();
                     break;
 
                 case RELOAD_REQUEST_TYPE:
@@ -183,17 +236,33 @@ public class Launcher {
     }
 
     /**
-     * Shutdown application and close objects with opened resources 
+     * Shutdown application - stops undertow, releases sources and stop JVM
+     */
+    private void internalShutdown() {
+        undertowInstance.stop();
+        undertowInstance = null;
+
+        for (Closeable o : objectsToClose)
+            closeSource(o);
+        
+        System.exit(0);
+    }
+    
+    /**
+     * Shutdown application and close objects with opened resources
+     * Used by tests (not stopping JVM).
      */
     public void shutdownApplication() {
         undertowInstance.stop();
+        undertowInstance = null;
 
-        try {
-            for (Closeable o : objectsToClose)
-                o.close();
-        } catch (IOException e) {
-        }
-        // System.exit(0);
+        for (Closeable o : objectsToClose)
+            closeSource(o);
+
+        if (this.controlThread != null) 
+            this.controlThread.interrupt();
+        
+        Thread.yield();
     }
 
     /**
@@ -204,8 +273,10 @@ public class Launcher {
     private boolean checkAppConfig() {
         if (options.warfile != null || options.webroot != null)
             return false;
-        else
+        else {
+            log.error("Warfile or webroot has to be specified!");
             return true;
+        }
     }
 
     /**
@@ -229,7 +300,8 @@ public class Launcher {
     }
 
     /**
-     * Main method for Undertow4Jenkins 
+     * Main method for Undertow4Jenkins
+     * 
      * @param args Command-line arguments
      */
     public static void main(String[] args) {
@@ -242,6 +314,6 @@ public class Launcher {
             return;
 
         Launcher launcher = new Launcher(options);
-        launcher.run();
+        launcher.startApplication();
     }
 }
