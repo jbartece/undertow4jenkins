@@ -7,19 +7,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
-import java.io.IOException;
 import java.math.BigInteger;
 import java.security.KeyFactory;
-import java.security.KeyManagementException;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPrivateKeySpec;
 
 import javax.net.ssl.KeyManagerFactory;
@@ -35,31 +29,45 @@ import sun.security.x509.CertAndKeyGen;
 import sun.security.x509.X500Name;
 import undertow4jenkins.option.Options;
 
+/**
+ * Class, which ensures creation of listeners for protocols HTTP and AJP
+ * 
+ * @author Jakub Bartecek <jbartece@redhat.com>
+ * 
+ */
 @SuppressWarnings("restriction")
 public class HttpsListenerBuilder {
+
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     /**
      * IP address, which should be set to bind listener in Undertow to listen on all interfaces
      */
     private static final String hostAllInterfacesString = "0.0.0.0";
 
+    /** Max port value */
     private static final int MAX_PORT = 65535;
-
-    private final Logger log = LoggerFactory.getLogger(getClass());
 
     private Options options;
 
+    /**
+     * Initializes builder
+     * @param options Undertow4Jenkins options
+     */
     public HttpsListenerBuilder(Options options) {
         this.options = options;
     }
 
     // "   --httpsKeepAliveTimeout   = how long idle HTTPS keep-alive connections are kept around (in ms; default 5000)?\n" +
-
     // "   --httpsPort              = set the https listening port. -1 to disable, Default is disabled\n" +
     // "                              if neither --httpsCertificate nor --httpsKeyStore are specified,\n" +
     // "                              https is run with one-time self-signed certificate.\n" +
     // "   --httpsListenAddress     = set the https listening address. Default is all interfaces\n" +
     // "   --httpsKeyManagerType    = the SSL KeyManagerFactory type (eg SunX509, IbmX509). Default is SunX509\n" +
+    /**
+     * Sets the HTTPS listener to Undertow if proper options were specified
+     * @param serverBuilder Undertow builder
+     */
     public void setHttpsListener(Builder serverBuilder) {
         if (options.httpsPort == -1)
             return;
@@ -85,11 +93,19 @@ public class HttpsListenerBuilder {
                 createHttpsListenerWithSelfSignedCert(serverBuilder, host, options.httpsPort);
 
         }
-        
+
         log.info("HTTPS listener created.");
 
     }
 
+    /**
+     * Creates HTTPS listener with generated certificate, which is not suitable for production versions, 
+     * but only for testing.
+     * 
+     * @param serverBuilder Undertow builder
+     * @param host IP adress or host name
+     * @param httpsPort Port 
+     */
     private void createHttpsListenerWithSelfSignedCert(Builder serverBuilder, String host,
             Integer httpsPort) {
         log.info("Using one-time self-signed certificate");
@@ -108,7 +124,7 @@ public class HttpsListenerBuilder {
             keyStoreInstance.load(null);
             keyStoreInstance.setKeyEntry("hudson", privateKey, keyStorePassword,
                     new Certificate[] { certificate });
-            
+
             SSLContext sslContext = createSSLContext(keyStorePassword, keyStoreInstance);
             serverBuilder.addHttpsListener(options.httpsPort, host, sslContext);
         } catch (Exception e) {
@@ -116,12 +132,20 @@ public class HttpsListenerBuilder {
         }
     }
 
+    
     // B:
     // "   --httpsCertificate       = the location of the PEM-encoded SSL certificate file.\n" +
     // "                              (the one that starts with '-----BEGIN CERTIFICATE-----')\n" +
     // "                              must be used with --httpsPrivateKey.\n" +
     // "   --httpsPrivateKey        = the location of the PEM-encoded SSL private key.\n" +
     // "                              (the one that starts with '-----BEGIN RSA PRIVATE KEY-----')\n" +
+    /**
+     * Creates HTTPS listener from specified certificate and private key
+     * 
+     * @param serverBuilder Undertow builder
+     * @param host IP adress or host name
+     * @param httpsPort Port 
+     */
     private void createHttpsListenerWithCert(Builder serverBuilder, String host,
             Integer httpsPort) {
         if (options.httpsPrivateKey == null) {
@@ -154,8 +178,14 @@ public class HttpsListenerBuilder {
 
     }
 
-    private PrivateKey createRSAPrivateKeyFromCert(FileReader fileReader) throws IOException,
-            NoSuchAlgorithmException, InvalidKeySpecException {
+    /**
+     * Creates private key from PEM certificate
+     * 
+     * @param fileReader Reader of certificate file
+     * @return Created private key
+     * @throws Exception Thrown if private key could not be created
+     */
+    private PrivateKey createRSAPrivateKeyFromCert(FileReader fileReader) throws Exception {
         ByteArrayOutputStream outStream = new ByteArrayOutputStream();
         BASE64Decoder decoder = new BASE64Decoder();
 
@@ -188,10 +218,17 @@ public class HttpsListenerBuilder {
         KeyFactory kf = KeyFactory.getInstance("RSA");
         return kf.generatePrivate(new RSAPrivateKeySpec(mod, privExpo));
     }
-
+    
     // A:
     // "   --httpsKeyStore          = the location of the SSL KeyStore file.\n" +
     // "   --httpsKeyStorePassword  = the password for the SSL KeyStore file. Default is null\n" +
+    /**
+     * Creates HTTPS listener from KeyStore
+     * 
+     * @param serverBuilder Undertow builder
+     * @param host IP adress or host name
+     * @param httpsPort Port 
+     */
     private void createHttpsListenerWithKeyStore(Builder serverBuilder, String host,
             Integer httpsPort) {
 
@@ -219,9 +256,16 @@ public class HttpsListenerBuilder {
         }
     }
 
+    /**
+     * Creates SSL context from key store
+     * 
+     * @param keyStorePassword Password of key store
+     * @param keyStoreInstance Key store
+     * @return Created SSL context
+     * @throws Exception Thrown if some security action fails
+     */
     private SSLContext createSSLContext(char[] keyStorePassword, KeyStore keyStoreInstance)
-            throws NoSuchAlgorithmException, KeyStoreException, UnrecoverableKeyException,
-            KeyManagementException {
+            throws Exception  {
         KeyManagerFactory keyManagerFactory = KeyManagerFactory
                 .getInstance(options.httpsKeyManagerType);
         keyManagerFactory.init(keyStoreInstance, keyStorePassword);

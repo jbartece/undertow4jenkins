@@ -6,6 +6,12 @@ import org.slf4j.LoggerFactory;
 import undertow4jenkins.option.Options;
 import io.undertow.Undertow.Builder;
 
+/**
+ * Class, which ensures creation of listeners for protocols HTTP and AJP
+ * 
+ * @author Jakub Bartecek <jbartece@redhat.com>
+ * 
+ */
 public class SimpleListenerBuilder {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
@@ -17,8 +23,14 @@ public class SimpleListenerBuilder {
      */
     private static final String hostAllInterfacesString = "0.0.0.0";
 
+    /** Max port value */
     private static final int MAX_PORT = 65535;
 
+    /**
+     * Initializes builder
+     * 
+     * @param options Undertow4Jenkins options
+     */
     public SimpleListenerBuilder(Options options) {
         this.options = options;
     }

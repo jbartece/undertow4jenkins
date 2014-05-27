@@ -24,8 +24,20 @@ import undertow4jenkins.parser.WebXmlContent.Servlet;
 import undertow4jenkins.parser.WebXmlContent.ServletMapping;
 import undertow4jenkins.parser.WebXmlContent.WebResourceCollection;
 
+/**
+ * Process parsing of subset of web.xml.
+ * @author Jakub Bartecek <jbartece@redhat.com>
+ *
+ */
 public class WebXmlParser {
 
+    /**
+     * Parse whole web.xml file and load stored configuration.
+     * 
+     * @param pathToFile Path to web.xml file
+     * @return Loaded configuration from web.xml
+     * @throws CustomException Thrown if parsing of web.xml failed
+     */
     public WebXmlContent parse(String pathToFile) throws CustomException{
         try {
         WebXmlContent result = new WebXmlContent();

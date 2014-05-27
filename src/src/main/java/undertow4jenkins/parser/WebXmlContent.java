@@ -3,6 +3,13 @@ package undertow4jenkins.parser;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class represents subset of entities from web.xml file. The names matches those in web.xml.
+ * Classes are hierarchical as tags in web.xml.
+ * 
+ * @author Jakub Bartecek <jbartece@redhat.com>
+ *
+ */
 public class WebXmlContent {
 
     public String webAppVersion;

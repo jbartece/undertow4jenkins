@@ -21,24 +21,47 @@ import org.slf4j.LoggerFactory;
 
 import undertow4jenkins.CustomException;
 
+/**
+ * Process parsing of command line options.
+ * Based on Apache Commons CLI
+ * 
+ * @author Jakub Bartecek <jbartece@redhat.com>
+ * 
+ */
 public class OptionParser {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
+    /**
+     * Options, which cannot be parsed with automatic
+     * loading of options based on Reflection API
+     */
     private static final String[] customParsingOptions = { "argumentsRealmPasswd",
             "argumentsRealmRoles" };
 
+    /** Definition of options */
     private org.apache.commons.cli.Options optionsDefinition;
 
+    /** Properties from config file */
     private Properties configFileProperties;
 
+    /** Pattern to replace "_" with dot */
     private Pattern dotReplacePattern;
-    
+
+    /**
+     * Initializes parser
+     */
     public OptionParser() {
         this.dotReplacePattern = Pattern.compile("_");
         optionsDefinition = createOptionsDefinition();
     }
 
+    /**
+     * Parse all command line arguments to internal options
+     * 
+     * @param args Command line arguments
+     * @return Loaded options from command line aruments
+     */
     public Options parse(String[] args) {
         Options options = new Options();
 
@@ -60,6 +83,14 @@ public class OptionParser {
 
     }
 
+    /**
+     * Process options, which has to be treated manually (those in field customParsingOptions)
+     * 
+     * @param args Command line arguments
+     * @param options Initialized options object
+     * @return Command line arguments without options from field customParsingOptions
+     * @throws ParseException Thrown if arguments could not be parsed
+     */
     private String[] preprocessOptions(String[] args, Options options) throws ParseException {
         List<String> editedArgs = new ArrayList<String>();
 
@@ -108,6 +139,12 @@ public class OptionParser {
         return editedArgs.toArray(new String[0]);
     }
 
+    /**
+     * Loads options from properties
+     * @param configFile File with options
+     * @param options Options object
+     * @throws Exception Thrown if arguments from config file could not be parsed
+     */
     private void createPropertiesLoadCustomOptions(String configFile, Options options)
             throws Exception {
         InputStream configStream = new FileInputStream(configFile);
@@ -136,6 +173,12 @@ public class OptionParser {
             configFileProperties.remove(opt);
     }
 
+    /**
+     * Parse usernames and roles for arguments realm
+     * @param options Options object
+     * @param arg Command line argument
+     * @throws Exception Thrown if arguments some error during parsing occurs
+     */
     private void parseArgumentsRealmRoles(Options options, String arg) throws Exception {
         String[] data = arg.substring(23).split("=");
         if (data.length != 2)
@@ -148,6 +191,13 @@ public class OptionParser {
         options.argumentsRealmRoles.put(data[0], rolesList.toArray(new String[0]));
     }
 
+    /**
+     * 
+     * Parse usernames and passwords for arguments realm
+     * @param options Options object
+     * @param arg Command line argument
+     * @throws Exception Thrown if arguments some error during parsing occurs
+     */
     private void parseArgumentsRealmPasswd(Options options, String arg) throws Exception {
         String[] data = arg.substring(24).split("=");
         if (data.length != 2)
@@ -156,6 +206,10 @@ public class OptionParser {
         options.argumentsRealmPasswd.put(data[0], data[1]);
     }
 
+    /**
+     * Prepares options for arguments parsing
+     * @return Prepared options
+     */
     private org.apache.commons.cli.Options createOptionsDefinition() {
         org.apache.commons.cli.Options options = new org.apache.commons.cli.Options();
 
@@ -177,6 +231,11 @@ public class OptionParser {
         return options;
     }
 
+    /**
+     * Skip option if it should be treated in custom way
+     * @param fieldName Name of field
+     * @return True if option should be skipped, otherwise false
+     */
     private boolean skipOption(String fieldName) {
         if (customParsingOptions[0].equals(fieldName) || customParsingOptions[1].equals(fieldName))
             return true;
@@ -184,7 +243,12 @@ public class OptionParser {
             return false;
     }
 
-    
+    /**
+     * Replace "_" with . in field name
+     * 
+     * @param name Field name
+     * @return Edited field name
+     */
     private String fieldNameToOptionName(String name) {
         if (name.indexOf("_") != -1) {
             return dotReplacePattern.matcher(name).replaceFirst(".");
@@ -193,7 +257,15 @@ public class OptionParser {
             return name;
     }
 
-    private Options loadParsedOptions(CommandLine parsedOptions, Options options) throws CustomException {
+    /**
+     * Load options from parsed command line arguments
+     * @param parsedOptions Result of parsing
+     * @param options Options object
+     * @return Loaded options from command line arguments
+     * @throws Exception Thrown if arguments some error during loading results occurs
+     */
+    private Options loadParsedOptions(CommandLine parsedOptions, Options options)
+            throws CustomException {
         Set<String> unsupportedOptions = Options.getUnsupportedOptions();
 
         for (Field field : Options.class.getFields()) {
@@ -218,6 +290,15 @@ public class OptionParser {
         return options;
     }
 
+    /**
+     * Save option value to field
+     * @param parsedOptions Result of parsing
+     * @param options Options object
+     * @param field Target field
+     * @param optionName Name of option
+     * @param fieldClass Type of field
+     * @throws Exception Thrown if arguments some error during loading results occurs
+     */
     private void saveOptionValue(CommandLine parsedOptions, Options options, Field field,
             String optionName, Class<?> fieldClass) throws CustomException {
         try {

@@ -6,7 +6,7 @@ import io.undertow.servlet.api.Deployment;
 import io.undertow.servlet.api.SessionManagerFactory;
 
 /**
- * Session manager factory , which provides option to set session 
+ * Session manager factory, which provides option to set session 
  * timeout value for each session manager
  * 
  * @author Jakub Bartecek <jbartece@redhat.com>

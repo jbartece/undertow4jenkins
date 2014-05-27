@@ -11,6 +11,14 @@ import org.slf4j.LoggerFactory;
 
 import undertow4jenkins.util.Configuration;
 
+/**
+ * Stores values of all available options of Undertow4Jenkins.
+ * 
+ * Names of options are related to those specified in Jenkins CI help 
+ *  
+ * @author Jakub Bartecek <jbartece@redhat.com>
+ *
+ */
 public class Options {
 
     //
@@ -74,6 +82,9 @@ public class Options {
     public Integer debug;
     
 
+    /**
+     * @return Set of unsupported options
+     */
     public static Set<String> getUnsupportedOptions() {
         Set<String> set =  new HashSet<String>();
         set.add("webappsDir");
@@ -88,10 +99,16 @@ public class Options {
         return set;
     }
     
+    /**
+     * Creates object and initialize options with default values.
+     */
     public Options() {
         loadOptionsDefaultValues();
     }
 
+    /**
+     * Loads all default values of options
+     */
     private void loadOptionsDefaultValues() {
         String propertyPrefix = "Options.defaultValue.";
         
@@ -103,6 +120,11 @@ public class Options {
         }
     }
 
+    /**
+     * Sets default value to specified field
+     * @param f Target field
+     * @param propertyName Name of property with default value
+     */
     private void setFieldDefaultValue(Field f, String propertyName) {
         Logger log = LoggerFactory.getLogger(getClass());
         Class<?> fieldClass = f.getType();

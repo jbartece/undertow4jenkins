@@ -1,13 +1,16 @@
 package undertow4jenkins.handlers;
 
+import io.undertow.server.HttpHandler;
+
 import java.io.Closeable;
 
-import io.undertow.server.HttpHandler;
-import io.undertow.server.HttpServerExchange;
-
-
+/**
+ * Interface for access logger, which can be added to undertow4jenkins
+ * as external or internal class
+ * 
+ * @author Jakub Bartecek <jbartece@redhat.com>
+ * 
+ */
 public interface AccessLoggerHandler extends HttpHandler, Closeable {
-
-    void log(HttpServerExchange exchange);
 
 }

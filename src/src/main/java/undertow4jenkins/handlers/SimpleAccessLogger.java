@@ -13,6 +13,13 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/**
+ * Access logger, which simulates an apache "combined" style logger,
+ * which logs User-Agent, Referer, etc. Format of logger is adapted from Winstone
+ * 
+ * @author Jakub Bartecek <jbartece@redhat.com>
+ * 
+ */
 public class SimpleAccessLogger implements AccessLoggerHandler {
 
     private static final DateFormat DF = new SimpleDateFormat("dd/MMM/yyyy:HH:mm:ss Z");
@@ -33,6 +40,15 @@ public class SimpleAccessLogger implements AccessLoggerHandler {
 
     private PrintWriter outputWriter;
 
+    /**
+     * Initializes access logger
+     * 
+     * @param next Next handler of handler chain
+     * @param appName Name of application
+     * @param loggerFilePattern Pattern for log file name
+     * @param loggerFormat Format of log messages
+     * @throws Exception Thrown if parameters are not correctly set or some IO problems occurs
+     */
     public SimpleAccessLogger(HttpHandler next, String appName,
             String loggerFilePattern, String loggerFormat) throws Exception {
 
@@ -61,6 +77,13 @@ public class SimpleAccessLogger implements AccessLoggerHandler {
         this.outputWriter = new PrintWriter(this.outputStream, true);
     }
 
+    /**
+     * Replaces part of pattern with values
+     * 
+     * @param pattern Pattern of string
+     * @param fields Data to be inserted to pattern
+     * @return String with replaced parts of pattern with data from fields parameter
+     */
     private String patternReplace(String pattern, String[][] fields) {
         if (fields == null)
             return pattern;
@@ -73,6 +96,12 @@ public class SimpleAccessLogger implements AccessLoggerHandler {
         }
     }
 
+    /**
+     * Process single pattern replace 
+     * @param pattern String template 
+     * @param fromStr Tag string, which will be replaced by toStr in pattern
+     * @param toStr New string to be inserted to pattern
+     */
     private void patternReplace0(StringBuffer pattern, String fromStr, String toStr) {
         if (pattern == null || fromStr == null)
             return;
@@ -92,11 +121,14 @@ public class SimpleAccessLogger implements AccessLoggerHandler {
 
     @Override
     public void handleRequest(HttpServerExchange exchange) throws Exception {
-        log(exchange);  
+        log(exchange);
         next.handleRequest(exchange);
     }
 
-    @Override
+    /**
+     * Logs current request
+     * @param exchange Data of exchange
+     */
     public void log(HttpServerExchange exchange) {
         String uriLine = exchange.getRequestMethod() + " " +
                 exchange.getRequestURI() + " " + exchange.getProtocol();
@@ -110,8 +142,8 @@ public class SimpleAccessLogger implements AccessLoggerHandler {
 
         String logLine = patternReplace(pattern,
                 new String[][] {
-                        { "###ip###", exchange.getHostName() }, 
-                        { "###user###", getUserName(exchange.getSecurityContext()) }, 
+                        { "###ip###", exchange.getHostName() },
+                        { "###user###", getUserName(exchange.getSecurityContext()) },
                         { "###time###", "[" + date + "]" },
                         { "###uriLine###", uriLine },
                         { "###status###", "" + status },
@@ -126,17 +158,30 @@ public class SimpleAccessLogger implements AccessLoggerHandler {
 
     }
 
+    /**
+     * Gets username if available
+     * @param securityContext Current security context
+     * @return Username or "-" if user is not logged in
+     */
     private String getUserName(SecurityContext securityContext) {
-        if(securityContext != null)
+        if (securityContext != null)
             return toString(securityContext.getAuthenticatedAccount());
         else
             return "-";
     }
 
+    /**
+     * @param str
+     * @return Str iff str is not null, otherwise returns "-"
+     */
     private String hyphenIfNull(String str) {
         return str != null ? str : "-";
     }
 
+    /**
+     * @param acc Account
+     * @return Username or "-" if user is not logged in
+     */
     private String toString(Account acc) {
         return acc != null ? acc.getPrincipal().getName() : "-";
     }
